@@ -1,5 +1,5 @@
 {
-  "tabulate": "left { Year:  classes(key:\"Term\"  all:\"Grand Total\") { label Lev:  classes(key:\"Level\" ) { label _1:  variable(key:\"GPA\") { _2:   aggregation(method:\"mean\" format:\"4.2\") { node {leaf} }  Count:   aggregation(method:\"n\" ) { node {leaf} }  }  }  }  } top { _3:  classes(key:\"Gender\" ) { label AL:  classes(key:\"Instate\" ) { label node {leaf} }  }  } ",
+  "tabulate": "left { Year:  classes(key:\"Term\"  all:\"Grand Total\") { label Lev:  classes(key:\"Level\" ) { label _1:  variable(key:\"GPA\") { mean:   aggregation(method:\"mean\" format:\"4.2\") { node {leaf} }  Count:   aggregation(method:\"n\" ) { node {leaf} }  }  }  }  } top { _2:  classes(key:\"Gender\" ) { label AL:  classes(key:\"Instate\" ) { label node {leaf} }  }  } ",
   "set": "main",
   "classes": [
     "Term",

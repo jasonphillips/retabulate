@@ -109,9 +109,10 @@ export default compose(
   withState('Components', 'updateComponents'),
 
   withHandlers({
-    changeExample: ({example, setExample, updateSAS}) => (e) => {
+    changeExample: ({example, setExample, updateSAS, touch}) => (e) => {
       setExample(e.target.value);
       updateSAS(examples[e.target.value]);
+      touch(true);
     },
     parse: ({sas, updateQuery, touch, updateComponents, updateMeta}) => () => {
       let parsed;

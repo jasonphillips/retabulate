@@ -1,5 +1,5 @@
 {
-  "tabulate": "left { Zee:  classes(key:\"z\" ) { label node {leaf} }  } top { X:  classes(key:\"x\" ) { label _1:  variable(key:\"a\") { node {leaf} }  }  Y:  classes(key:\"y\" ) { label _1:  variable(key:\"a\") { node {leaf} }  }  } ",
+  "tabulate": "left { Zee:  classes(key:\"z\" ) { label node {leaf} }  } top { X:  classes(key:\"x\" ) { label a:  variable(key:\"a\") { Avg:   aggregation(method:\"mean\" ) { node {leaf} }  }  }  Y:  classes(key:\"y\" ) { label a:  variable(key:\"a\") { Avg:   aggregation(method:\"mean\" ) { node {leaf} }  }  }  } ",
   "set": "test",
   "classes": [
     "x",
