@@ -1,0 +1,107 @@
+.App {
+  text-align: left;
+  font-size: 12px;
+}
+
+.CodeMirror {
+  height: 600px;
+}
+
+.row > div {
+  -webkit-transition: 0.25s;
+  -moz-transition: 0.25s;
+  -o-transition: 0.25s;
+  transition: 0.25s;
+  transition-delay: 0.25s;
+  -webkit-transition-delay: 0.25s;
+  -moz-transition-delay: 0.25s;
+  -o-transition-delay: 0.25s;
+  transition-timing-function: ease-in-out;
+  -webkit-transition-timing-function: ease-in-out;
+  -moz-transition-timing-function: ease-in-out;
+  -o-transition-timing-function: ease-in-out;
+}
+
+.rightCol {
+  border-left: 1px dotted #ccc;
+}
+
+th {
+  background-color: #844;
+  color: white;
+  text-align: center;
+}
+
+tbody th {
+  text-align: left;
+}
+
+td.corner {
+  border: none !important;
+}
+
+.tooltip-inner {
+  font-size:90%
+}
+
+.tooltip-inner h4 {
+  font-size: 1.2em;
+  color: #944;
+}
+
+.sas-editor {
+  font-family: monospace;
+  font-size: 12px;
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+}
+
+.rendered-result h2, .rendered-result h3, .rendered-result  h4 {
+  text-align: center;
+}
+
+h1, h2, h3, h4 { 
+  font-family: Oswald; 
+}
+
+h1 {
+  border-bottom: 1px solid #eee;
+  margin-top: 1em;
+  margin-bottom: .5em;
+}
+
+h3, h4 {
+  font-weight: normal;
+  color: #555;
+}
+
+.bs-tether-element h4 {
+  font-family: initial;
+}
+
+.intro {
+  font-size: 1.25em;
+  color: #555;
+  margin-bottom: 2em;
+}
+
+.intro p {
+  padding-right: 2em;
+}
+
+.results-row {
+  margin-top: 2em;
+}
+
+.results-row h2 {
+  border-bottom: 1px solid #ccc;
+}
+
+.results {
+  padding-top: 2em;
+  text-align: center;
+}
+
+.rendered-result {
+  margin: auto;
+}

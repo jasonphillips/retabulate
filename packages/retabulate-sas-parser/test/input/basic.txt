@@ -1,0 +1,6 @@
+PROC TABULATE DATA=test;
+    CLASS x y z; 
+    VAR a; 
+    TABLE z="Zee",
+       (x="X" y="Y") * a*mean="Avg";
+RUN;

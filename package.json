@@ -1,0 +1,13 @@
+{
+  "name": "retabulate-project",
+  "description": "parent project for retabulate; see packages/",
+  "private": true,
+  "scripts": {
+    "postinstall": "lerna bootstrap --concurrency=1",
+    "start": "cd packages/retabulate-sas-demo && npm start",
+    "test": "lerna run test"
+  },
+  "devDependencies": {
+    "lerna": "2.0.0-beta.38"
+  }
+}

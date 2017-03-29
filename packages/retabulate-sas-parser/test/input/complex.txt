@@ -1,0 +1,9 @@
+PROC TABULATE DATA=main;
+   TITLE "cool table";
+   TITLE1 "but why?";
+    VAR GPA / test=hi; 
+    CLASS Term Level Gender Instate; 
+    TABLE (Term="Year" ALL="Grand Total") * Level="Lev" * GPA="" * (mean*f=4.2 n="Count"),
+       Gender="" * Instate="AL";
+    FOOTNOTE "not real data";
+RUN;

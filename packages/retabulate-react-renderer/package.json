@@ -1,0 +1,35 @@
+{
+  "name": "retabulate-react-renderer",
+  "version": "0.5.0",
+  "description": "react table renderer for retabulate",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel -d lib/ src/"
+  },
+  "dependencies": {
+    "dot-object": "^1.5.4",
+    "lodash": "^4.17.4",
+    "react": "^15.4.2",
+    "reactstrap": "^4.1.0",
+    "react-addons-css-transition-group": "^15.4.2",
+    "react-addons-transition-group": "^15.4.2",
+    "react-dom": "^15.4.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.0",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-preset-react": "^6.23.0",
+    "babel-preset-stage-0": "^6.16.0"
+  },
+  "keywords": [
+    "react",
+    "retabulate",
+    "table",
+    "renderer",
+    "pivot",
+    "data"
+  ],
+  "author": "Jason Phillips",
+  "license": "ISC"
+}

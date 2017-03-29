@@ -1,0 +1,9 @@
+.CodeMirror {
+    height: 325px !important;
+    padding-left: 1em;
+    border-left: 1px dotted #999;
+}
+
+.sas-codeMirror .CodeMirror {
+    height: 200px !important;
+}

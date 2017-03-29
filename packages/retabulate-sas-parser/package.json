@@ -1,0 +1,25 @@
+{
+  "name": "retabulate-sas-parser",
+  "version": "0.1.0",
+  "description": "jison parser for translating SAS TABULATE statements into retabulate queries",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/index.js",
+    "build": "jison grammar/tabulate.yy -o grammar/tabulate.js"
+  },
+  "keywords": [
+    "SAS",
+    "tabulate",
+    "retabulate",
+    "pivot",
+    "data"
+  ],
+  "author": "Jason Phillips",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "jison": "^0.4.17",
+    "mocha": "^3.2.0",
+    "should": "^11.2.1"
+  }
+}

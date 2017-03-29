@@ -1,0 +1,17 @@
+{
+  "tabulate": "left { Zee:  classes(key:\"z\" ) { label node {leaf} }  } top { X:  classes(key:\"x\" ) { label _1:  variable(key:\"a\") { node {leaf} }  }  Y:  classes(key:\"y\" ) { label _1:  variable(key:\"a\") { node {leaf} }  }  } ",
+  "set": "test",
+  "classes": [
+    "x",
+    "y",
+    "z"
+  ],
+  "vars": [
+    "a"
+  ],
+  "titles": [
+    "",
+    "",
+    ""
+  ]
+}

@@ -1,0 +1,16 @@
+lerna(verbose) GitUtilities.isInitialized    ()
+lerna(verbose) GitUtilities.isInitialized    () => true
+lerna(verbose) GitUtilities.getTopLevelDirectory()
+lerna(verbose) GitUtilities.getTopLevelDirectory() => "."
+lerna(verbose) FileSystemUtilities.existsSync("./lerna.json")
+lerna(verbose) FileSystemUtilities.existsSync("./lerna.json") => false
+lerna(verbose) FileSystemUtilities.existsSync("./package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./package.json") => true
+lerna(verbose) FileSystemUtilities.readFileSync("./package.json")
+lerna(verbose) FileSystemUtilities.readFileSync("./package.json") => "{\n  \"name\": \"retabulate-sas-parser\",\n  \"version\": \"0.1.0\",\n  \"description\": \"jison parser for translating SAS TABULATE statements into retabulate queries\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"mocha test/index.js\",\n    \"build\": \"jison grammar/tabulate.yy -o grammar/tabulate.js\"\n  },\n  \"keywords\": [\n    \"SAS\",\n    \"tabulate\",\n    \"retabulate\",\n    \"pivot\",\n    \"data\"\n  ],\n  \"author\": \"Jason Phillips\",\n  \"license\": \"ISC\",\n  \"devDependencies\": {\n    \"chai\": \"^3.5.0\",\n    \"jison\": \"^0.4.17\",\n    \"mocha\": \"^3.2.0\",\n    \"should\": \"^11.2.1\"\n  }\n}"
+lerna(info)    Lerna v2.0.0-beta.38
+lerna(verbose) FileSystemUtilities.existsSync("./package.json")
+lerna(verbose) FileSystemUtilities.existsSync("./package.json") => true
+lerna(verbose) FileSystemUtilities.existsSync("./lerna.json")
+lerna(verbose) FileSystemUtilities.existsSync("./lerna.json") => false
+lerna(warn)    `lerna.json` does not exist, have you run `lerna init`?

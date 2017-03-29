@@ -1,0 +1,28 @@
+var GPA; 
+class Term Level Gender Instate; 
+table Term="Year" * Level="Lev" * GPA="" * (mean="Mean Grade" n="Count"),
+   Gender="" * Instate="AL";
+
+
+var GPA;  
+class Term Level Gender Instate;  
+table (Term="Year" ALL="Grand Total")  * GPA="" * (mean="Mean Grade" n="Count"*f="decimal2.1"),    
+   Gender="" * Instate="ALP";
+
+PROC TABULATE DATA=inOne;
+   VAR GPA;  CLASS Term Level Gender Instate;  TABLE ((Term="Year" Level) ALL="Grand Total")  * GPA="" * (mean="Mean Grade" n="Count"*f="decimal2.1"),    Gender="" * Instate="ALP"; RUN;
+
+
+PROC TABULATE DATA=inOne;    
+  VAR GPA;  
+  CLASS Term Level Gender Instate;  
+  TABLE ((Term="Year" Level) ALL="Grand Total")  * GPA="" * (mean="Mean Grade" n="Count"*f="decimal2.1"),    
+   Gender="" * Instate="ALP"; 
+RUN;
+
+PROC TABULATE DATA=main;
+    VAR GPA; 
+    CLASS Term Level Gender Instate; 
+    TABLE (Term="Year" ALL="Grand Total") * Level="Lev" * GPA="" * (mean="Mean Grade" n="Count"),
+       Gender="" * Instate="AL";
+RUN;
