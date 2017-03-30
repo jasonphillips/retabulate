@@ -81,7 +81,7 @@ var QueryClosure = function () {
                     return copy.setArgument(key, _this2.arguments[key]);
                 });
             }
-            if (this.child) copy.inject(child.clone());
+            if (this.child) copy.inject(this.child.clone());
             if (this.siblings) this.siblings.forEach(function (sibling) {
                 return copy.push(sibling.clone());
             });

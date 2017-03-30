@@ -17,6 +17,7 @@
 
 \s*<<EOF>>            return 'EOF'
 (\/[^\;]+)?\s*\;                 return 'SEMI'
+\s+\*                return '*'
 \s+                   return 'S' /* skip whitespace */
 ','                   return ','
 [0-9]+("."[0-9]+)?\b  return 'NUMBER'
@@ -34,20 +35,20 @@ TITLE1\b              return 'TITLE1'
 FOOTNOTE\b            return 'FOOTNOTE'
 [a-zA-Z0-9]+\b        return 'TOKEN'
 (\"|\')[a-zA-Z0-9\s\?\,\.\:\-]*?(\"|\')  return 'LABEL' /* " */
+\*                    return '*'
 '='                   return '='
 "/"                   return '/'
-\(\s*                 return '('
-\s*\*\s*              return '*'
-\s*\)                 return ')'
+\(                 return '('
+\)                 return ')'
 .                     return 'INVALID'
 
 /lex
 
 /* operator associations and precedence */
 
-%left 'S'
-%left '='
+%left S
 %left '*' '/'
+%left '='
 %left '^'
 
 %start tabulate
@@ -83,16 +84,26 @@ all_type
     ;
 
 e
-    : e S e
+    : group S group 
         {$$ = $1.push($3)}
-    | e S all_type 
+    | e S group
+        {$$ = $1.push($3)}
+    | group S all_type 
         {$$ = $1.setArgument('all', $3)}
-    | e S? '*' S? e
+    | group
+        {$$ = $1}
+    ;
+
+group 
+    : group S? '*' S? item
         {$$ = $1.inject($5)}
-    | '(' S? e S?  ')'
-        {$$ = $3}
-    | NUMBER
-        {$$ = Number(yytext)}
+    | item 
+        {$$ = $1}
+    ;
+
+item
+    : '(' e ')' 
+        {$$ = $2}
     | TOKEN '=' LABEL
         {$$ = tokenType($1, makeLabel($3))}
     | TOKEN '=' LABEL FORMAT
@@ -102,6 +113,7 @@ e
     | TOKEN
         {$$ = tokenType($1)}
     ;
+
 %%
 
 var QC = require('./QueryClosure.js').default;

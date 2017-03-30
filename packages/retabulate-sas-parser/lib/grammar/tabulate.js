@@ -89,25 +89,26 @@ var tabulate = function () {
         $V9 = [1, 23],
         $Va = [16, 27],
         $Vb = [16, 20, 26, 29, 31, 35, 38],
-        $Vc = [2, 28],
+        $Vc = [2, 30],
         $Vd = [1, 27],
-        $Ve = [1, 32],
-        $Vf = [1, 30],
-        $Vg = [1, 31],
-        $Vh = [27, 33],
-        $Vi = [16, 20, 26, 27, 29, 31, 35, 38],
-        $Vj = [23, 27],
-        $Vk = [10, 47, 51],
-        $Vl = [12, 23, 27, 45, 50],
+        $Ve = [1, 33],
+        $Vf = [1, 32],
+        $Vg = [27, 33],
+        $Vh = [16, 20, 26, 27, 29, 31, 35, 38],
+        $Vi = [23, 27],
+        $Vj = [1, 43],
+        $Vk = [2, 64],
+        $Vl = [12, 23, 27, 46, 50],
         $Vm = [10, 12],
-        $Vn = [1, 61],
-        $Vo = [10, 27, 47, 51],
-        $Vp = [45, 50];
+        $Vn = [2, 65],
+        $Vo = [10, 27, 49],
+        $Vp = [12, 23, 27, 50],
+        $Vq = [10, 49];
     var parser = { trace: function trace() {},
         yy: {},
-        symbols_: { "error": 2, "tabulate": 3, "PROC": 4, "tabulate_repetition0": 5, "TABULATE": 6, "tabulate_repetition1": 7, "DATA": 8, "=": 9, "TOKEN": 10, "tabulate_repetition2": 11, "SEMI": 12, "tabulate_repetition3": 13, "tabulate_repetition_plus4": 14, "tabulate_repetition5": 15, "RUN": 16, "tabulate_repetition6": 17, "EOF": 18, "statement": 19, "TABLE": 20, "axis": 21, "statement_repetition0": 22, ",": 23, "statement_repetition1": 24, "statement_repetition2": 25, "VAR": 26, "S": 27, "statement_repetition3": 28, "CLASS": 29, "statement_repetition4": 30, "TITLE": 31, "statement_repetition5": 32, "LABEL": 33, "statement_repetition6": 34, "TITLE1": 35, "statement_repetition7": 36, "statement_repetition8": 37, "FOOTNOTE": 38, "statement_repetition9": 39, "statement_repetition10": 40, "e": 41, "all_type": 42, "ALL": 43, "e_option0": 44, "*": 45, "e_option1": 46, "(": 47, "e_option2": 48, "e_option3": 49, ")": 50, "NUMBER": 51, "FORMAT": 52, "tabulate_repetition_plus4_option0": 53, "statement_repetition3_option0": 54, "statement_repetition4_option0": 55, "$accept": 0, "$end": 1 },
-        terminals_: { 2: "error", 4: "PROC", 6: "TABULATE", 8: "DATA", 9: "=", 10: "TOKEN", 12: "SEMI", 16: "RUN", 18: "EOF", 20: "TABLE", 23: ",", 26: "VAR", 27: "S", 29: "CLASS", 31: "TITLE", 33: "LABEL", 35: "TITLE1", 38: "FOOTNOTE", 43: "ALL", 45: "*", 47: "(", 50: ")", 51: "NUMBER", 52: "FORMAT" },
-        productions_: [0, [3, 16], [19, 8], [19, 4], [19, 4], [19, 5], [19, 5], [19, 5], [21, 1], [42, 3], [42, 1], [41, 3], [41, 3], [41, 5], [41, 5], [41, 1], [41, 3], [41, 4], [41, 2], [41, 1], [5, 0], [5, 2], [7, 0], [7, 2], [11, 0], [11, 2], [13, 0], [13, 2], [53, 0], [53, 1], [14, 2], [14, 3], [15, 0], [15, 2], [17, 0], [17, 2], [22, 0], [22, 2], [24, 0], [24, 2], [25, 0], [25, 2], [54, 0], [54, 1], [28, 0], [28, 3], [55, 0], [55, 1], [30, 0], [30, 3], [32, 0], [32, 2], [34, 0], [34, 2], [36, 0], [36, 2], [37, 0], [37, 2], [39, 0], [39, 2], [40, 0], [40, 2], [44, 0], [44, 1], [46, 0], [46, 1], [48, 0], [48, 1], [49, 0], [49, 1]],
+        symbols_: { "error": 2, "tabulate": 3, "PROC": 4, "tabulate_repetition0": 5, "TABULATE": 6, "tabulate_repetition1": 7, "DATA": 8, "=": 9, "TOKEN": 10, "tabulate_repetition2": 11, "SEMI": 12, "tabulate_repetition3": 13, "tabulate_repetition_plus4": 14, "tabulate_repetition5": 15, "RUN": 16, "tabulate_repetition6": 17, "EOF": 18, "statement": 19, "TABLE": 20, "axis": 21, "statement_repetition0": 22, ",": 23, "statement_repetition1": 24, "statement_repetition2": 25, "VAR": 26, "S": 27, "statement_repetition3": 28, "CLASS": 29, "statement_repetition4": 30, "TITLE": 31, "statement_repetition5": 32, "LABEL": 33, "statement_repetition6": 34, "TITLE1": 35, "statement_repetition7": 36, "statement_repetition8": 37, "FOOTNOTE": 38, "statement_repetition9": 39, "statement_repetition10": 40, "e": 41, "all_type": 42, "ALL": 43, "group": 44, "group_option0": 45, "*": 46, "group_option1": 47, "item": 48, "(": 49, ")": 50, "FORMAT": 51, "tabulate_repetition_plus4_option0": 52, "statement_repetition3_option0": 53, "statement_repetition4_option0": 54, "$accept": 0, "$end": 1 },
+        terminals_: { 2: "error", 4: "PROC", 6: "TABULATE", 8: "DATA", 9: "=", 10: "TOKEN", 12: "SEMI", 16: "RUN", 18: "EOF", 20: "TABLE", 23: ",", 26: "VAR", 27: "S", 29: "CLASS", 31: "TITLE", 33: "LABEL", 35: "TITLE1", 38: "FOOTNOTE", 43: "ALL", 46: "*", 49: "(", 50: ")", 51: "FORMAT" },
+        productions_: [0, [3, 16], [19, 8], [19, 4], [19, 4], [19, 5], [19, 5], [19, 5], [21, 1], [42, 3], [42, 1], [41, 3], [41, 3], [41, 3], [41, 1], [44, 5], [44, 1], [48, 3], [48, 3], [48, 4], [48, 2], [48, 1], [5, 0], [5, 2], [7, 0], [7, 2], [11, 0], [11, 2], [13, 0], [13, 2], [52, 0], [52, 1], [14, 2], [14, 3], [15, 0], [15, 2], [17, 0], [17, 2], [22, 0], [22, 2], [24, 0], [24, 2], [25, 0], [25, 2], [53, 0], [53, 1], [28, 0], [28, 3], [54, 0], [54, 1], [30, 0], [30, 3], [32, 0], [32, 2], [34, 0], [34, 2], [36, 0], [36, 2], [37, 0], [37, 2], [39, 0], [39, 2], [40, 0], [40, 2], [45, 0], [45, 1], [47, 0], [47, 1]],
         performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
             /* this == yyval */
 
@@ -134,55 +135,52 @@ var tabulate = function () {
                 case 7:
                     titles[2] = $$[$0 - 2].replace(/\"/g, '');
                     break;
-                case 9:
+                case 9:case 14:case 16:
                     this.$ = $$[$0];
                     break;
                 case 10:
                     this.$ = 'Total';
                     break;
-                case 11:
+                case 11:case 12:
                     this.$ = $$[$0 - 2].push($$[$0]);
                     break;
-                case 12:
+                case 13:
                     this.$ = $$[$0 - 2].setArgument('all', $$[$0]);
                     break;
-                case 13:
+                case 15:
                     this.$ = $$[$0 - 4].inject($$[$0]);
                     break;
-                case 14:
-                    this.$ = $$[$0 - 2];
-                    break;
-                case 15:
-                    this.$ = Number(yytext);
-                    break;
-                case 16:
-                    this.$ = tokenType($$[$0 - 2], makeLabel($$[$0]));
-                    break;
                 case 17:
-                    this.$ = tokenType($$[$0 - 3], makeLabel($$[$0 - 1]), $$[$0]);
+                    this.$ = $$[$0 - 1];
                     break;
                 case 18:
-                    this.$ = tokenType($$[$0 - 1], null, $$[$0]);
+                    this.$ = tokenType($$[$0 - 2], makeLabel($$[$0]));
                     break;
                 case 19:
+                    this.$ = tokenType($$[$0 - 3], makeLabel($$[$0 - 1]), $$[$0]);
+                    break;
+                case 20:
+                    this.$ = tokenType($$[$0 - 1], null, $$[$0]);
+                    break;
+                case 21:
                     this.$ = tokenType($$[$0]);
                     break;
-                case 20:case 22:case 24:case 26:case 32:case 34:case 36:case 38:case 40:case 44:case 48:case 50:case 52:case 54:case 56:case 58:case 60:
+                case 22:case 24:case 26:case 28:case 34:case 36:case 38:case 40:case 42:case 46:case 50:case 52:case 54:case 56:case 58:case 60:case 62:
                     this.$ = [];
                     break;
-                case 21:case 23:case 25:case 27:case 33:case 35:case 37:case 39:case 41:case 51:case 53:case 55:case 57:case 59:case 61:
+                case 23:case 25:case 27:case 29:case 35:case 37:case 39:case 41:case 43:case 53:case 55:case 57:case 59:case 61:case 63:
                     $$[$0 - 1].push($$[$0]);
                     break;
-                case 30:
+                case 32:
                     this.$ = [$$[$0 - 1]];
                     break;
-                case 31:case 45:case 49:
+                case 33:case 47:case 51:
                     $$[$0 - 2].push($$[$0 - 1]);
                     break;
             }
         },
-        table: [{ 3: 1, 4: [1, 2] }, { 1: [3] }, o($V0, [2, 20], { 5: 3 }), { 6: [1, 4], 27: [1, 5] }, o($V1, [2, 22], { 7: 6 }), o($V0, [2, 21]), { 8: [1, 7], 27: [1, 8] }, { 9: [1, 9] }, o($V1, [2, 23]), { 10: [1, 10] }, o($V2, [2, 24], { 11: 11 }), { 12: [1, 12], 27: [1, 13] }, o($V3, [2, 26], { 13: 14 }), o($V2, [2, 25]), { 14: 15, 19: 17, 20: $V4, 26: $V5, 27: [1, 16], 29: $V6, 31: $V7, 35: $V8, 38: $V9 }, o($Va, [2, 32], { 15: 24, 19: 25, 20: $V4, 26: $V5, 29: $V6, 31: $V7, 35: $V8, 38: $V9 }), o($V3, [2, 27]), o($Vb, $Vc, { 53: 26, 27: $Vd }), { 10: $Ve, 21: 28, 41: 29, 47: $Vf, 51: $Vg }, { 27: [1, 33] }, { 27: [1, 34] }, o($Vh, [2, 50], { 32: 35 }), o($Vh, [2, 54], { 36: 36 }), o($Vh, [2, 58], { 39: 37 }), { 16: [1, 38], 27: [1, 39] }, o($Vb, $Vc, { 53: 40, 27: $Vd }), o($Vi, [2, 30]), o($Vi, [2, 29]), o($Vj, [2, 36], { 22: 41 }), o([12, 23], [2, 8], { 44: 43, 27: [1, 42], 45: [2, 62] }), o($Vk, [2, 66], { 48: 44, 27: [1, 45] }), o($Vl, [2, 15]), o($Vl, [2, 19], { 9: [1, 46], 52: [1, 47] }), o($Vm, [2, 44], { 28: 48 }), o($Vm, [2, 48], { 30: 49 }), { 27: [1, 51], 33: [1, 50] }, { 27: [1, 53], 33: [1, 52] }, { 27: [1, 55], 33: [1, 54] }, o($V2, [2, 34], { 17: 56 }), o($Va, [2, 33]), o($Vi, [2, 31]), { 23: [1, 57], 27: [1, 58] }, { 10: $Ve, 41: 59, 42: 60, 43: $Vn, 45: [2, 63], 47: $Vf, 51: $Vg }, { 45: [1, 62] }, { 10: $Ve, 41: 63, 47: $Vf, 51: $Vg }, o($Vk, [2, 67]), { 33: [1, 64] }, o($Vl, [2, 18]), { 10: [1, 66], 12: [1, 65] }, { 10: [1, 68], 12: [1, 67] }, o($V2, [2, 52], { 34: 69 }), o($Vh, [2, 51]), o($V2, [2, 56], { 37: 70 }), o($Vh, [2, 55]), o($V2, [2, 60], { 40: 71 }), o($Vh, [2, 59]), { 12: [1, 72], 27: [1, 73] }, o($Vo, [2, 38], { 24: 74 }), o($Vj, [2, 37]), o($Vl, [2, 11], { 44: 43 }), o($Vl, [2, 12]), o($Vl, [2, 10], { 9: [1, 75] }), o($Vk, [2, 64], { 46: 76, 27: [1, 77] }), o($Vp, [2, 68], { 44: 43, 49: 78, 27: [1, 79] }), o($Vl, [2, 16], { 52: [1, 80] }), o($Vi, [2, 3]), o($Vm, [2, 42], { 54: 81, 27: [1, 82] }), o($Vi, [2, 4]), o($Vm, [2, 46], { 55: 83, 27: [1, 84] }), { 12: [1, 85], 27: [1, 86] }, { 12: [1, 87], 27: [1, 88] }, { 12: [1, 89], 27: [1, 90] }, { 18: [1, 91] }, o($V2, [2, 35]), { 10: $Ve, 21: 92, 27: [1, 93], 41: 29, 47: $Vf, 51: $Vg }, { 33: [1, 94] }, { 10: $Ve, 41: 95, 47: $Vf, 51: $Vg }, o($Vk, [2, 65]), { 50: [1, 96] }, o($Vp, [2, 69], { 41: 59, 42: 60, 10: $Ve, 43: $Vn, 47: $Vf, 51: $Vg }), o($Vl, [2, 17]), o($Vm, [2, 45]), o($Vm, [2, 43]), o($Vm, [2, 49]), o($Vm, [2, 47]), o($Vi, [2, 5]), o($V2, [2, 53]), o($Vi, [2, 6]), o($V2, [2, 57]), o($Vi, [2, 7]), o($V2, [2, 61]), { 1: [2, 1] }, o($V2, [2, 40], { 25: 97 }), o($Vo, [2, 39]), o($Vl, [2, 9]), o($Vl, [2, 13], { 44: 43 }), o($Vl, [2, 14]), { 12: [1, 98], 27: [1, 99] }, o($Vi, [2, 2]), o($V2, [2, 41])],
-        defaultActions: { 91: [2, 1] },
+        table: [{ 3: 1, 4: [1, 2] }, { 1: [3] }, o($V0, [2, 22], { 5: 3 }), { 6: [1, 4], 27: [1, 5] }, o($V1, [2, 24], { 7: 6 }), o($V0, [2, 23]), { 8: [1, 7], 27: [1, 8] }, { 9: [1, 9] }, o($V1, [2, 25]), { 10: [1, 10] }, o($V2, [2, 26], { 11: 11 }), { 12: [1, 12], 27: [1, 13] }, o($V3, [2, 28], { 13: 14 }), o($V2, [2, 27]), { 14: 15, 19: 17, 20: $V4, 26: $V5, 27: [1, 16], 29: $V6, 31: $V7, 35: $V8, 38: $V9 }, o($Va, [2, 34], { 15: 24, 19: 25, 20: $V4, 26: $V5, 29: $V6, 31: $V7, 35: $V8, 38: $V9 }), o($V3, [2, 29]), o($Vb, $Vc, { 52: 26, 27: $Vd }), { 10: $Ve, 21: 28, 41: 29, 44: 30, 48: 31, 49: $Vf }, { 27: [1, 34] }, { 27: [1, 35] }, o($Vg, [2, 52], { 32: 36 }), o($Vg, [2, 56], { 36: 37 }), o($Vg, [2, 60], { 39: 38 }), { 16: [1, 39], 27: [1, 40] }, o($Vb, $Vc, { 52: 41, 27: $Vd }), o($Vh, [2, 32]), o($Vh, [2, 31]), o($Vi, [2, 38], { 22: 42 }), o([12, 23], [2, 8], { 27: $Vj }), o([12, 23, 50], [2, 14], { 45: 45, 27: [1, 44], 46: $Vk }), o($Vl, [2, 16]), { 10: $Ve, 41: 46, 44: 30, 48: 31, 49: $Vf }, o($Vl, [2, 21], { 9: [1, 47], 51: [1, 48] }), o($Vm, [2, 46], { 28: 49 }), o($Vm, [2, 50], { 30: 50 }), { 27: [1, 52], 33: [1, 51] }, { 27: [1, 54], 33: [1, 53] }, { 27: [1, 56], 33: [1, 55] }, o($V2, [2, 36], { 17: 57 }), o($Va, [2, 35]), o($Vh, [2, 33]), { 23: [1, 58], 27: [1, 59] }, { 10: $Ve, 44: 60, 48: 31, 49: $Vf }, { 10: $Ve, 42: 62, 43: [1, 63], 44: 61, 46: $Vn, 48: 31, 49: $Vf }, { 46: [1, 64] }, { 27: $Vj, 50: [1, 65] }, { 33: [1, 66] }, o($Vl, [2, 20]), { 10: [1, 68], 12: [1, 67] }, { 10: [1, 70], 12: [1, 69] }, o($V2, [2, 54], { 34: 71 }), o($Vg, [2, 53]), o($V2, [2, 58], { 37: 72 }), o($Vg, [2, 57]), o($V2, [2, 62], { 40: 73 }), o($Vg, [2, 61]), { 12: [1, 74], 27: [1, 75] }, o($Vo, [2, 40], { 24: 76 }), o($Vi, [2, 39]), o($Vp, [2, 12], { 45: 45, 46: $Vk }), o($Vp, [2, 11], { 45: 45, 46: $Vk }), o($Vp, [2, 13]), o($Vp, [2, 10], { 9: [1, 78] }), o($Vq, [2, 66], { 47: 79, 27: [1, 80] }), o($Vl, [2, 17]), o($Vl, [2, 18], { 51: [1, 81] }), o($Vh, [2, 3]), o($Vm, [2, 44], { 53: 82, 27: [1, 83] }), o($Vh, [2, 4]), o($Vm, [2, 48], { 54: 84, 27: [1, 85] }), { 12: [1, 86], 27: [1, 87] }, { 12: [1, 88], 27: [1, 89] }, { 12: [1, 90], 27: [1, 91] }, { 18: [1, 92] }, o($V2, [2, 37]), { 10: $Ve, 21: 93, 27: [1, 94], 41: 29, 44: 30, 48: 31, 49: $Vf }, { 46: $Vn }, { 33: [1, 95] }, { 10: $Ve, 48: 96, 49: $Vf }, o($Vq, [2, 67]), o($Vl, [2, 19]), o($Vm, [2, 47]), o($Vm, [2, 45]), o($Vm, [2, 51]), o($Vm, [2, 49]), o($Vh, [2, 5]), o($V2, [2, 55]), o($Vh, [2, 6]), o($V2, [2, 59]), o($Vh, [2, 7]), o($V2, [2, 63]), { 1: [2, 1] }, o($V2, [2, 42], { 25: 97 }), o($Vo, [2, 41]), o($Vp, [2, 9]), o($Vl, [2, 15]), { 12: [1, 98], 27: [1, 99] }, o($Vh, [2, 2]), o($V2, [2, 43])],
+        defaultActions: { 77: [2, 65], 92: [2, 1] },
         parseError: function parseError(str, hash) {
             if (hash.recoverable) {
                 this.trace(str);
@@ -745,78 +743,81 @@ var tabulate = function () {
                         return 12;
                         break;
                     case 2:
-                        return 27; /* skip whitespace */
+                        return 46;
                         break;
                     case 3:
-                        return 23;
+                        return 27; /* skip whitespace */
                         break;
                     case 4:
-                        return 51;
+                        return 23;
                         break;
                     case 5:
-                        return 20;
+                        return 'NUMBER';
                         break;
                     case 6:
-                        return 26;
+                        return 20;
                         break;
                     case 7:
-                        return 29;
+                        return 26;
                         break;
                     case 8:
-                        return 43;
+                        return 29;
                         break;
                     case 9:
-                        return 52;
+                        return 43;
                         break;
                     case 10:
-                        return 4;
+                        return 51;
                         break;
                     case 11:
-                        return 6;
+                        return 4;
                         break;
                     case 12:
-                        return 8;
+                        return 6;
                         break;
                     case 13:
-                        return 16;
+                        return 8;
                         break;
                     case 14:
-                        return 31;
+                        return 16;
                         break;
                     case 15:
-                        return 35;
+                        return 31;
                         break;
                     case 16:
-                        return 38;
+                        return 35;
                         break;
                     case 17:
-                        return 10;
+                        return 38;
                         break;
                     case 18:
-                        return 33; /* " */
+                        return 10;
                         break;
                     case 19:
-                        return 9;
+                        return 33; /* " */
                         break;
                     case 20:
-                        return '/';
+                        return 46;
                         break;
                     case 21:
-                        return 47;
+                        return 9;
                         break;
                     case 22:
-                        return 45;
+                        return '/';
                         break;
                     case 23:
-                        return 50;
+                        return 49;
                         break;
                     case 24:
+                        return 50;
+                        break;
+                    case 25:
                         return 'INVALID';
                         break;
                 }
             },
-            rules: [/^(?:\s*$)/, /^(?:(\/[^\;]+)?\s*;)/, /^(?:\s+)/, /^(?:,)/, /^(?:[0-9]+(\.[0-9]+)?\b)/, /^(?:TABLE\s*)/, /^(?:VAR\b)/, /^(?:CLASS\b)/, /^(?:ALL\b)/, /^(?:\*[fF]=[a-zA-Z]*[0-9]+\.[0-9]*)/, /^(?:PROC\b)/, /^(?:TABULATE\b)/, /^(?:DATA\b)/, /^(?:RUN\b)/, /^(?:TITLE\b)/, /^(?:TITLE1\b)/, /^(?:FOOTNOTE\b)/, /^(?:[a-zA-Z0-9]+\b)/, /^(?:("|')[a-zA-Z0-9\s\?\,\.\:\-]*?("|'))/, /^(?:=)/, /^(?:\/)/, /^(?:\(\s*)/, /^(?:\s*\*\s*)/, /^(?:\s*\))/, /^(?:.)/],
-            conditions: { "INITIAL": { "rules": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24], "inclusive": true } }
+            rules: [/^(?:\s*$)/, /^(?:(\/[^\;]+)?\s*;)/, /^(?:\s+\*)/, /^(?:\s+)/, /^(?:,)/, /^(?:[0-9]+(\.[0-9]+)?\b)/, /^(?:TABLE\s*)/, /^(?:VAR\b)/, /^(?:CLASS\b)/, /^(?:ALL\b)/, /^(?:\*[fF]=[a-zA-Z]*[0-9]+\.[0-9]*)/, /^(?:PROC\b)/, /^(?:TABULATE\b)/, /^(?:DATA\b)/, /^(?:RUN\b)/, /^(?:TITLE\b)/, /^(?:TITLE1\b)/, /^(?:FOOTNOTE\b)/, /^(?:[a-zA-Z0-9]+\b)/, /^(?:("|')[a-zA-Z0-9\s\?\,\.\:\-]*?("|'))/, /^(?:\*)/, /^(?:=)/, /^(?:\/)/, /^(?:\()/, /^(?:\))/, /^(?:.)/],
+            conditions: { "INITIAL": { "rules": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25], "inclusive": true } }
         };
         return lexer;
     }();

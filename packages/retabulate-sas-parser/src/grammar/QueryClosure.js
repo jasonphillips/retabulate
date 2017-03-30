@@ -56,7 +56,7 @@ class QueryClosure {
         if (this.arguments) {
             Object.keys(this.arguments).forEach(key => copy.setArgument(key, this.arguments[key]));
         }
-        if (this.child) copy.inject(child.clone());
+        if (this.child) copy.inject(this.child.clone());
         if (this.siblings) this.siblings.forEach((sibling) => copy.push(sibling.clone()));
         return copy;
     }
