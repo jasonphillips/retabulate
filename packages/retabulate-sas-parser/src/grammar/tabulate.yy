@@ -63,7 +63,7 @@ tabulate
     ;
 
 statement
-    : TABLE axis S* ',' S* axis S* SEMI { table = getAxes([$2,$6]) }
+    : TABLE axis S* ',' S* axis S* SEMI { table = getAxes($2,$6) }
     | VAR S (TOKEN S?)* SEMI { vars = $3 }
     | CLASS S (TOKEN S?)* SEMI { classes = $3 }
     | TITLE S* LABEL S* SEMI { titles[0] = $3.replace(/\"/g,'') }
@@ -79,16 +79,16 @@ all_type
     : ALL '=' LABEL
         {$$ = $3}
     | ALL 
-        {$$ = '"Total"'}
+        {$$ = 'Total'}
     ;
 
 e
     : e S e
-        {$$ = `${$1} ${$3}`}
+        {$$ = $1.push($3)}
     | e S all_type 
-        {$$ = addAll($1, $3)}
+        {$$ = $1.setArgument('all', $3)}
     | e S? '*' S? e
-        {$$ = inject($1, $5)}
+        {$$ = $1.inject($5)}
     | '(' S? e S?  ')'
         {$$ = $3}
     | NUMBER
@@ -103,6 +103,8 @@ e
         {$$ = tokenType($1)}
     ;
 %%
+
+var QC = require('./QueryClosure.js').default;
 
 function buildAndReset(dataset) {
     var output = {
@@ -121,42 +123,35 @@ function buildAndReset(dataset) {
 }
 
 function classClosure(name, label, all) {
-  var pre = makeLabel(label, name);
-  return `${pre+': '} classes(key:"${name}" ${all ? 'total="'+all+'"' : ''}) { label node {leaf} } `
+  var prefix = makeLabel(label, name);
+  var closure = new QC('classes', name, prefix);
+  if (all) closure.setArgument('all', all);
+
+  return closure;
 }
 
 function varClosure(name, label) {
-  var pre = makeLabel(label, name);
-  return `${pre+': '} variable(key:"${name}") { node {leaf} } `;
-}
-
-function allClosure(label) {
-  return `${label ? makeLabel(label) : 'Total'}: node { node {leaf} }`;
+  var prefix = makeLabel(label, name);
+  var closure = new QC('variable', name, prefix);
+  
+  return closure;
 }
 
 function aggClosure(name, label, format) {
-  var pre = makeLabel(label, name);
-  var format = format ? `format:"${format.split('=')[1]}"` : '';
-  return `${pre+': '}  aggregation(method:"${name}" ${format}) { node {leaf} } `;
+  var prefix = makeLabel(label, name);
+  var closure = new QC('aggregation', name, prefix);
+  if (format) closure.setArgument('format', `${format.split('=')[1]}`);
+  
+  return closure;
 }
-
 
 function inject(closure, inner) {
-  var match = new RegExp('node {leaf}', 'g');
-  return closure.replace(match, inner);
+  return closure.inject(inner);
 }
 
-function addAll(closure, all) {
-   var isClasses = closure.match(/^(([^\(:]+:\s+)?classes\([^\)]+)\)/);
-   if (isClasses && closure.match(/{leaf}/g).length==1) {
-      return closure.replace(isClasses[0], `${isClasses[1]} all:${all})`);
-   }
-   return `${closure} ${allClosure(all)}`;
-}
-
-function getAxes(listed) {
-   var axes = `left { ${listed[0]} } `;
-   if (listed[1]) axes += `top { ${listed[1]} } `;
+function getAxes(left, top) {
+   var axes = `left { ${left.toString()} } `;
+   if (top) axes += `top { ${top.toString()} } `;
    return axes;
 }
 
