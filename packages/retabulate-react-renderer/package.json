@@ -1,6 +1,6 @@
 {
   "name": "retabulate-react-renderer",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "react table renderer for retabulate",
   "main": "lib/index.js",
   "scripts": {
