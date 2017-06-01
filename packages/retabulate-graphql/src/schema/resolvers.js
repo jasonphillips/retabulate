@@ -1,7 +1,10 @@
 import _ from 'lodash';
-import gauss, {Collection, Vector} from 'gauss';
+import gauss from 'gauss';
 import DataCollection from 'data-collection';
 import crypto from 'crypto';
+
+// gauss library has terrible import strategy on client
+const Vector = typeof(window!=='undefined') ? window.gauss.Vector : gauss.Vector;
 
 const md5 = (val) => {
    const c= crypto.createHash('md5')
@@ -9,7 +12,7 @@ const md5 = (val) => {
    return c.digest('hex')
 }
 
-const generateLeaf = ({_aggIndex, _query, _variable, _agg, _fmt, _grid, _axis}) => {
+const generateLeaf = ({_aggIndex, _query, _variable, _agg, _over, _fmt, _grid, _axis}) => {
   const id = md5(JSON.stringify(_query) + _variable + _agg);
   if (!_grid[_axis]) _grid[_axis] = [];
   _grid[_axis].push({
@@ -18,6 +21,7 @@ const generateLeaf = ({_aggIndex, _query, _variable, _agg, _fmt, _grid, _axis}) 
       query: {..._query},
       variable: _variable,
       agg: _agg,
+      over: _over,
       fmt: _fmt
   })
   return id;
@@ -28,6 +32,7 @@ const makeSeries = (query, variable, rows) =>
 
 const applyAggregation = {
   n: (series, key) => series.count() || 0,
+  pctn: (series, key, over) => series.count() / over * 100,
   mean: (series, key) => series.count() ? series.exclude({[key]:''}).avg(key) : undefined,
   median: (series, key) => new Vector(series.values(key)).median(),
   mode: (series, key) => series.mode(key),
@@ -78,13 +83,11 @@ const resolvers = {
       return new Promise((resolve, reject) => {
         context.getDataset(set).then((data) => {
 
-          console.log({data});
           if (!data) {
             throw new Error(`dataset ${set} not found`);
           }
 
           const collection = new DataCollection(data).query();
-          console.log({collection})
 
           if (where) {
             const filter = {}
@@ -109,6 +112,7 @@ const resolvers = {
             ...y,
             _grid,
             _rows: _rows.filter(y.query),
+            _all: _rows
           }))
         )
       })
@@ -117,7 +121,7 @@ const resolvers = {
   Axis: {
     label: ({key}) => key,
     length: ({_rows}) => _rows.count(),
-    classes: (data, {key, all, total}) => {
+    classes: (data, {key, all, total, orderBy}) => {
       data._aggIndex++;
 
       // total never groups again, just descends
@@ -125,13 +129,15 @@ const resolvers = {
         return [{...data, key: '_', _aggIndex:data._aggIndex, _isTotal: true}];
       }
 
-      const value = data._rows.distinct(key).map((groupValue) => ({
+      let value = data._rows.distinct(key).map((groupValue) => ({
         ...data,
         key: groupValue,
         _rows:data._rows.filter({[key]:groupValue}),
         _aggIndex:data._aggIndex,
         _query:{...data._query, [key]:groupValue}
       }))
+
+      if (orderBy) value = _.sortBy(value, (v) => v._rows.first()[orderBy]);
 
       if (all) value.push(
         {...data, key:all, _aggIndex:data._aggIndex}
@@ -153,7 +159,7 @@ const resolvers = {
     node: (data) => data,
   },
   Variable: {
-    aggregation: (data, {method, format}) => ({...data, _agg:method, _fmt:format, method}),
+    aggregation: (data, {method, over, format}) => ({...data, _agg:method, _over:over, _fmt:format, method}),
     leaf: (data) => generateLeaf(data),
     node: (data) => data,
   },
@@ -163,23 +169,28 @@ const resolvers = {
   },
   Row: {
     cells: (y, args) => _.map(y._grid.x, (x) => {
+      const query = {...y.query, ...x.query};
+      const agg = y.agg || x.agg || 'n';
+      const over = y.over || x.over || null;
+      const overQuery = over ? _.omit(query, over) : null;
+
       return {
-        query: {...y.query, ...x.query},
+        query: query,
         variable: y.variable || x.variable || null,
-        agg: y.agg || x.agg || 'n',
+        agg: agg,
         colID: x.id,
         rowID: y.id,
         rows: y._rows.filter(x.query),
+        over: over ? y._all.filter(overQuery).count() : null,
         fmt: y.fmt || x.fmt || '',
       }
     }),
   },
   Cell: {
-    value: ({query, variable, agg, rows, fmt}, {missing}) =>
-      //applyFormat(fmt)(applyAggregation[agg](makeSeries(query, variable, rows))),
-      //rows.filter(query) && 1,
-      applyFormat(fmt, missing || '.')(applyAggregation[agg](rows, variable)),
-        //applyAggregation[agg](makeSeries(query, variable, rows))),
+    value: ({query, variable, agg, over, rows, fmt}, {missing}) => {
+      const aggregated = applyAggregation[agg](rows, variable, over);
+      return applyFormat(fmt, missing || '.')(aggregated);
+    },
     queries: ({query}) => _.map(_.keys(query), (key) => ({key, value: query[key]})),
   },
   QueryCondition: {},

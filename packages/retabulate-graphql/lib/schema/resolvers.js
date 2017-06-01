@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -26,6 +28,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+// gauss library has terrible import strategy on client
+var Vector = _typeof(window !== 'undefined') ? window.gauss.Vector : _gauss2.default.Vector;
+
 var md5 = function md5(val) {
   var c = _crypto2.default.createHash('md5');
   c.update(val);
@@ -37,6 +42,7 @@ var generateLeaf = function generateLeaf(_ref) {
       _query = _ref._query,
       _variable = _ref._variable,
       _agg = _ref._agg,
+      _over = _ref._over,
       _fmt = _ref._fmt,
       _grid = _ref._grid,
       _axis = _ref._axis;
@@ -49,6 +55,7 @@ var generateLeaf = function generateLeaf(_ref) {
     query: _extends({}, _query),
     variable: _variable,
     agg: _agg,
+    over: _over,
     fmt: _fmt
   });
   return id;
@@ -62,17 +69,20 @@ var applyAggregation = {
   n: function n(series, key) {
     return series.count() || 0;
   },
+  pctn: function pctn(series, key, over) {
+    return series.count() / over * 100;
+  },
   mean: function mean(series, key) {
     return series.count() ? series.exclude(_defineProperty({}, key, '')).avg(key) : undefined;
   },
   median: function median(series, key) {
-    return new _gauss.Vector(series.values(key)).median();
+    return new Vector(series.values(key)).median();
   },
   mode: function mode(series, key) {
     return series.mode(key);
   },
   stdev: function stdev(series, key) {
-    return new _gauss.Vector(series.exclude(_defineProperty({}, key, '')).values(key)).stdev();
+    return new Vector(series.exclude(_defineProperty({}, key, '')).values(key)).stdev();
   },
   min: function min(series, key) {
     return series.exclude(_defineProperty({}, key, '')).min(key);
@@ -149,13 +159,11 @@ var resolvers = {
       return new Promise(function (resolve, reject) {
         context.getDataset(set).then(function (data) {
 
-          console.log({ data: data });
           if (!data) {
             throw new Error('dataset ' + set + ' not found');
           }
 
           var collection = new _dataCollection2.default(data).query();
-          console.log({ collection: collection });
 
           if (where) {
             var filter = {};
@@ -192,7 +200,8 @@ var resolvers = {
           resolve(_lodash2.default.map(_lodash2.default.sortBy(_grid.y, 'index'), function (y) {
             return _extends({}, y, {
               _grid: _grid,
-              _rows: _rows.filter(y.query)
+              _rows: _rows.filter(y.query),
+              _all: _rows
             });
           }));
         });
@@ -211,7 +220,8 @@ var resolvers = {
     classes: function classes(data, _ref8) {
       var key = _ref8.key,
           all = _ref8.all,
-          total = _ref8.total;
+          total = _ref8.total,
+          orderBy = _ref8.orderBy;
 
       data._aggIndex++;
 
@@ -227,6 +237,10 @@ var resolvers = {
           _aggIndex: data._aggIndex,
           _query: _extends({}, data._query, _defineProperty({}, key, groupValue))
         });
+      });
+
+      if (orderBy) value = _lodash2.default.sortBy(value, function (v) {
+        return v._rows.first()[orderBy];
       });
 
       if (all) value.push(_extends({}, data, { key: all, _aggIndex: data._aggIndex }));
@@ -261,8 +275,9 @@ var resolvers = {
   Variable: {
     aggregation: function aggregation(data, _ref11) {
       var method = _ref11.method,
+          over = _ref11.over,
           format = _ref11.format;
-      return _extends({}, data, { _agg: method, _fmt: format, method: method });
+      return _extends({}, data, { _agg: method, _over: over, _fmt: format, method: method });
     },
     leaf: function leaf(data) {
       return generateLeaf(data);
@@ -282,13 +297,19 @@ var resolvers = {
   Row: {
     cells: function cells(y, args) {
       return _lodash2.default.map(y._grid.x, function (x) {
+        var query = _extends({}, y.query, x.query);
+        var agg = y.agg || x.agg || 'n';
+        var over = y.over || x.over || null;
+        var overQuery = over ? _lodash2.default.omit(query, over) : null;
+
         return {
-          query: _extends({}, y.query, x.query),
+          query: query,
           variable: y.variable || x.variable || null,
-          agg: y.agg || x.agg || 'n',
+          agg: agg,
           colID: x.id,
           rowID: y.id,
           rows: y._rows.filter(x.query),
+          over: over ? y._all.filter(overQuery).count() : null,
           fmt: y.fmt || x.fmt || ''
         };
       });
@@ -299,16 +320,14 @@ var resolvers = {
       var query = _ref12.query,
           variable = _ref12.variable,
           agg = _ref12.agg,
+          over = _ref12.over,
           rows = _ref12.rows,
           fmt = _ref12.fmt;
       var missing = _ref13.missing;
-      return (
-        //applyFormat(fmt)(applyAggregation[agg](makeSeries(query, variable, rows))),
-        //rows.filter(query) && 1,
-        applyFormat(fmt, missing || '.')(applyAggregation[agg](rows, variable))
-      );
+
+      var aggregated = applyAggregation[agg](rows, variable, over);
+      return applyFormat(fmt, missing || '.')(aggregated);
     },
-    //applyAggregation[agg](makeSeries(query, variable, rows))),
     queries: function queries(_ref14) {
       var query = _ref14.query;
       return _lodash2.default.map(_lodash2.default.keys(query), function (key) {

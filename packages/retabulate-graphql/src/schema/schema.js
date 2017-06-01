@@ -11,7 +11,7 @@ export default `
     length: Int
     node: Axis
     leaf: ID
-    classes(key:String, all:String, total:String): [Axis]
+    classes(key:String, all:String, total:String, orderBy:String): [Axis]
     all(label:String): Axis
     variable(key:String): Variable
   }
@@ -23,7 +23,7 @@ export default `
 
   type Variable {
     key: String
-    aggregation(method:String, format:String): Aggregation
+    aggregation(method:String, format:String, over:String): Aggregation
     leaf: ID
     node: Node
   }
