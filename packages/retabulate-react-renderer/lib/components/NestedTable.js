@@ -115,8 +115,13 @@ var NestedTable = function (_React$PureComponent) {
   _createClass(NestedTable, [{
     key: 'render',
     value: function render() {
-      var tabulated = this.props.tabulated;
+      var _props2 = this.props,
+          tabulated = _props2.tabulated,
+          cellRenderer = _props2.cellRenderer;
 
+      var getCellComponent = cellRenderer ? cellRenderer : function () {
+        return ActiveCell;
+      };
 
       var top = _dotObject2.default.dot(tabulated.top);
       var left = _dotObject2.default.dot(tabulated.left);
@@ -169,7 +174,11 @@ var NestedTable = function (_React$PureComponent) {
                 );
               }),
               tabulated.rows[i].cells.map(function (cell, j) {
-                return _react2.default.createElement(ActiveCell, { key: '' + i + j, cellID: 'cell-' + i + j, cell: cell });
+                return _react2.default.createElement(getCellComponent(cell), {
+                  key: '' + i + j,
+                  cellID: 'cell-' + i + j,
+                  cell: cell
+                });
               })
             );
           })

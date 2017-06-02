@@ -33,7 +33,8 @@ class ActiveCell extends React.Component {
 
 class NestedTable extends React.PureComponent {
   render() {
-    const {tabulated} = this.props;
+    const {tabulated, cellRenderer} = this.props;
+    let getCellComponent = cellRenderer ? cellRenderer : () => ActiveCell;
 
     const top = dot.dot(tabulated.top)
     const left = dot.dot(tabulated.left)
@@ -66,7 +67,11 @@ class NestedTable extends React.PureComponent {
                     <th key={j} rowSpan={row[i].rowSpan}>{(row[i].label || '').replace('_', ' ')}</th>
                 )}
                 {tabulated.rows[i].cells.map((cell,j) =>
-                    <ActiveCell key={`${i}${j}`} cellID={`cell-${i}${j}`} cell={cell}/>
+                    React.createElement(getCellComponent(cell), {
+                      key: `${i}${j}`,
+                      cellID: `cell-${i}${j}`,
+                      cell
+                    })
                 )}
               </tr>
             )}
