@@ -39,7 +39,7 @@ const LikertCell = ({cellProps, cell: {value}}) => (
           float: 'right',
           height: '1em',
           width: (value[answer.text] || 0) * 100 + '%',          
-        }} key={i}/>
+        }} key={i} className="likert"/>
       )}
     </div>
 
@@ -51,7 +51,7 @@ const LikertCell = ({cellProps, cell: {value}}) => (
           float: 'left',
           height: '1em',
           width: (value[answer.text] || 0) * 100 + '%',
-        }} key={i}/>
+        }} key={i} className="likert"/>
       )}
     </div>
 

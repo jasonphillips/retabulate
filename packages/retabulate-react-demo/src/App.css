@@ -11,3 +11,10 @@ h2 {
 thead th {
   text-align: center;
 }
+
+div.likert {
+  animation: slide 1s;
+}
+@keyframes slide {
+  from { width: 0}
+}
