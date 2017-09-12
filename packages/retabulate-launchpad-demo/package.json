@@ -1,6 +1,6 @@
 {
-  "name": "retabulate-react-demo",
-  "description": "demo for retabulate-react",
+  "name": "retabulate-launchpad-demo",
+  "description": "demo for retabulate-react using launchpad backend",
   "version": "0.1.4",
   "private": true,
   "dependencies": {
