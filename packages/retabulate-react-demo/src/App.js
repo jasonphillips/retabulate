@@ -44,7 +44,7 @@ const LikertCell = ({cellProps, cell: {value}}) => (
     </div>
 
     {/* positive likerts: floating left within right 50% */}
-    <div style={{width:'50%', float:'left', height: '2.5em', paddingTop: '.75em', borderRight: '2px dotted #ddd'}}>
+    <div style={{width:'50%', float:'left', height: '2.5em', paddingTop: '.75em'}}>
       {likertScale.filter(a => a.negative===false).map((answer,i) => 
         <div style={{
           backgroundColor: answer.color,
