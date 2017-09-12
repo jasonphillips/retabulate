@@ -1,7 +1,7 @@
 {
   "name": "retabulate-react-renderer",
   "version": "0.7.0",
-  "description": "react table renderer for retabulate",
+  "description": "react table renderer for retabulate-react",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

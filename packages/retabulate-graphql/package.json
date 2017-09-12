@@ -1,5 +1,6 @@
 {
   "name": "retabulate-graphql",
+  "description": "executable graphql schema for retabulate",
   "version": "1.2.0",
   "description": "",
   "main": "lib/index.js",
