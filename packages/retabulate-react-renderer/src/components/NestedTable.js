@@ -80,7 +80,9 @@ class NestedTable extends React.PureComponent {
                   const CellRenderer = getRenderer(cell, renderers) || BasicCell;
                   // value is the one non-cell prop that can be overwritten
                   if (typeof(mergedProps.value)!=='undefined') {
-                    cell = Object.assign({}, cell, {value: JSON.parse(mergedProps.value)});
+                    let parsed = mergedProps.value;
+                    try { parsed = JSON.parse(mergedProps.value) } catch(e) { }
+                    cell = Object.assign({}, cell, {value: parsed});
                     delete mergedProps.value;
                   }
 
