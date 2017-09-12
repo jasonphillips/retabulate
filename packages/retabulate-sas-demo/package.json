@@ -1,6 +1,6 @@
 {
   "name": "sas-retabulate",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "devDependencies": {
     "csv-parse": "^1.2.0",
@@ -19,7 +19,7 @@
     "react-dom": "^15.4.2",
     "recompose": "^0.22.0",
     "retabulate-graphql": "^1.2.1",
-    "retabulate-react-renderer": "^0.7.1",
+    "retabulate-react-renderer": "^0.7.2",
     "retabulate-sas-parser": "^0.1.1"
   },
   "scripts": {
