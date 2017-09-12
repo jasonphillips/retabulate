@@ -1,17 +1,20 @@
 {
-  "name": "retabulate-react-renderer",
+  "name": "retabulate-react",
   "version": "0.6.0",
-  "description": "react table renderer for retabulate",
+  "description": "react interface for retabulate",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "babel -d lib/ src/"
   },
   "dependencies": {
-    "dot-object": "^1.5.4",
-    "lodash": "^4.17.4",
+    "apollo-client": "^1.9.2",
+    "graphql-tag": "^2.4.2",
+    "prop-types": "^15.5.10",
     "react": "^15.4.2",
-    "react-dom": "^15.4.2"
+    "react-dom": "^15.4.2",
+    "retabulate-graphql": "^0.6.0",
+    "retabulate-react-renderer": "^0.6.0"
   },
   "devDependencies": {
     "babel-cli": "^6.24.0",

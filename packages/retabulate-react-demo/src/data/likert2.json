@@ -1,0 +1,74 @@
+[
+    {
+        "u": "r0",
+        "college": "AS",
+        "q1": "strongly disagree",
+        "q2": "strongly agree",
+        "q3": "agree",
+        "q4": "agree"
+    },
+    {
+        "u": "r1",
+        "college": "EG",
+        "q1": "disagree",
+        "q2": "agree",
+        "q3": "strongly disagree",
+        "q4": "agree"
+    },
+    {
+        "u": "r2",
+        "college": "AS",
+        "q1": "disagree",
+        "q2": "strongly agree",
+        "q3": "strongly disagree",
+        "q4": "strongly disagree"
+    },
+    {
+        "u": "r3",
+        "college": "EG",
+        "q1": "disagree",
+        "q2": "agree",
+        "q3": "agree",
+        "q4": "strongly disagree"
+    },
+    {
+        "u": "r4",
+        "college": "EG",
+        "q1": "strongly agree",
+        "q2": "disagree",
+        "q3": "strongly disagree",
+        "q4": "agree"
+    },
+    {
+        "u": "r5",
+        "college": "AS",
+        "q1": "agree",
+        "q2": "strongly disagree",
+        "q3": "agree",
+        "q4": "disagree"
+    },
+    {
+        "u": "r6",
+        "college": "AS",
+        "q1": "disagree",
+        "q2": "agree",
+        "q3": "strongly disagree",
+        "q4": "agree"
+    },
+    {
+        "u": "r7",
+        "college": "AS",
+        "q1": "disagree",
+        "q2": "strongly agree",
+        "q3": "strongly disagree",
+        "q4": "strongly disagree"
+    },
+    {
+        "u": "r8",
+        "college": "AS",
+        "q1": "disagree",
+        "q2": "agree",
+        "q3": "agree",
+        "q4": "strongly disagree"
+    }
+]

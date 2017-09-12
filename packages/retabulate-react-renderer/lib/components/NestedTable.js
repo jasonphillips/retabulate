@@ -6,27 +6,25 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
-
-var _dotObject = require('dot-object');
-
-var _dotObject2 = _interopRequireDefault(_dotObject);
 
 var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _buildGroups = require('./buildGroups');
+var _buildGroups = require('../utils/buildGroups');
 
 var _buildGroups2 = _interopRequireDefault(_buildGroups);
 
-var _buildRows = require('./buildRows');
+var _buildRows = require('../utils/buildRows');
 
 var _buildRows2 = _interopRequireDefault(_buildRows);
 
-var _reactstrap = require('reactstrap');
+var _getRenderers = require('../utils/getRenderers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -36,72 +34,30 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ActiveCell = function (_React$Component) {
-  _inherits(ActiveCell, _React$Component);
+var BasicCell = function BasicCell(_ref) {
+  var _ref$cell = _ref.cell,
+      value = _ref$cell.value,
+      queries = _ref$cell.queries,
+      variable = _ref$cell.variable,
+      agg = _ref$cell.agg,
+      cellID = _ref.cellID,
+      cellProps = _ref.cellProps;
+  return _react2.default.createElement(
+    'td',
+    _extends({ id: cellID }, cellProps),
+    value
+  );
+};
 
-  function ActiveCell(props) {
-    _classCallCheck(this, ActiveCell);
-
-    var _this = _possibleConstructorReturn(this, (ActiveCell.__proto__ || Object.getPrototypeOf(ActiveCell)).call(this, props));
-
-    _this.state = { tooltip: false };
-    return _this;
-  }
-
-  _createClass(ActiveCell, [{
-    key: 'render',
-    value: function render() {
-      var _this2 = this;
-
-      var _props = this.props,
-          _props$cell = _props.cell,
-          value = _props$cell.value,
-          queries = _props$cell.queries,
-          variable = _props$cell.variable,
-          agg = _props$cell.agg,
-          cellID = _props.cellID;
-      var tooltip = this.state.tooltip;
-
-
-      return _react2.default.createElement(
-        'td',
-        { id: cellID },
-        value,
-        _react2.default.createElement(
-          _reactstrap.Tooltip,
-          { target: cellID, isOpen: tooltip,
-            toggle: function toggle() {
-              return _this2.setState({ tooltip: !tooltip });
-            },
-            delay: { show: 500, hide: 250 } },
-          _react2.default.createElement(
-            'h4',
-            null,
-            variable ? variable + ' | ' + agg : agg
-          ),
-          queries.map(function (_ref) {
-            var key = _ref.key,
-                value = _ref.value;
-            return _react2.default.createElement(
-              'div',
-              { key: key },
-              _react2.default.createElement(
-                'b',
-                null,
-                key,
-                ': '
-              ),
-              ' ',
-              value
-            );
-          })
-        )
-      );
-    }
-  }]);
-
-  return ActiveCell;
-}(_react2.default.Component);
+var Th = function Th(_ref2) {
+  var cellProps = _ref2.cellProps,
+      data = _ref2.data;
+  return _react2.default.createElement(
+    'th',
+    cellProps,
+    data.label
+  );
+};
 
 var NestedTable = function (_React$PureComponent) {
   _inherits(NestedTable, _React$PureComponent);
@@ -115,26 +71,24 @@ var NestedTable = function (_React$PureComponent) {
   _createClass(NestedTable, [{
     key: 'render',
     value: function render() {
-      var _props2 = this.props,
-          tabulated = _props2.tabulated,
-          cellRenderer = _props2.cellRenderer;
+      var _props = this.props,
+          tabulated = _props.tabulated,
+          renderers = _props.renderers,
+          labels = _props.labels;
 
-      var getCellComponent = cellRenderer ? cellRenderer : function () {
-        return ActiveCell;
-      };
 
-      var top = _dotObject2.default.dot(tabulated.top);
-      var left = _dotObject2.default.dot(tabulated.left);
+      var topGrouped = (0, _buildGroups2.default)(tabulated.top);
+      var leftGrouped = (0, _buildGroups2.default)(tabulated.left);
 
-      var topGrouped = (0, _buildGroups2.default)(top);
-      var leftGrouped = (0, _buildGroups2.default)(left);
+      Object.assign(labels, topGrouped.labels);
+      Object.assign(labels, leftGrouped.labels);
 
-      var topRows = (0, _buildRows2.default)(topGrouped);
-      var leftRows = (0, _buildRows2.default)(leftGrouped, true);
+      var topRows = (0, _buildRows2.default)(topGrouped.groups);
+      var leftRows = (0, _buildRows2.default)(leftGrouped.groups, true);
 
       return _react2.default.createElement(
         'table',
-        { className: 'table table-bordered', style: { margin: '1em' } },
+        { className: 'table table-bordered' },
         _react2.default.createElement(
           'thead',
           null,
@@ -150,11 +104,17 @@ var NestedTable = function (_React$PureComponent) {
                 ' '
               ),
               row.map(function (cell, j) {
-                return _react2.default.createElement(
-                  'th',
-                  { key: j, colSpan: cell.colSpan },
-                  (cell.label || '').replace('_', ' ')
-                );
+                var cellProps = _lodash2.default.pick(cell, 'colSpan');
+                var renderId = cell.label.split('|')[0];
+
+                var mergedProps = (0, _getRenderers.mergeCellRenderers)(renderId, cellProps, renderers, true);
+                var LabelRenderer = (0, _getRenderers.getLabelRenderer)(renderId, renderers);
+
+                return _react2.default.createElement(LabelRenderer || Th, {
+                  key: j,
+                  cellProps: mergedProps,
+                  data: _extends({}, cell, { label: labels[cell.label] || cell.label })
+                });
               })
             );
           })
@@ -167,18 +127,36 @@ var NestedTable = function (_React$PureComponent) {
               'tr',
               { key: i },
               leftRows.map(function (row, j) {
-                return row[i] && _react2.default.createElement(
-                  'th',
-                  { key: j, rowSpan: row[i].rowSpan },
-                  (row[i].label || '').replace('_', ' ')
-                );
+                if (!row[i]) return;
+
+                var cell = row[i];
+                var renderId = cell.label.split('|')[0];
+
+                var cellProps = _lodash2.default.pick(cell, 'rowSpan');
+                var mergedProps = (0, _getRenderers.mergeCellRenderers)(renderId, cellProps, renderers, true);
+                var LabelRenderer = (0, _getRenderers.getLabelRenderer)(renderId, renderers);
+
+                return _react2.default.createElement(LabelRenderer || Th, {
+                  key: j,
+                  cellProps: mergedProps,
+                  data: _extends({}, cell, { label: labels[cell.label] || cell.label })
+                });
               }),
               tabulated.rows[i].cells.map(function (cell, j) {
-                return _react2.default.createElement(getCellComponent(cell), {
+                var mergedProps = (0, _getRenderers.mergeCellRenderers)(cell.renderIds, { value: cell.value }, renderers);
+                var CellRenderer = (0, _getRenderers.getRenderer)(cell, renderers) || BasicCell;
+                // value is the one non-cell prop that can be overwritten
+                if (typeof mergedProps.value !== 'undefined') {
+                  cell = Object.assign({}, cell, { value: JSON.parse(mergedProps.value) });
+                  delete mergedProps.value;
+                }
+
+                return _react2.default.createElement(CellRenderer, {
                   key: '' + i + j,
                   cellID: 'cell-' + i + j,
+                  cellProps: mergedProps,
                   cell: cell
-                });
+                }, labels[cell.label] || cell.label);
               })
             );
           })

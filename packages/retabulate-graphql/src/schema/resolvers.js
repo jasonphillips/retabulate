@@ -1,28 +1,27 @@
 import _ from 'lodash';
 import gauss from 'gauss';
 import DataCollection from 'data-collection';
-import crypto from 'crypto';
 
 // gauss library has terrible import strategy on client
 const Vector = typeof(window!=='undefined') ? window.gauss.Vector : gauss.Vector;
+const concat = (arr, val) => val ? arr.concat([val]) : arr;
 
-const md5 = (val) => {
-   const c= crypto.createHash('md5')
-   c.update(val)
-   return c.digest('hex')
-}
-
-const generateLeaf = ({_aggIndex, _query, _variable, _agg, _over, _fmt, _grid, _axis}) => {
-  const id = md5(JSON.stringify(_query) + _variable + _agg);
+const generateLeaf = (data, context) => {
+  const {_aggIndex, _renderIds, _query, _variable, _agg, _over, _fmt, _grid, _axis, _detransposes} = data;
+  context.tabulate.iterator++;
+  const id = `t${context.tabulate.iterator}`;
   if (!_grid[_axis]) _grid[_axis] = [];
+
   _grid[_axis].push({
       id,
       index: _aggIndex,
       query: {..._query},
+      detransposes: _detransposes,
       variable: _variable,
       agg: _agg,
       over: _over,
-      fmt: _fmt
+      fmt: _fmt,
+      renderIds: _renderIds
   })
   return id;
 }
@@ -31,6 +30,8 @@ const makeSeries = (query, variable, rows) =>
   rows.filter(query).values(variable)
 
 const applyAggregation = {
+  distribution: (series, key) => new Vector(series.values(key)).distribution(),
+  distributionRatio: (series, key) => new Vector(series.values(key)).distribution('relative'),
   n: (series, key) => series.count() || 0,
   pctn: (series, key, over) => series.count() / over * 100,
   mean: (series, key) => series.count() ? series.exclude({[key]:''}).avg(key) : undefined,
@@ -43,40 +44,6 @@ const applyAggregation = {
   sum: (series, key) => series.sum(key) || 0,
 }
 
-const applyFormat = (fmt, missing) => {
-  const undefCheck = (n) => (n===undefined ? missing : false)
-  const SASparts = fmt.match(/^([A-Z]+)?(\d+)\.(\d*)$/);
-  // SAS-like {precision}.{fixed}
-  if (SASparts) {
-    const prefix = SASparts[1];
-    const precision = parseInt(SASparts[2]);
-    const fixed = parseInt(SASparts[3] || '0');
-
-    let applyPrefix = (out) => out;
-    if (prefix=='COMMA') applyPrefix = (out) => parseFloat(out).toLocaleString();
-    if (prefix=='DOLLAR') applyPrefix = (out) => '$'+parseFloat(out).toLocaleString();
-
-    if (!fixed) {
-      return (n) => undefCheck(n) || applyPrefix(parseInt(n.toPrecision(precision)).toString());
-    }
-    return (n) => (undefCheck(n) || 
-        applyPrefix(parseFloat(n.toPrecision(precision-1)).toFixed(fixed))
-    );
-  }
-  // commas
-  if (fmt==='comma') return (n) => undefCheck(n) || n.toLocaleString()
-  // precision
-  if (fmt.slice(0,10)==='precision|') {
-    return (n) => undefCheck(n) || n.toPrecision(parseInt(fmt.slice(10)))
-  }
-  // fixed
-  if (fmt.slice(0,6)==='fixed|') {
-    return (n) => undefCheck(n) || n.toFixed(parseInt(fmt.slice(6)))
-  }
-  // default non-format
-  return (n) => undefCheck(n) || n;
-}
-
 const resolvers = {
   Query: {
     table (root, {set, where}, context) {
@@ -87,15 +54,23 @@ const resolvers = {
             throw new Error(`dataset ${set} not found`);
           }
 
+          context.tabulate = {iterator: 0};
           const collection = new DataCollection(data).query();
 
           if (where) {
             const filter = {}
             _.forEach(where, ({key, value}) => { filter[key] = value })
-            return  {_rows:collection.filter(filter), _query:{}, _grid:{}, _aggIndex:0}
+            return  {
+              _rows:collection.filter(filter), 
+              _query:{},
+              _transposes:{},
+              _detransposes:{},
+              _grid:{}, 
+              _aggIndex:0
+            }
           }
 
-          resolve({_rows:collection, _query:{}, _grid:{}, _aggIndex:0});
+          resolve({_rows:collection, _query:{}, _grid:{}, _renderIds:[], _transposes:{}, _detransposes:{}, _aggIndex:0});
         });
       });
     },
@@ -121,7 +96,7 @@ const resolvers = {
   Axis: {
     label: ({key}) => key,
     length: ({_rows}) => _rows.count(),
-    classes: (data, {key, all, total, orderBy}) => {
+    classes: (data, {key, all, total, orderBy, renderId}) => {
       data._aggIndex++;
 
       // total never groups again, just descends
@@ -129,18 +104,22 @@ const resolvers = {
         return [{...data, key: '_', _aggIndex:data._aggIndex, _isTotal: true}];
       }
 
-      let value = data._rows.distinct(key).map((groupValue) => ({
+      let dataKey = data._detransposes[key] || key;
+
+      let value = data._rows.distinct(dataKey).map((groupValue) => ({
         ...data,
         key: groupValue,
-        _rows:data._rows.filter({[key]:groupValue}),
+        _rows:data._rows.filter({[dataKey]:groupValue}),
         _aggIndex:data._aggIndex,
-        _query:{...data._query, [key]:groupValue}
+        _query:{...data._query, [dataKey]:groupValue},
+        _renderIds: concat(data._renderIds, renderId),
+        renderId
       }))
 
       if (orderBy) value = _.sortBy(value, (v) => v._rows.first()[orderBy]);
 
       if (all) value.push(
-        {...data, key:all, _aggIndex:data._aggIndex}
+        {...data, key:all, _aggIndex:data._aggIndex, renderIds: concat(data._renderIds, renderId), renderId}
       )
 
       if (total) value.push(
@@ -149,22 +128,45 @@ const resolvers = {
 
       return value;
     },
+    transpose: (data, {keys, asKey, renderId}) => {
+      data._aggIndex++;
+
+      return keys.map(inKey => ({
+        ...data, 
+        key: inKey,
+        _rows:data._rows,
+        _transposes:{...data._transposes, [inKey]:asKey},
+        _detransposes: {...data._detransposes, [asKey]:inKey},
+        _renderIds: concat(data._renderIds, renderId),
+        renderId
+      }));
+    },
     all: (data, {label}) => { data._aggIndex++; return {...data, label, key:label}},
+    renderIds: ({_renderIds}) => _renderIds,
     node: (data) => data,
-    leaf: (data) => generateLeaf(data),
-    variable: (data, {key}) => ({...data, _variable:key, key}),
+    leaf: (data, args, context) => generateLeaf(data, context),
+    variable: (data, {key, keys, renderId}) => ({
+      ...data, _variable: keys || key, key, _renderIds: concat(data._renderIds, renderId
+      )}),
   },
   Node: {
-    leaf: (data) => generateLeaf(data),
+    leaf: (data, args, context) => generateLeaf(data, context),
     node: (data) => data,
   },
   Variable: {
-    aggregation: (data, {method, over, format}) => ({...data, _agg:method, _over:over, _fmt:format, method}),
-    leaf: (data) => generateLeaf(data),
+    aggregation: (data, {method, over, renderId}) => ({
+      ...data, _agg:method, _over:over, method, _renderIds: concat(data._renderIds, renderId)
+    }),
+    statistic: (data, {method, over, renderId}) => ({
+      ...data, _agg:method, _over:over, method, _renderIds: concat(data._renderIds, renderId)
+    }),
+    renderIds: ({_renderIds}) => _renderIds,
+    leaf: (data, args, context) => generateLeaf(data, context),
     node: (data) => data,
   },
   Aggregation: {
-    leaf: (data) => generateLeaf(data),
+    renderIds: ({_renderIds}) => _renderIds,
+    leaf: (data, args, context) => generateLeaf(data, context),
     node: (data) => data,
   },
   Row: {
@@ -173,23 +175,25 @@ const resolvers = {
       const agg = y.agg || x.agg || 'n';
       const over = y.over || x.over || null;
       const overQuery = over ? _.omit(query, over) : null;
+      const detransposes = {...x.detransposes, ...y.detransposes};
 
       return {
         query: query,
-        variable: y.variable || x.variable || null,
+        variable: detransposes[y.variable] || y.variable || detransposes[x.variable] || x.variable || null,
         agg: agg,
+        detransposes,
         colID: x.id,
         rowID: y.id,
         rows: y._rows.filter(x.query),
         over: over ? y._all.filter(overQuery).count() : null,
         fmt: y.fmt || x.fmt || '',
+        renderIds: x.renderIds.concat(y.renderIds),
       }
     }),
   },
   Cell: {
-    value: ({query, variable, agg, over, rows, fmt}, {missing}) => {
-      const aggregated = applyAggregation[agg](rows, variable, over);
-      return applyFormat(fmt, missing || '.')(aggregated);
+    value: ({query, detransposes, variable, agg, over, rows, fmt}, {missing}) => {
+      return JSON.stringify(applyAggregation[agg](rows, detransposes[variable] || variable, over));
     },
     queries: ({query}) => _.map(_.keys(query), (key) => ({key, value: query[key]})),
   },

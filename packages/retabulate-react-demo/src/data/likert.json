@@ -1,0 +1,50 @@
+[
+    {
+        "u": 0,
+        "q": "1",
+        "strongly_disagree": 0,
+        "disagree": 0,
+        "agree": 0,
+        "strongly_agree": 1
+    },
+    {
+        "u": 0,
+        "q": "2",
+        "strongly_disagree": 0,
+        "disagree": 1,
+        "agree": 0,
+        "strongly_agree": 0
+    },
+    {
+        "u": 1,
+        "q": "1",
+        "strongly_disagree": 0,
+        "disagree": 0,
+        "agree": 1,
+        "strongly_agree": 0
+    },
+    {
+        "u": 1,
+        "q": "2",
+        "strongly_disagree": 0,
+        "disagree": 0,
+        "agree": 1,
+        "strongly_agree": 0
+    },
+    {
+        "u": 3,
+        "q": "1",
+        "strongly_disagree": 0,
+        "disagree": 1,
+        "agree": 0,
+        "strongly_agree": 0
+    },
+    {
+        "u": 3,
+        "q": "2",
+        "strongly_disagree": 1,
+        "disagree": 0,
+        "agree": 0,
+        "strongly_agree": 0
+    }
+]

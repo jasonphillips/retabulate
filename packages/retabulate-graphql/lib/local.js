@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.makeNetworkInterface = exports.makeLocalExecution = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -53,4 +54,19 @@ function makeLocalExecution() {
     };
 }
 
-exports.default = makeLocalExecution;
+var makeNetworkInterface = function makeNetworkInterface(context) {
+    var localQuery = makeLocalExecution(context);
+
+    return {
+        query: function query(r) {
+            return new Promise(function (resolve, reject) {
+                localQuery(r.query, { variables: r.variables }, {}).then(function (data, errors) {
+                    resolve({ data: data, errors: errors });
+                });
+            });
+        }
+    };
+};
+
+exports.makeLocalExecution = makeLocalExecution;
+exports.makeNetworkInterface = makeNetworkInterface;

@@ -11,9 +11,12 @@ export default `
     length: Int
     node: Axis
     leaf: ID
-    classes(key:String, all:String, total:String, orderBy:String): [Axis]
+    renderId: String
+    renderIds: [String]
+    classes(key:String, all:String, total:String, orderBy:String, renderId:String): [Axis]
+    transpose(keys:[String], asKey:String, renderId:String): [Axis]
     all(label:String): Axis
-    variable(key:String): Variable
+    variable(key:String, keys:[String], renderId:String): Variable
   }
 
   type Node {
@@ -23,7 +26,11 @@ export default `
 
   type Variable {
     key: String
-    aggregation(method:String, format:String, over:String): Aggregation
+    keys: [String]
+    renderId: String
+    renderIds: [String]
+    aggregation(method:String, format:String, over:String, renderId:String): Aggregation
+    statistic(method:String, format:String, over:String, renderId:String): Aggregation
     leaf: ID
     node: Node
   }
@@ -31,6 +38,8 @@ export default `
   type Aggregation {
     method: String
     leaf: ID
+    renderId: String
+    renderIds: [String]
     node: Node
   }
 
@@ -43,6 +52,8 @@ export default `
     colID: ID
     rowID: ID
     queries: [QueryCondition]
+    renderId: String
+    renderIds: [String]
     variable: String
     agg: String
   }

@@ -1,78 +1,97 @@
 import React from 'react';
-import dot from 'dot-object';
 import _ from 'lodash';
-import buildGroups from './buildGroups';
-import buildRows from './buildRows';
-import { Tooltip } from 'reactstrap';
+import buildGroups from '../utils/buildGroups';
+import buildRows from '../utils/buildRows';
+import {mergeCellRenderers, getRenderer, getLabelRenderer} from '../utils/getRenderers';
 
-class ActiveCell extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {tooltip:false};
-  }
+const BasicCell = ({cell: {value, queries, variable, agg}, cellID, cellProps}) => (
+  <td id={cellID} {...cellProps}>
+    {value}
+  </td>
+)
 
-  render() {
-    const {cell: {value, queries, variable, agg}, cellID} = this.props;
-    const {tooltip} = this.state;
+const Th = ({cellProps, data}) => <th {...cellProps}>{data.label}</th>;
 
-    return (
-      <td id={cellID}>
-        {value}
-        <Tooltip target={cellID} isOpen={tooltip}
-            toggle={() => this.setState({tooltip:!tooltip})}
-            delay={{ show: 500, hide: 250 }}>
-          <h4>{variable ? `${variable} | ${agg}` : agg}</h4>
-          {queries.map(({key, value}) =>
-            <div key={key}><b>{key}: </b> {value}</div>
-          )}
-        </Tooltip>
-      </td>
-    )
-  }
-}
 
 class NestedTable extends React.PureComponent {
   render() {
-    const {tabulated, cellRenderer} = this.props;
-    let getCellComponent = cellRenderer ? cellRenderer : () => ActiveCell;
+    const {tabulated, renderers, labels} = this.props;
 
-    const top = dot.dot(tabulated.top)
-    const left = dot.dot(tabulated.left)
+    const topGrouped = buildGroups(tabulated.top);
+    const leftGrouped = buildGroups(tabulated.left);
 
-    const topGrouped = buildGroups(top);
-    const leftGrouped = buildGroups(left);
+    Object.assign(labels, topGrouped.labels);
+    Object.assign(labels, leftGrouped.labels);
 
-    const topRows = buildRows(topGrouped);
-    const leftRows = buildRows(leftGrouped, true);
+    const topRows = buildRows(topGrouped.groups);
+    const leftRows = buildRows(leftGrouped.groups, true);
 
     return (
-        <table className="table table-bordered" style={{margin:'1em'}}>
+        <table className="table table-bordered">
           <thead>
             {topRows.map((row,i) =>
               <tr key={i}>
                 {i===0 && <td rowSpan={topRows.length}
                             colSpan={leftRows.length}
                             className="corner"> </td>}
-                {row.map((cell, j) =>
-                  <th key={j} colSpan={cell.colSpan}>{(cell.label || '').replace('_', ' ')}</th>
-                )}
+                {row.map((cell, j) => {
+                  const cellProps = _.pick(cell, 'colSpan');
+                  const renderId = cell.label.split('|')[0];
+                  
+                  const mergedProps = mergeCellRenderers(renderId, cellProps, renderers, true);
+                  const LabelRenderer = getLabelRenderer(renderId, renderers);
+
+                  return (
+                    React.createElement(LabelRenderer || Th, {
+                      key: j,
+                      cellProps: mergedProps,
+                      data: {...cell, label: labels[cell.label] || cell.label}
+                    })
+                  );
+                })}
               </tr>
             )}
           </thead>
           <tbody>
             {_.range(0, leftRows[0].length).map(i =>
               <tr key={i}>
-                { leftRows.map((row, j) =>
-                    row[i] &&
-                    <th key={j} rowSpan={row[i].rowSpan}>{(row[i].label || '').replace('_', ' ')}</th>
-                )}
-                {tabulated.rows[i].cells.map((cell,j) =>
-                    React.createElement(getCellComponent(cell), {
-                      key: `${i}${j}`,
-                      cellID: `cell-${i}${j}`,
-                      cell
-                    })
-                )}
+
+                {leftRows.map((row, j) => {
+                    if (!row[i]) return;
+
+                    const cell = row[i];
+                    const renderId = cell.label.split('|')[0];
+
+                    const cellProps = _.pick(cell, 'rowSpan');
+                    const mergedProps = mergeCellRenderers(renderId, cellProps, renderers, true);
+                    const LabelRenderer = getLabelRenderer(renderId, renderers);
+
+                    return (
+                      React.createElement(LabelRenderer || Th, {
+                        key: j,
+                        cellProps: mergedProps,
+                        data: {...cell, label: labels[cell.label] || cell.label}
+                      })
+                    );
+                })}
+
+                {tabulated.rows[i].cells.map((cell,j) => {
+                  const mergedProps = mergeCellRenderers(cell.renderIds, {value: cell.value}, renderers);
+                  const CellRenderer = getRenderer(cell, renderers) || BasicCell;
+                  // value is the one non-cell prop that can be overwritten
+                  if (typeof(mergedProps.value)!=='undefined') {
+                    cell = Object.assign({}, cell, {value: JSON.parse(mergedProps.value)});
+                    delete mergedProps.value;
+                  }
+
+                  return React.createElement(CellRenderer, {
+                    key: `${i}${j}`,
+                    cellID: `cell-${i}${j}`,
+                    cellProps: mergedProps,
+                    cell,
+                  }, labels[cell.label] || cell.label);
+                })}
+
               </tr>
             )}
           </tbody>

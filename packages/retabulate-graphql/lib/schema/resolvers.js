@@ -20,43 +20,42 @@ var _dataCollection = require('data-collection');
 
 var _dataCollection2 = _interopRequireDefault(_dataCollection);
 
-var _crypto = require('crypto');
-
-var _crypto2 = _interopRequireDefault(_crypto);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 // gauss library has terrible import strategy on client
 var Vector = _typeof(window !== 'undefined') ? window.gauss.Vector : _gauss2.default.Vector;
-
-var md5 = function md5(val) {
-  var c = _crypto2.default.createHash('md5');
-  c.update(val);
-  return c.digest('hex');
+var concat = function concat(arr, val) {
+  return val ? arr.concat([val]) : arr;
 };
 
-var generateLeaf = function generateLeaf(_ref) {
-  var _aggIndex = _ref._aggIndex,
-      _query = _ref._query,
-      _variable = _ref._variable,
-      _agg = _ref._agg,
-      _over = _ref._over,
-      _fmt = _ref._fmt,
-      _grid = _ref._grid,
-      _axis = _ref._axis;
+var generateLeaf = function generateLeaf(data, context) {
+  var _aggIndex = data._aggIndex,
+      _renderIds = data._renderIds,
+      _query = data._query,
+      _variable = data._variable,
+      _agg = data._agg,
+      _over = data._over,
+      _fmt = data._fmt,
+      _grid = data._grid,
+      _axis = data._axis,
+      _detransposes = data._detransposes;
 
-  var id = md5(JSON.stringify(_query) + _variable + _agg);
+  context.tabulate.iterator++;
+  var id = 't' + context.tabulate.iterator;
   if (!_grid[_axis]) _grid[_axis] = [];
+
   _grid[_axis].push({
     id: id,
     index: _aggIndex,
     query: _extends({}, _query),
+    detransposes: _detransposes,
     variable: _variable,
     agg: _agg,
     over: _over,
-    fmt: _fmt
+    fmt: _fmt,
+    renderIds: _renderIds
   });
   return id;
 };
@@ -66,6 +65,12 @@ var makeSeries = function makeSeries(query, variable, rows) {
 };
 
 var applyAggregation = {
+  distribution: function distribution(series, key) {
+    return new Vector(series.values(key)).distribution();
+  },
+  distributionRatio: function distributionRatio(series, key) {
+    return new Vector(series.values(key)).distribution('relative');
+  },
   n: function n(series, key) {
     return series.count() || 0;
   },
@@ -98,63 +103,11 @@ var applyAggregation = {
   }
 };
 
-var applyFormat = function applyFormat(fmt, missing) {
-  var undefCheck = function undefCheck(n) {
-    return n === undefined ? missing : false;
-  };
-  var SASparts = fmt.match(/^([A-Z]+)?(\d+)\.(\d*)$/);
-  // SAS-like {precision}.{fixed}
-  if (SASparts) {
-    var prefix = SASparts[1];
-    var precision = parseInt(SASparts[2]);
-    var fixed = parseInt(SASparts[3] || '0');
-
-    var applyPrefix = function applyPrefix(out) {
-      return out;
-    };
-    if (prefix == 'COMMA') applyPrefix = function applyPrefix(out) {
-      return parseFloat(out).toLocaleString();
-    };
-    if (prefix == 'DOLLAR') applyPrefix = function applyPrefix(out) {
-      return '$' + parseFloat(out).toLocaleString();
-    };
-
-    if (!fixed) {
-      return function (n) {
-        return undefCheck(n) || applyPrefix(parseInt(n.toPrecision(precision)).toString());
-      };
-    }
-    return function (n) {
-      return undefCheck(n) || applyPrefix(parseFloat(n.toPrecision(precision - 1)).toFixed(fixed));
-    };
-  }
-  // commas
-  if (fmt === 'comma') return function (n) {
-    return undefCheck(n) || n.toLocaleString();
-  };
-  // precision
-  if (fmt.slice(0, 10) === 'precision|') {
-    return function (n) {
-      return undefCheck(n) || n.toPrecision(parseInt(fmt.slice(10)));
-    };
-  }
-  // fixed
-  if (fmt.slice(0, 6) === 'fixed|') {
-    return function (n) {
-      return undefCheck(n) || n.toFixed(parseInt(fmt.slice(6)));
-    };
-  }
-  // default non-format
-  return function (n) {
-    return undefCheck(n) || n;
-  };
-};
-
 var resolvers = {
   Query: {
-    table: function table(root, _ref2, context) {
-      var set = _ref2.set,
-          where = _ref2.where;
+    table: function table(root, _ref, context) {
+      var set = _ref.set,
+          where = _ref.where;
 
       return new Promise(function (resolve, reject) {
         context.getDataset(set).then(function (data) {
@@ -163,26 +116,34 @@ var resolvers = {
             throw new Error('dataset ' + set + ' not found');
           }
 
+          context.tabulate = { iterator: 0 };
           var collection = new _dataCollection2.default(data).query();
 
           if (where) {
             var filter = {};
-            _lodash2.default.forEach(where, function (_ref3) {
-              var key = _ref3.key,
-                  value = _ref3.value;
+            _lodash2.default.forEach(where, function (_ref2) {
+              var key = _ref2.key,
+                  value = _ref2.value;
               filter[key] = value;
             });
-            return { _rows: collection.filter(filter), _query: {}, _grid: {}, _aggIndex: 0 };
+            return {
+              _rows: collection.filter(filter),
+              _query: {},
+              _transposes: {},
+              _detransposes: {},
+              _grid: {},
+              _aggIndex: 0
+            };
           }
 
-          resolve({ _rows: collection, _query: {}, _grid: {}, _aggIndex: 0 });
+          resolve({ _rows: collection, _query: {}, _grid: {}, _renderIds: [], _transposes: {}, _detransposes: {}, _aggIndex: 0 });
         });
       });
     }
   },
   Table: {
-    length: function length(_ref4) {
-      var _rows = _ref4._rows;
+    length: function length(_ref3) {
+      var _rows = _ref3._rows;
       return _rows.count();
     },
     top: function top(data, args) {
@@ -192,9 +153,9 @@ var resolvers = {
       return _extends({}, data, { key: null, _axis: 'y' });
     },
     // after delay of other resolvers, process cells grid
-    rows: function rows(_ref5) {
-      var _rows = _ref5._rows,
-          _grid = _ref5._grid;
+    rows: function rows(_ref4) {
+      var _rows = _ref4._rows,
+          _grid = _ref4._grid;
       return new Promise(function (resolve, rej) {
         return process.nextTick(function () {
           resolve(_lodash2.default.map(_lodash2.default.sortBy(_grid.y, 'index'), function (y) {
@@ -209,19 +170,20 @@ var resolvers = {
     }
   },
   Axis: {
-    label: function label(_ref6) {
-      var key = _ref6.key;
+    label: function label(_ref5) {
+      var key = _ref5.key;
       return key;
     },
-    length: function length(_ref7) {
-      var _rows = _ref7._rows;
+    length: function length(_ref6) {
+      var _rows = _ref6._rows;
       return _rows.count();
     },
-    classes: function classes(data, _ref8) {
-      var key = _ref8.key,
-          all = _ref8.all,
-          total = _ref8.total,
-          orderBy = _ref8.orderBy;
+    classes: function classes(data, _ref7) {
+      var key = _ref7.key,
+          all = _ref7.all,
+          total = _ref7.total,
+          orderBy = _ref7.orderBy,
+          renderId = _ref7.renderId;
 
       data._aggIndex++;
 
@@ -230,12 +192,16 @@ var resolvers = {
         return [_extends({}, data, { key: '_', _aggIndex: data._aggIndex, _isTotal: true })];
       }
 
-      var value = data._rows.distinct(key).map(function (groupValue) {
+      var dataKey = data._detransposes[key] || key;
+
+      var value = data._rows.distinct(dataKey).map(function (groupValue) {
         return _extends({}, data, {
           key: groupValue,
-          _rows: data._rows.filter(_defineProperty({}, key, groupValue)),
+          _rows: data._rows.filter(_defineProperty({}, dataKey, groupValue)),
           _aggIndex: data._aggIndex,
-          _query: _extends({}, data._query, _defineProperty({}, key, groupValue))
+          _query: _extends({}, data._query, _defineProperty({}, dataKey, groupValue)),
+          _renderIds: concat(data._renderIds, renderId),
+          renderId: renderId
         });
       });
 
@@ -243,52 +209,92 @@ var resolvers = {
         return v._rows.first()[orderBy];
       });
 
-      if (all) value.push(_extends({}, data, { key: all, _aggIndex: data._aggIndex }));
+      if (all) value.push(_extends({}, data, { key: all, _aggIndex: data._aggIndex, renderIds: concat(data._renderIds, renderId), renderId: renderId }));
 
       if (total) value.push(_extends({}, data, { key: total, _aggIndex: data._aggIndex, _isTotal: total }));
 
       return value;
     },
+    transpose: function transpose(data, _ref8) {
+      var keys = _ref8.keys,
+          asKey = _ref8.asKey,
+          renderId = _ref8.renderId;
+
+      data._aggIndex++;
+
+      return keys.map(function (inKey) {
+        return _extends({}, data, {
+          key: inKey,
+          _rows: data._rows,
+          _transposes: _extends({}, data._transposes, _defineProperty({}, inKey, asKey)),
+          _detransposes: _extends({}, data._detransposes, _defineProperty({}, asKey, inKey)),
+          _renderIds: concat(data._renderIds, renderId),
+          renderId: renderId
+        });
+      });
+    },
     all: function all(data, _ref9) {
       var label = _ref9.label;
       data._aggIndex++;return _extends({}, data, { label: label, key: label });
     },
+    renderIds: function renderIds(_ref10) {
+      var _renderIds = _ref10._renderIds;
+      return _renderIds;
+    },
     node: function node(data) {
       return data;
     },
-    leaf: function leaf(data) {
-      return generateLeaf(data);
+    leaf: function leaf(data, args, context) {
+      return generateLeaf(data, context);
     },
-    variable: function variable(data, _ref10) {
-      var key = _ref10.key;
-      return _extends({}, data, { _variable: key, key: key });
+    variable: function variable(data, _ref11) {
+      var key = _ref11.key,
+          keys = _ref11.keys,
+          renderId = _ref11.renderId;
+      return _extends({}, data, { _variable: keys || key, key: key, _renderIds: concat(data._renderIds, renderId) });
     }
   },
   Node: {
-    leaf: function leaf(data) {
-      return generateLeaf(data);
+    leaf: function leaf(data, args, context) {
+      return generateLeaf(data, context);
     },
     node: function node(data) {
       return data;
     }
   },
   Variable: {
-    aggregation: function aggregation(data, _ref11) {
-      var method = _ref11.method,
-          over = _ref11.over,
-          format = _ref11.format;
-      return _extends({}, data, { _agg: method, _over: over, _fmt: format, method: method });
+    aggregation: function aggregation(data, _ref12) {
+      var method = _ref12.method,
+          over = _ref12.over,
+          renderId = _ref12.renderId;
+      return _extends({}, data, { _agg: method, _over: over, method: method, _renderIds: concat(data._renderIds, renderId)
+      });
     },
-    leaf: function leaf(data) {
-      return generateLeaf(data);
+    statistic: function statistic(data, _ref13) {
+      var method = _ref13.method,
+          over = _ref13.over,
+          renderId = _ref13.renderId;
+      return _extends({}, data, { _agg: method, _over: over, method: method, _renderIds: concat(data._renderIds, renderId)
+      });
+    },
+    renderIds: function renderIds(_ref14) {
+      var _renderIds = _ref14._renderIds;
+      return _renderIds;
+    },
+    leaf: function leaf(data, args, context) {
+      return generateLeaf(data, context);
     },
     node: function node(data) {
       return data;
     }
   },
   Aggregation: {
-    leaf: function leaf(data) {
-      return generateLeaf(data);
+    renderIds: function renderIds(_ref15) {
+      var _renderIds = _ref15._renderIds;
+      return _renderIds;
+    },
+    leaf: function leaf(data, args, context) {
+      return generateLeaf(data, context);
     },
     node: function node(data) {
       return data;
@@ -301,35 +307,38 @@ var resolvers = {
         var agg = y.agg || x.agg || 'n';
         var over = y.over || x.over || null;
         var overQuery = over ? _lodash2.default.omit(query, over) : null;
+        var detransposes = _extends({}, x.detransposes, y.detransposes);
 
         return {
           query: query,
-          variable: y.variable || x.variable || null,
+          variable: detransposes[y.variable] || y.variable || detransposes[x.variable] || x.variable || null,
           agg: agg,
+          detransposes: detransposes,
           colID: x.id,
           rowID: y.id,
           rows: y._rows.filter(x.query),
           over: over ? y._all.filter(overQuery).count() : null,
-          fmt: y.fmt || x.fmt || ''
+          fmt: y.fmt || x.fmt || '',
+          renderIds: x.renderIds.concat(y.renderIds)
         };
       });
     }
   },
   Cell: {
-    value: function value(_ref12, _ref13) {
-      var query = _ref12.query,
-          variable = _ref12.variable,
-          agg = _ref12.agg,
-          over = _ref12.over,
-          rows = _ref12.rows,
-          fmt = _ref12.fmt;
-      var missing = _ref13.missing;
+    value: function value(_ref16, _ref17) {
+      var query = _ref16.query,
+          detransposes = _ref16.detransposes,
+          variable = _ref16.variable,
+          agg = _ref16.agg,
+          over = _ref16.over,
+          rows = _ref16.rows,
+          fmt = _ref16.fmt;
+      var missing = _ref17.missing;
 
-      var aggregated = applyAggregation[agg](rows, variable, over);
-      return applyFormat(fmt, missing || '.')(aggregated);
+      return JSON.stringify(applyAggregation[agg](rows, detransposes[variable] || variable, over));
     },
-    queries: function queries(_ref14) {
-      var query = _ref14.query;
+    queries: function queries(_ref18) {
+      var query = _ref18.query;
       return _lodash2.default.map(_lodash2.default.keys(query), function (key) {
         return { key: key, value: query[key] };
       });

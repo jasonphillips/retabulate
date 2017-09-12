@@ -29,4 +29,16 @@ function makeLocalExecution(initialContext = {}) {
     });
 }
 
-export default makeLocalExecution;
+const makeNetworkInterface = (context) => {
+    const localQuery = makeLocalExecution(context);
+    
+    return {
+        query: (r) => new Promise((resolve, reject) => {
+            localQuery(r.query, {variables: r.variables}, {}).then((data, errors) => {
+                resolve({data, errors});
+            })
+        }),
+    };
+};
+
+export {makeLocalExecution, makeNetworkInterface};

@@ -1,5 +1,5 @@
 import schema from './schema';
-import makeLocalExecution from './local';
+import {makeLocalExecution, makeNetworkInterface} from './local';
 
-export {makeLocalExecution};
+export {makeLocalExecution, makeNetworkInterface};
 export default schema;

@@ -1,0 +1,50 @@
+[
+    {
+        "term": "Spring 2017",
+        "school": "Nursing",
+        "status": "Part-Time",
+        "gpa": 3.72
+    },
+    {
+        "term": "Spring 2017",
+        "school": "A&S",
+        "status": "Part-Time",
+        "gpa": 2.72
+    },
+    {
+        "term": "Spring 2017",
+        "school": "A&S",
+        "status": "Full-Time",
+        "gpa": 3.55
+    },
+    {
+        "term": "Spring 2017",
+        "school": "Engineering",
+        "status": "Part-Time",
+        "gpa": 2.22
+    },
+    {
+        "term": "Fall 2017",
+        "school": "Nursing",
+        "status": "Part-Time",
+        "gpa": 3.72
+    },
+    {
+        "term": "Fall 2017",
+        "school": "A&S",
+        "status": "Part-Time",
+        "gpa": 2.72
+    },
+    {
+        "term": "Fall 2017",
+        "school": "A&S",
+        "status": "Full-Time",
+        "gpa": 3.55
+    },
+    {
+        "term": "Fall 2017",
+        "school": "Engineering",
+        "status": "Part-Time",
+        "gpa": 2.22
+    }
+]

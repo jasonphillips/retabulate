@@ -1,0 +1,13 @@
+body {
+  padding: 2rem;
+}
+
+h2 {
+  text-align: center;
+  color: #555;
+  margin-bottom: 1.5em;
+}
+
+thead th {
+  text-align: center;
+}
