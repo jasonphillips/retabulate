@@ -118,6 +118,12 @@ class App extends Component {
                     cellStyles={{textAlign:'right'}}
                   />
                   <Statistic 
+                    method="n" 
+                    label="Rate"
+                    formatter={(val) => val / 10 * 100 + '%'} 
+                    cellStyles={{textAlign:'right'}}
+                  />
+                  <Statistic 
                     method="distributionRatio" 
                     cellRenderer={LikertCell}
                     labelRenderer={LikertKey}
