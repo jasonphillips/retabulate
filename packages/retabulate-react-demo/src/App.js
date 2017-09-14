@@ -34,24 +34,23 @@ const LikertCell = ({cellProps, cell: {value}}) => (
     {/* negative likerts: floating right within left 50% */}
     <div style={{width:'50%', float:'left', height: '2.5em', paddingTop: '.75em', borderRight: '2px dotted #ddd'}}>
       {likertScale.filter(a => a.negative===true).reverse().map((answer,i) => 
-        <div style={{
-          backgroundColor: answer.color,
-          float: 'right',
-          height: '1em',
-          width: (value[answer.text] || 0) * 100 + '%',          
-        }} key={i} className="likert"/>
+        <svg style={{float: 'right'}} class="chart" width={(value[answer.text] || 0) * 100 + '%'} height="1em" key={i} className="likert">
+        <g transform="translate(0,0)">
+          <rect style={{fill: answer.color}} width="100%" height="100%"></rect>
+          <text style={{fontSize: '.65em'}} x="2" y="9.5" dy=".25em">{(value[answer.text] || 0) * 100 + '%'}</text>
+        </g>
+      </svg>
       )}
     </div>
 
     {/* positive likerts: floating left within right 50% */}
     <div style={{width:'50%', float:'left', height: '2.5em', paddingTop: '.75em'}}>
       {likertScale.filter(a => a.negative===false).map((answer,i) => 
-        <div style={{
-          backgroundColor: answer.color,
-          float: 'left',
-          height: '1em',
-          width: (value[answer.text] || 0) * 100 + '%',
-        }} key={i} className="likert"/>
+        <svg style={{float: 'left'}} class="chart" width={(value[answer.text] || 0) * 100 + '%'} height="1em" key={i} className="likert">
+        <g transform="translate(0,0)">
+          <rect style={{fill: answer.color}} width="100%" height="100%" />
+        </g>
+      </svg>
       )}
     </div>
 
@@ -62,10 +61,13 @@ const LikertCell = ({cellProps, cell: {value}}) => (
 const LikertKey = ({cellProps}) => (
   <th {...cellProps}>
     {likertScale.map((answer,i) => 
-      <span key={i}>
-        &nbsp;
-        <span style={{display:'inline-box', height:'1em', borderLeft: `15px solid ${answer.color}`}}/>
-        &nbsp; {answer.text}
+      <span style={{textTransform: 'capitalize'}} key={i}>
+        <svg style={{float: 'left'}} class="chart" width={(value[answer.text] || 0) * 100 + '%'} height="1em" key={i} className="likert">
+          <g transform="translate(0,0)">
+            <rect style={{fill: answer.color}} width="100%" height="100%" />
+          </g>
+        </svg>
+        {answer.text}
       </span>
     )}
   </th>
