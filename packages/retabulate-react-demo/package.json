@@ -1,12 +1,12 @@
 {
   "name": "retabulate-react-demo",
   "description": "demo for retabulate-react",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "dependencies": {
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
-    "retabulate-react": "^0.6.4"
+    "retabulate-react": "^0.7.0"
   },
   "devDependencies": {
     "react-scripts": "1.0.13"
