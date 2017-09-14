@@ -21,8 +21,7 @@ function extractLabels(dotted) {
   const labels = {};
   const transforms = {};
 
-  _.forEach(_.filter(_.keys(dotted), p=>p.split('.').slice(-1)=='label'), (paths) => {
-    const index = paths.split('.').slice(-2)[0];
+  _.forEach(_.filter(_.keys(dotted), p=>p.split('.').slice(-1)=='label'), (paths,index) => {
     const renderId = dotted[paths.split('.').slice(0,-1).concat(['renderId']).join('.')];
     
     labels[`_${renderId}|${index}`] = dotted[paths];

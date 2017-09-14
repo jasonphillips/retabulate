@@ -6,9 +6,9 @@ import {makeNetworkInterface} from 'retabulate-graphql';
 class RetabulateProvider extends React.Component {
     constructor(props) {
         super(props);
-        const {getDataset} = props;
+        const {getDataset, client} = props;
 
-        this.client = new ApolloClient({
+        this.client = client || new ApolloClient({
             networkInterface: makeNetworkInterface({getDataset})
         });
     }

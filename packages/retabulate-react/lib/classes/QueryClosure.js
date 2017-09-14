@@ -8,6 +8,14 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+// serialize obj {"key": "value", "another": "value"} to gql {key: "value", another: "value"}
+// -- quotes around keys (normal JSON stringify) are rejected in gql args
+var toGqlObjectArg = exports.toGqlObjectArg = function toGqlObjectArg(obj) {
+    return '{' + Object.keys(obj).map(function (k) {
+        return k + ': ' + JSON.stringify(obj[k]);
+    }) + '}';
+};
+
 var QueryClosure = function () {
     function QueryClosure(type, key, label, renderId, args) {
         var _this = this;
@@ -23,11 +31,13 @@ var QueryClosure = function () {
         this.siblings = [];
 
         if (type == 'statistic') {
-            this.arguments = { method: key };
-        } else if (key.map) {
-            this.arguments = { keys: key };
+            this.arguments = { method: JSON.stringify(key) };
+        } else if (key && key.map) {
+            this.arguments = { keys: JSON.stringify(key) };
+        } else if (type == 'all') {
+            this.arguments = { label: JSON.stringify(key) };
         } else {
-            this.arguments = { key: key };
+            this.arguments = { key: JSON.stringify(key) };
         }
 
         Object.keys(args || {}).map(function (k) {
@@ -39,7 +49,13 @@ var QueryClosure = function () {
     _createClass(QueryClosure, [{
         key: 'setArgument',
         value: function setArgument(key, arg) {
-            this.arguments[key] = arg;
+            if (key === 'mapping') {
+                this.arguments[key] = '[ ' + arg.map(function (a) {
+                    return toGqlObjectArg(a);
+                }) + ' ]';
+                return this;
+            }
+            this.arguments[key] = JSON.stringify(arg);
             return this;
         }
     }, {
@@ -48,7 +64,7 @@ var QueryClosure = function () {
             var _this2 = this;
 
             var args = Object.keys(this.arguments).map(function (key) {
-                return key + ': ' + JSON.stringify(_this2.arguments[key]);
+                return key + ': ' + _this2.arguments[key];
             });
 
             if (this.renderId) args.push('renderId:"' + this.renderId + '"');
@@ -56,7 +72,7 @@ var QueryClosure = function () {
             var descendent = this.child ? this.child.toString() : ' node {leaf} ';
 
             var props = 'renderId renderIds';
-            if (this.type == 'classes' || this.type == 'transpose') props += ' label';
+            if (this.type == 'classes' || this.type == 'transpose' || this.type == 'all') props += ' label';
 
             var fragment = '_' + this.label + ': ' + this.type + '(' + args + ') { ' + props + ' ' + descendent + ' } ';
             this.siblings.forEach(function (sibling) {

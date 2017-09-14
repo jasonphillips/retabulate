@@ -8,7 +8,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(['\n    query tabulate {\n        table(set:"', '") {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable agg renderIds\n                queries { key value }\n              }\n            }\n        }\n    }\n'], ['\n    query tabulate {\n        table(set:"', '") {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable agg renderIds\n                queries { key value }\n              }\n            }\n        }\n    }\n']);
+var _templateObject = _taggedTemplateLiteral(['\n    query tabulate {\n        table(set:"', '" ', ') {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable agg renderIds\n                queries { key value }\n              }\n            }\n        }\n    }\n'], ['\n    query tabulate {\n        table(set:"', '" ', ') {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable agg renderIds\n                queries { key value }\n              }\n            }\n        }\n    }\n']);
 
 var _react = require('react');
 
@@ -26,6 +26,8 @@ var _retabulateReactRenderer = require('retabulate-react-renderer');
 
 var _retabulateReactRenderer2 = _interopRequireDefault(_retabulateReactRenderer);
 
+var _QueryClosure = require('../classes/QueryClosure');
+
 var _gatherChildConfig = require('../utils/gatherChildConfig');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -38,8 +40,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
-var queryTemplate = function queryTemplate(dataset, axes) {
-    return (0, _graphqlTag2.default)(_templateObject, dataset, axes);
+var queryTemplate = function queryTemplate(dataset, where, axes) {
+    return (0, _graphqlTag2.default)(_templateObject, dataset, where, axes);
 };
 
 var Tabulation = function (_React$Component) {
@@ -51,6 +53,7 @@ var Tabulation = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (Tabulation.__proto__ || Object.getPrototypeOf(Tabulation)).call(this, props));
 
         _this.startQuery = _this.startQuery.bind(_this);
+        _this.updateQuery = _this.updateQuery.bind(_this);
         _this.client = context.RetabulateClient;
 
         var _this$getQuery = _this.getQuery(props),
@@ -58,21 +61,70 @@ var Tabulation = function (_React$Component) {
             renderers = _this$getQuery.renderers,
             labels = _this$getQuery.labels;
 
-        _this.startQuery(query);
-
         _this.state = {
             pending: true,
             data: null,
             renderers: renderers || {},
             labels: labels || {}
         };
+
+        _this.startQuery(query).then(function (data) {
+            return _this.setState({ data: data, pending: false });
+        });
         return _this;
     }
 
     _createClass(Tabulation, [{
+        key: 'updateQuery',
+        value: function updateQuery(props) {
+            var _this2 = this;
+
+            var _getQuery = this.getQuery(props),
+                query = _getQuery.query,
+                renderers = _getQuery.renderers,
+                labels = _getQuery.labels;
+
+            this.setState({ pending: true });
+
+            this.startQuery(query).then(function (data) {
+                return _this2.setState({
+                    data: data,
+                    pending: false,
+                    renderers: renderers || {},
+                    labels: labels || {}
+                });
+            });
+
+            return true;
+        }
+    }, {
+        key: 'shouldComponentUpdate',
+        value: function shouldComponentUpdate(nextProps, nextState) {
+            // network pending status or data object change
+            if (nextState.pending !== this.state.pending || nextState.data !== this.state.data) return true;
+
+            return false;
+        }
+    }, {
+        key: 'componentWillReceiveProps',
+        value: function componentWillReceiveProps(nextProps) {
+            var _this3 = this;
+
+            // watched props: dataset / where
+            if (nextProps.dataset !== this.props.dataset || JSON.stringify(nextProps.where) != JSON.stringify(this.props.where)) this.updateQuery(nextProps);
+            // user-defined watched props
+            if (this.props.watchedProps) {
+                var changed = Object.keys(this.props.watchedProps).reduce(function (should, prop) {
+                    return _this3.props.watchedProps[prop] !== nextProps.watchedProps[prop] ? true : should;
+                }, false);
+                if (changed) this.updateQuery(nextProps);
+            }
+        }
+    }, {
         key: 'getQuery',
         value: function getQuery(props) {
             var dataset = props.dataset,
+                where = props.where,
                 children = props.children;
 
             var axes = (0, _gatherChildConfig.callChildSerializers)(children, { iterator: 0 });
@@ -83,8 +135,13 @@ var Tabulation = function (_React$Component) {
                 return _extends({}, r, a.labels);
             }, {});
 
+            // if where conditions
+            var whereArg = where ? 'where: [' + where.map(function (condition) {
+                return (0, _QueryClosure.toGqlObjectArg)(condition);
+            }) + ']' : '';
+
             return {
-                query: queryTemplate(dataset, axes.map(function (a) {
+                query: queryTemplate(dataset, whereArg, axes.map(function (a) {
                     return a.queryFragment;
                 }).join(' ')),
                 renderers: renderers,
@@ -94,11 +151,13 @@ var Tabulation = function (_React$Component) {
     }, {
         key: 'startQuery',
         value: function startQuery(query) {
-            var _this2 = this;
+            var _this4 = this;
 
-            this.client.query({ query: query }).then(function (data) {
-                return _this2.setState({ data: data, pending: false });
-            }).catch(console.error);
+            return new Promise(function (res, rej) {
+                return _this4.client.query({ query: query, fetchPolicy: 'network-only' }).then(function (data) {
+                    return res(data);
+                }).catch(console.error);
+            });
         }
     }, {
         key: 'render',
@@ -114,10 +173,11 @@ var Tabulation = function (_React$Component) {
             return _react2.default.createElement(
                 'div',
                 null,
-                !pending && _react2.default.createElement(_retabulateReactRenderer2.default, {
+                data && _react2.default.createElement(_retabulateReactRenderer2.default, {
                     tabulated: data.data.table,
                     renderers: _extends({}, renderers, { cellRenderer: cellRenderer }),
-                    labels: labels
+                    labels: labels,
+                    pending: pending
                 })
             );
         }

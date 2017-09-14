@@ -54,6 +54,8 @@ var Expand = function (_React$Component) {
       var column = props.column,
           label = props.label,
           total = props.total,
+          mapping = props.mapping,
+          ordering = props.ordering,
           cellProps = props.cellProps,
           cellStyles = props.cellStyles,
           labelRenderer = props.labelRenderer,
@@ -67,7 +69,7 @@ var Expand = function (_React$Component) {
           renderId = _makeRenderers.renderId,
           renderers = _makeRenderers.renderers;
 
-      var Query = new _QueryClosure2.default('classes', column, label ? renderId : '__' + index, renderId, { all: total });
+      var Query = new _QueryClosure2.default('classes', column, label ? renderId : '__' + index, renderId, { all: total, mapping: mapping, ordering: ordering });
       var descendents = (0, _gatherChildConfig2.default)(children, context);
 
       if (descendents.query) {

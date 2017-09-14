@@ -13,9 +13,17 @@ export default `
     leaf: ID
     renderId: String
     renderIds: [String]
-    classes(key:String, all:String, total:String, orderBy:String, renderId:String): [Axis]
+    classes(
+      key:String, 
+      all:String, 
+      total:String, 
+      orderBy:String, 
+      renderId:String, 
+      mapping:[GroupMap],
+      ordering: [String],
+    ): [Axis]
     transpose(keys:[String], asKey:String, renderId:String): [Axis]
-    all(label:String): Axis
+    all(label:String, renderId:String): Axis
     variable(key:String, keys:[String], renderId:String): Variable
   }
 
@@ -66,6 +74,11 @@ export default `
   input Condition {
     key: String!
     value: String!
+  }
+
+  input GroupMap {
+    label: String!
+    values: [String]
   }
 
   type Query {

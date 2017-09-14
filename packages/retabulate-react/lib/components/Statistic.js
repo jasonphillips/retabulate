@@ -47,6 +47,7 @@ var Statistic = function (_React$Component) {
     value: function serialize(props, index, context) {
       var method = props.method,
           label = props.label,
+          over = props.over,
           cellRenderer = props.cellRenderer,
           cellProps = props.cellProps,
           cellStyles = props.cellStyles,
@@ -64,7 +65,7 @@ var Statistic = function (_React$Component) {
           renderId = _makeRenderers.renderId,
           renderers = _makeRenderers.renderers;
 
-      var Query = new _QueryClosure2.default('statistic', method, renderId, renderId);
+      var Query = new _QueryClosure2.default('statistic', method, renderId, renderId, { over: over });
 
       return { query: Query, renderers: renderers, labels: _defineProperty({}, '_' + renderId, useLabel) };
     }

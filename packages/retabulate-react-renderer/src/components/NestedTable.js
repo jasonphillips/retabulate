@@ -15,7 +15,7 @@ const Th = ({cellProps, data}) => <th {...cellProps}>{data.label}</th>;
 
 class NestedTable extends React.PureComponent {
   render() {
-    const {tabulated, renderers, labels} = this.props;
+    const {tabulated, pending, renderers, labels} = this.props;
 
     const topGrouped = buildGroups(tabulated.top);
     const leftGrouped = buildGroups(tabulated.left);
@@ -27,7 +27,7 @@ class NestedTable extends React.PureComponent {
     const leftRows = buildRows(leftGrouped.groups, true);
 
     return (
-        <table className="table table-bordered">
+        <table className="table table-bordered" style={{opacity: pending ? '0.25' : '1'}}>
           <thead>
             {topRows.map((row,i) =>
               <tr key={i}>
@@ -36,7 +36,7 @@ class NestedTable extends React.PureComponent {
                             className="corner"> </td>}
                 {row.map((cell, j) => {
                   const cellProps = _.pick(cell, 'colSpan');
-                  const renderId = cell.label.split('|')[0];
+                  const renderId = cell.label && cell.label.split('|')[0];
                   
                   const mergedProps = mergeCellRenderers(renderId, cellProps, renderers, true);
                   const LabelRenderer = getLabelRenderer(renderId, renderers);
@@ -60,7 +60,7 @@ class NestedTable extends React.PureComponent {
                     if (!row[i]) return;
 
                     const cell = row[i];
-                    const renderId = cell.label.split('|')[0];
+                    const renderId = cell.label && cell.label.split('|')[0];
 
                     const cellProps = _.pick(cell, 'rowSpan');
                     const mergedProps = mergeCellRenderers(renderId, cellProps, renderers, true);
@@ -87,7 +87,7 @@ class NestedTable extends React.PureComponent {
                   }
 
                   return React.createElement(CellRenderer, {
-                    key: `${i}${j}`,
+                    key: `${cell.colID}${cell.rowID}`,
                     cellID: `cell-${i}${j}`,
                     cellProps: mergedProps,
                     cell,

@@ -11,6 +11,8 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function buildRows(groups, pivoted) {
     var maxDepth = _lodash2.default.max(groups.map(function (g) {
         return g.length;
@@ -19,6 +21,7 @@ function buildRows(groups, pivoted) {
         return group.slice(0, depth).join('.');
     };
     var rows = [];
+    var spanKey = pivoted ? 'rowSpan' : 'colSpan';
 
     // for each level
 
@@ -45,15 +48,10 @@ function buildRows(groups, pivoted) {
                     return group[i] === value;
                 }).length;
 
-                cells.push(pivoted ? {
+                cells.push(_defineProperty({
                     path: parentPath,
-                    label: value,
-                    rowSpan: span
-                } : {
-                    path: parentPath,
-                    label: value,
-                    colSpan: span
-                });
+                    label: value
+                }, spanKey, span));
 
                 if (pivoted) _lodash2.default.range(1, span).forEach(function (i) {
                     return cells.push(null);

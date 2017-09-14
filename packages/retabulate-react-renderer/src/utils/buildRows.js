@@ -4,6 +4,7 @@ export default function buildRows(groups, pivoted) {
   const maxDepth = _.max(groups.map(g => g.length))
   const pathTo = (group, depth) => group.slice(0,depth).join('.')
   const rows = []
+  const spanKey = pivoted ? 'rowSpan' : 'colSpan';
 
   // for each level
   for (let i=0; i<maxDepth; i++) {
@@ -21,22 +22,17 @@ export default function buildRows(groups, pivoted) {
           _.forEach(uniqValues, value => {
               const span = _.filter(matchingGroups, group => group[i]===value).length
 
-              cells.push(pivoted
-                ? {
+              cells.push(
+                {
                     path: parentPath,
                     label: value,
-                    rowSpan: span,
-                }
-                : {
-                  path: parentPath,
-                  label: value,
-                  colSpan: span,
+                    [spanKey]: span,
                 }
               )
 
               if (pivoted) _.range(1, span).forEach(i => cells.push(null))
           })
-      })
+      });      
 
       rows.push(cells)
   }

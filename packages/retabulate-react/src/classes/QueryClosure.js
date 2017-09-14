@@ -1,3 +1,9 @@
+// serialize obj {"key": "value", "another": "value"} to gql {key: "value", another: "value"}
+// -- quotes around keys (normal JSON stringify) are rejected in gql args
+export const toGqlObjectArg = (obj) => 
+    '{' + Object.keys(obj).map(k => `${k}: ${JSON.stringify(obj[k])}`)  + '}'
+;
+
 class QueryClosure {
     constructor(type, key, label, renderId, args) {
         this.type = type;
@@ -9,11 +15,13 @@ class QueryClosure {
         this.siblings = [];
 
         if (type=='statistic') {
-            this.arguments = {method: key};
-        } else if (key.map) {
-            this.arguments = {keys: key};
+            this.arguments = {method: JSON.stringify(key)};
+        } else if (key && key.map) {
+            this.arguments = {keys: JSON.stringify(key)};
+        } else if (type=='all') {
+            this.arguments = {label: JSON.stringify(key)};
         } else {
-            this.arguments = {key};
+            this.arguments = {key: JSON.stringify(key)};
         }
 
         Object.keys(args || {}).map((k) => typeof(args[k])!=='undefined' && this.setArgument(k, args[k]));
@@ -21,13 +29,17 @@ class QueryClosure {
     }
 
     setArgument(key, arg) {
-        this.arguments[key] = arg;
+        if (key==='mapping') {
+            this.arguments[key] = `[ ${arg.map(a => toGqlObjectArg(a))} ]`
+            return this;
+        }
+        this.arguments[key] = JSON.stringify(arg);
         return this;
     }
 
     toString() {
         const args = Object.keys(this.arguments).map((key) => 
-            `${key}: ${JSON.stringify(this.arguments[key])}`
+            `${key}: ${this.arguments[key]}`
         )
 
         if (this.renderId) args.push(`renderId:"${this.renderId}"`)
@@ -37,7 +49,7 @@ class QueryClosure {
             : ' node {leaf} ';
 
         let props = 'renderId renderIds';
-        if (this.type=='classes' || this.type=='transpose') props += ' label';
+        if (this.type=='classes' || this.type=='transpose' || this.type=='all') props += ' label';
 
         let fragment = `_${this.label}: ${this.type}(${args}) { ${props} ${descendent} } `;
         this.siblings.forEach((sibling) => { fragment += sibling.toString() });

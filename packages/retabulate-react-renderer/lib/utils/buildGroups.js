@@ -48,8 +48,7 @@ function extractLabels(dotted) {
 
   _lodash2.default.forEach(_lodash2.default.filter(_lodash2.default.keys(dotted), function (p) {
     return p.split('.').slice(-1) == 'label';
-  }), function (paths) {
-    var index = paths.split('.').slice(-2)[0];
+  }), function (paths, index) {
     var renderId = dotted[paths.split('.').slice(0, -1).concat(['renderId']).join('.')];
 
     labels['_' + renderId + '|' + index] = dotted[paths];

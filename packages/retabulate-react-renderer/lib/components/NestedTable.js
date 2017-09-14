@@ -73,6 +73,7 @@ var NestedTable = function (_React$PureComponent) {
     value: function render() {
       var _props = this.props,
           tabulated = _props.tabulated,
+          pending = _props.pending,
           renderers = _props.renderers,
           labels = _props.labels;
 
@@ -88,7 +89,7 @@ var NestedTable = function (_React$PureComponent) {
 
       return _react2.default.createElement(
         'table',
-        { className: 'table table-bordered' },
+        { className: 'table table-bordered', style: { opacity: pending ? '0.25' : '1' } },
         _react2.default.createElement(
           'thead',
           null,
@@ -105,7 +106,7 @@ var NestedTable = function (_React$PureComponent) {
               ),
               row.map(function (cell, j) {
                 var cellProps = _lodash2.default.pick(cell, 'colSpan');
-                var renderId = cell.label.split('|')[0];
+                var renderId = cell.label && cell.label.split('|')[0];
 
                 var mergedProps = (0, _getRenderers.mergeCellRenderers)(renderId, cellProps, renderers, true);
                 var LabelRenderer = (0, _getRenderers.getLabelRenderer)(renderId, renderers);
@@ -130,7 +131,7 @@ var NestedTable = function (_React$PureComponent) {
                 if (!row[i]) return;
 
                 var cell = row[i];
-                var renderId = cell.label.split('|')[0];
+                var renderId = cell.label && cell.label.split('|')[0];
 
                 var cellProps = _lodash2.default.pick(cell, 'rowSpan');
                 var mergedProps = (0, _getRenderers.mergeCellRenderers)(renderId, cellProps, renderers, true);
@@ -156,7 +157,7 @@ var NestedTable = function (_React$PureComponent) {
                 }
 
                 return _react2.default.createElement(CellRenderer, {
-                  key: '' + i + j,
+                  key: '' + cell.colID + cell.rowID,
                   cellID: 'cell-' + i + j,
                   cellProps: mergedProps,
                   cell: cell

@@ -5,11 +5,17 @@ import DataCollection from 'data-collection';
 // gauss library has terrible import strategy on client
 const Vector = typeof(window!=='undefined') ? window.gauss.Vector : gauss.Vector;
 const concat = (arr, val) => val ? arr.concat([val]) : arr;
+// distribute filter args if array
+const filterAny = (collection, filters) => Object.keys(filters).reduce((filtered, key) => 
+  filters[key].map 
+    ? collection.filter.apply(collection, filters[key].map(v => ({[key]:v})))
+    : collection.filter({[key]: filters[key]})
+, collection)
 
 const generateLeaf = (data, context) => {
   const {_aggIndex, _renderIds, _query, _variable, _agg, _over, _fmt, _grid, _axis, _detransposes} = data;
   context.tabulate.iterator++;
-  const id = `t${context.tabulate.iterator}`;
+  const id = ('00000000' + context.tabulate.iterator).slice(-8) + 't';
   if (!_grid[_axis]) _grid[_axis] = [];
 
   _grid[_axis].push({
@@ -25,9 +31,6 @@ const generateLeaf = (data, context) => {
   })
   return id;
 }
-
-const makeSeries = (query, variable, rows) =>
-  rows.filter(query).values(variable)
 
 const applyAggregation = {
   distribution: (series, key) => new Vector(series.values(key)).distribution(),
@@ -55,20 +58,11 @@ const resolvers = {
           }
 
           context.tabulate = {iterator: 0};
-          const collection = new DataCollection(data).query();
+          let collection = new DataCollection(data).query();
 
-          if (where) {
-            const filter = {}
-            _.forEach(where, ({key, value}) => { filter[key] = value })
-            return  {
-              _rows:collection.filter(filter), 
-              _query:{},
-              _transposes:{},
-              _detransposes:{},
-              _grid:{}, 
-              _aggIndex:0
-            }
-          }
+          if (where) collection = collection.filter(
+            where.reduce((filter, {key, value}) => ({...filter, [key]:value}), {}
+          ))
 
           resolve({_rows:collection, _query:{}, _grid:{}, _renderIds:[], _transposes:{}, _detransposes:{}, _aggIndex:0});
         });
@@ -83,10 +77,10 @@ const resolvers = {
     rows: ({_rows, _grid}) => new Promise(
       (resolve, rej) => process.nextTick(() => {
         resolve(
-          _.map(_.sortBy(_grid.y, 'index'), (y) => ({
+          _.map(_.sortBy(_grid.y, 'id'), (y) => ({
             ...y,
             _grid,
-            _rows: _rows.filter(y.query),
+            _rows: filterAny(_rows, y.query),
             _all: _rows
           }))
         )
@@ -96,7 +90,7 @@ const resolvers = {
   Axis: {
     label: ({key}) => key,
     length: ({_rows}) => _rows.count(),
-    classes: (data, {key, all, total, orderBy, renderId}) => {
+    classes: (data, {key, all, total, orderBy, renderId, mapping, ordering}) => {
       data._aggIndex++;
 
       // total never groups again, just descends
@@ -105,25 +99,39 @@ const resolvers = {
       }
 
       let dataKey = data._detransposes[key] || key;
+      let value;
 
-      let value = data._rows.distinct(dataKey).map((groupValue) => ({
-        ...data,
-        key: groupValue,
-        _rows:data._rows.filter({[dataKey]:groupValue}),
-        _aggIndex:data._aggIndex,
-        _query:{...data._query, [dataKey]:groupValue},
-        _renderIds: concat(data._renderIds, renderId),
-        renderId
-      }))
+      if (mapping) {
+        value = mapping.map(({label, values}) => {
+          const filters = values.map(v => ({[dataKey]:v}));
+
+          return {
+            ...data,
+            key: label,
+            _rows: data._rows.filter.apply(data._rows, filters),
+            _aggIndex: data._aggIndex,
+            _query: {...data._query, [dataKey]: values},
+            _renderIds: concat(data._renderIds, renderId),
+            renderId
+          }
+        })
+      } else {
+        const valuesSet = ordering ? ordering : data._rows.distinct(dataKey);
+        value = valuesSet.map((groupValue) => ({
+          ...data,
+          key: groupValue,
+          _rows: data._rows.filter({[dataKey]:groupValue}),
+          _aggIndex: data._aggIndex,
+          _query: {...data._query, [dataKey]:groupValue},
+          _renderIds: concat(data._renderIds, renderId),
+          renderId
+        }))
+      }
 
       if (orderBy) value = _.sortBy(value, (v) => v._rows.first()[orderBy]);
 
-      if (all) value.push(
+      if (all || total) value.push(
         {...data, key:all, _aggIndex:data._aggIndex, renderIds: concat(data._renderIds, renderId), renderId}
-      )
-
-      if (total) value.push(
-        {...data, key:total, _aggIndex:data._aggIndex, _isTotal: total}
       )
 
       return value;
@@ -141,7 +149,12 @@ const resolvers = {
         renderId
       }));
     },
-    all: (data, {label}) => { data._aggIndex++; return {...data, label, key:label}},
+    all: (data, {label, renderId}) => ({
+      ...data, 
+      label, key:label, 
+      renderId, _renderIds: concat(data._renderIds, renderId),
+      _aggIndex: data._aggIndex + 1,
+    }),
     renderIds: ({_renderIds}) => _renderIds,
     node: (data) => data,
     leaf: (data, args, context) => generateLeaf(data, context),
@@ -184,8 +197,8 @@ const resolvers = {
         detransposes,
         colID: x.id,
         rowID: y.id,
-        rows: y._rows.filter(x.query),
-        over: over ? y._all.filter(overQuery).count() : null,
+        rows: filterAny(y._rows, x.query),
+        over: over ? filterAny(y._all, overQuery).count() : null,
         fmt: y.fmt || x.fmt || '',
         renderIds: x.renderIds.concat(y.renderIds),
       }

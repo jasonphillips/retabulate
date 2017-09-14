@@ -36,10 +36,11 @@ var RetabulateProvider = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (RetabulateProvider.__proto__ || Object.getPrototypeOf(RetabulateProvider)).call(this, props));
 
-        var getDataset = props.getDataset;
+        var getDataset = props.getDataset,
+            client = props.client;
 
 
-        _this.client = new _apolloClient2.default({
+        _this.client = client || new _apolloClient2.default({
             networkInterface: (0, _retabulateGraphql.makeNetworkInterface)({ getDataset: getDataset })
         });
         return _this;
