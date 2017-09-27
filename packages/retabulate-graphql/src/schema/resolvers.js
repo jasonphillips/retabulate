@@ -36,16 +36,6 @@ const generateLeaf = (data, context) => {
 }
 
 const applyAggregations = (aggs, diff, diffOver) => {
-  // diff option: calculate each, return difference, % difference
-  if (diff) return (series, key, over) => {
-    const b = aggregations[aggs](series, key, over);
-    const a = aggregations[aggs](diff, key, diffOver);
-
-    return {
-      diff: b - a,
-      diff_pct: (b - a) / a,
-    }
-  }
   // single method
   if (!aggs.map) return aggregations[aggs];
   // mutliple: return as key => value
@@ -124,9 +114,10 @@ const resolvers = {
 
       let dataKey = data._detransposes[key] || key;
       let value;
-      const cumulative = mapping.reduce((all,next) => next.values ? all.concat(next.values) : all, []);
 
       if (mapping) {
+        const cumulative = mapping.reduce((all,next) => next.values ? all.concat(next.values) : all, []);
+        
         value = mapping.map(({label, values}) => {
           const rows = values
             // filter 
@@ -267,7 +258,14 @@ const resolvers = {
   },
   Cell: {
     value: ({query, detransposes, variable, agg, diff, diffOver, over, rows, fmt}, {missing}) => {
-      return JSON.stringify(applyAggregations(agg, diff, diffOver)(rows, detransposes[variable] || variable, over));
+      return JSON.stringify(diff
+        // if diff: calculate this group, diff group
+        ? {
+            group: applyAggregations(agg)(rows, detransposes[variable] || variable, over),
+            diff: applyAggregations(agg)(diff, detransposes[variable] || variable, diffOver)
+          }
+        : applyAggregations(agg, diff, diffOver)(rows, detransposes[variable] || variable, over)
+      );
     },
     queries: ({query}) => _.map(_.keys(query), (key) => ({key, value: query[key]})),
   },

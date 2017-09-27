@@ -77,18 +77,6 @@ var generateLeaf = function generateLeaf(data, context) {
 };
 
 var applyAggregations = function applyAggregations(aggs, diff, diffOver) {
-  // diff option: calculate each, return difference, % difference
-  if (diff) return function (series, key, over) {
-    var b = aggregations[aggs](series, key, over);
-    var a = aggregations[aggs](diff, key, diffOver);
-
-    console.log({ aggs: aggs, a: a, b: b, series: series, diff: diff });
-
-    return {
-      diff: b - a,
-      diff_pct: (b - a) / a
-    };
-  };
   // single method
   if (!aggs.map) return aggregations[aggs];
   // mutliple: return as key => value
@@ -222,11 +210,12 @@ var resolvers = {
 
       var dataKey = data._detransposes[key] || key;
       var value = void 0;
-      var cumulative = mapping.reduce(function (all, next) {
-        return next.values ? all.concat(next.values) : all;
-      }, []);
 
       if (mapping) {
+        var cumulative = mapping.reduce(function (all, next) {
+          return next.values ? all.concat(next.values) : all;
+        }, []);
+
         value = mapping.map(function (_ref9) {
           var label = _ref9.label,
               values = _ref9.values;
@@ -443,7 +432,12 @@ var resolvers = {
           fmt = _ref21.fmt;
       var missing = _ref22.missing;
 
-      return JSON.stringify(applyAggregations(agg, diff, diffOver)(rows, detransposes[variable] || variable, over));
+      return JSON.stringify(diff
+      // if diff: calculate this group, diff group
+      ? {
+        group: applyAggregations(agg)(rows, detransposes[variable] || variable, over),
+        diff: applyAggregations(agg)(diff, detransposes[variable] || variable, diffOver)
+      } : applyAggregations(agg, diff, diffOver)(rows, detransposes[variable] || variable, over));
     },
     queries: function queries(_ref23) {
       var query = _ref23.query;
