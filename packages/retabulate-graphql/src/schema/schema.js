@@ -37,14 +37,30 @@ export default `
     keys: [String]
     renderId: String
     renderIds: [String]
-    aggregation(method:String, format:String, over:String, renderId:String): Aggregation
-    statistic(method:String, format:String, over:String, renderId:String): Aggregation
+    aggregation(
+      method:String, 
+      methods:[String], 
+      diff: Condition,
+      format:String, 
+      over:String, 
+      renderId:String
+    ): Aggregation
+    statistic(
+      method:String, 
+      methods:[String], 
+      diff: Condition,
+      format:String, 
+      over:String, 
+      renderId:String
+    ): Aggregation
+    value(value: String, values: [String], renderId: String): Variable
     leaf: ID
     node: Node
   }
 
   type Aggregation {
     method: String
+    methods: [String]
     leaf: ID
     renderId: String
     renderIds: [String]
@@ -73,7 +89,7 @@ export default `
 
   input Condition {
     key: String!
-    value: String!
+    values: [String]
   }
 
   input GroupMap {

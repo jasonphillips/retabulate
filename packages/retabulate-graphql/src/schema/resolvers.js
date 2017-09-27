@@ -8,12 +8,12 @@ const concat = (arr, val) => val ? arr.concat([val]) : arr;
 // distribute filter args if array
 const filterAny = (collection, filters) => Object.keys(filters).reduce((filtered, key) => 
   filters[key].map 
-    ? collection.filter.apply(collection, filters[key].map(v => ({[key]:v})))
-    : collection.filter({[key]: filters[key]})
+    ? filtered.filter.apply(filtered, filters[key].map(v => ({[key]:v})))
+    : filtered.filter({[key]: filters[key]})
 , collection)
 
 const generateLeaf = (data, context) => {
-  const {_aggIndex, _renderIds, _query, _variable, _agg, _over, _fmt, _grid, _axis, _detransposes} = data;
+  const {_aggIndex, _renderIds, _query, _exclude, _variable, _value, _agg, _diff, _over, _fmt, _grid, _axis, _detransposes} = data;
   context.tabulate.iterator++;
   const id = ('00000000' + context.tabulate.iterator).slice(-8) + 't';
   if (!_grid[_axis]) _grid[_axis] = [];
@@ -22,21 +22,43 @@ const generateLeaf = (data, context) => {
       id,
       index: _aggIndex,
       query: {..._query},
+      exclude: _exclude,
       detransposes: _detransposes,
       variable: _variable,
       agg: _agg,
+      diff: _diff,
       over: _over,
       fmt: _fmt,
+      value: _value,
       renderIds: _renderIds
   })
   return id;
 }
 
-const applyAggregation = {
-  distribution: (series, key) => new Vector(series.values(key)).distribution(),
-  distributionRatio: (series, key) => new Vector(series.values(key)).distribution('relative'),
-  n: (series, key) => series.count() || 0,
-  pctn: (series, key, over) => series.count() / over * 100,
+const applyAggregations = (aggs, diff, diffOver) => {
+  // diff option: calculate each, return difference, % difference
+  if (diff) return (series, key, over) => {
+    const b = aggregations[aggs](series, key, over);
+    const a = aggregations[aggs](diff, key, diffOver);
+
+    return {
+      diff: b - a,
+      diff_pct: (b - a) / a,
+    }
+  }
+  // single method
+  if (!aggs.map) return aggregations[aggs];
+  // mutliple: return as key => value
+  return (series, variable, over) => aggs.reduce((combined, agg) => 
+    ({...combined, [agg]: aggregations[agg](series, variable, over)})
+  , {});
+}
+
+const aggregations = {
+  distribution: (series, key) => new Vector(series.exclude({[key]:''}).values(key)).distribution(),
+  distributionRatio: (series, key) => new Vector(series.exclude({[key]:''}).values(key)).distribution('relative'),
+  n: (series, key) => series.exclude({[key]:''}).count() || 0,
+  pctn: (series, key, over) => series.exclude({[key]:''}).count() / over.exclude({[key]:''}).count() * 100,
   mean: (series, key) => series.count() ? series.exclude({[key]:''}).avg(key) : undefined,
   median: (series, key) => new Vector(series.values(key)).median(),
   mode: (series, key) => series.mode(key),
@@ -60,11 +82,13 @@ const resolvers = {
           context.tabulate = {iterator: 0};
           let collection = new DataCollection(data).query();
 
-          if (where) collection = collection.filter(
-            where.reduce((filter, {key, value}) => ({...filter, [key]:value}), {}
-          ))
+          if (where) collection = filterAny(
+            collection, where.reduce((all, {key, values}) => ({...all, [key]: values}), {})
+          );
 
-          resolve({_rows:collection, _query:{}, _grid:{}, _renderIds:[], _transposes:{}, _detransposes:{}, _aggIndex:0});
+          resolve({
+            _rows: collection, 
+            _query:{}, _grid:{}, _renderIds:[], _transposes:{}, _detransposes:{}, _exclude:[], _aggIndex:0});
         });
       });
     },
@@ -100,17 +124,23 @@ const resolvers = {
 
       let dataKey = data._detransposes[key] || key;
       let value;
+      const cumulative = mapping.reduce((all,next) => next.values ? all.concat(next.values) : all, []);
 
       if (mapping) {
         value = mapping.map(({label, values}) => {
-          const filters = values.map(v => ({[dataKey]:v}));
+          const rows = values
+            // filter 
+            ? data._rows.filter.apply(data._rows, values.map(v => ({[dataKey]:v})))
+            // unfiltered remaining rows
+            : cumulative.reduce((remaining, filter) => remaining.exclude({[dataKey]:filter}), data._rows);
 
           return {
             ...data,
             key: label,
-            _rows: data._rows.filter.apply(data._rows, filters),
+            _rows: rows,
             _aggIndex: data._aggIndex,
-            _query: {...data._query, [dataKey]: values},
+            _query: values ? {...data._query, [dataKey]: values} : data.query,
+            _exclude: values ? data._exclude : [...data._exclude, ...cumulative.map(v => ({[dataKey]:v}))],
             _renderIds: concat(data._renderIds, renderId),
             renderId
           }
@@ -167,11 +197,14 @@ const resolvers = {
     node: (data) => data,
   },
   Variable: {
-    aggregation: (data, {method, over, renderId}) => ({
-      ...data, _agg:method, _over:over, method, _renderIds: concat(data._renderIds, renderId)
+    value: (data, {value, values, renderId}) => ({
+      ...data, _value: value || values, _renderIds: concat(data._renderIds, renderId)
     }),
-    statistic: (data, {method, over, renderId}) => ({
-      ...data, _agg:method, _over:over, method, _renderIds: concat(data._renderIds, renderId)
+    aggregation: (data, {method, methods, diff, over, renderId}) => ({
+      ...data, _agg: method || methods, _over: over, _diff: diff, method, _renderIds: concat(data._renderIds, renderId)
+    }),
+    statistic: (data, {method, methods, diff, over, renderId}) => ({
+      ...data, _agg: method || methods, _over: over, _diff: diff, method, _renderIds: concat(data._renderIds, renderId)
     }),
     renderIds: ({_renderIds}) => _renderIds,
     leaf: (data, args, context) => generateLeaf(data, context),
@@ -184,29 +217,57 @@ const resolvers = {
   },
   Row: {
     cells: (y, args) => _.map(y._grid.x, (x) => {
-      const query = {...y.query, ...x.query};
-      const agg = y.agg || x.agg || 'n';
-      const over = y.over || x.over || null;
-      const overQuery = over ? _.omit(query, over) : null;
       const detransposes = {...x.detransposes, ...y.detransposes};
+      const variable = detransposes[y.variable] || y.variable || detransposes[x.variable] || x.variable || null;
+      const value = y.value || x.value || null;
+      const exclude = (y.exclude.length || x.exclude.length) ? [...y.exclude, ...x.exclude] : null;
 
+      let query = {...y.query, ...x.query};
+      let cellFilter = x.query;
+      let diffRows;
+      let diffOver;
+
+      if (variable && value!==null) {
+        cellFilter = {...cellFilter, [variable]: value};
+        query = {...query, [variable]: value};
+      }
+
+      const agg = y.agg || x.agg || 'n';
+      const over = detransposes[y.over] || y.over || detransposes[x.over] || x.over || null;
+      const overQuery = over ? _.omit(query, over) : null;
+
+      const rows = filterAny(y._rows, cellFilter);
+
+      if (y.diff || x.diff) {
+        const diff = x.diff || y.diff;
+        diffRows = filterAny(y._all, _.omit(query, diff.key));
+        diffOver = filterAny(y._all, _.omit(query, [diff.key, over]));
+
+        if (diff.values) {
+          diffRows = filterAny(diffRows, {[diff.key]: diff.values});
+          diffOver = filterAny(diffOver, {[diff.key]: diff.values});
+        }
+      }
+      
       return {
         query: query,
-        variable: detransposes[y.variable] || y.variable || detransposes[x.variable] || x.variable || null,
+        variable,
         agg: agg,
         detransposes,
         colID: x.id,
         rowID: y.id,
-        rows: filterAny(y._rows, x.query),
-        over: over ? filterAny(y._all, overQuery).count() : null,
+        rows: exclude ? exclude.reduce((r,e) => r.exclude(e), rows) : rows,
+        over: over ? filterAny(y._all, overQuery) : null,
+        diff: diffRows,
+        diffOver: diffOver,
         fmt: y.fmt || x.fmt || '',
         renderIds: x.renderIds.concat(y.renderIds),
       }
     }),
   },
   Cell: {
-    value: ({query, detransposes, variable, agg, over, rows, fmt}, {missing}) => {
-      return JSON.stringify(applyAggregation[agg](rows, detransposes[variable] || variable, over));
+    value: ({query, detransposes, variable, agg, diff, diffOver, over, rows, fmt}, {missing}) => {
+      return JSON.stringify(applyAggregations(agg, diff, diffOver)(rows, detransposes[variable] || variable, over));
     },
     queries: ({query}) => _.map(_.keys(query), (key) => ({key, value: query[key]})),
   },
