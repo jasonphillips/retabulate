@@ -15,11 +15,13 @@ class QueryClosure {
         this.siblings = [];
 
         if (type=='statistic') {
-            this.arguments = {method: JSON.stringify(key)};
+            this.arguments = {[key.map ? 'methods' : 'method']: JSON.stringify(key)};
         } else if (key && key.map) {
             this.arguments = {keys: JSON.stringify(key)};
         } else if (type=='all') {
             this.arguments = {label: JSON.stringify(key)};
+        } else if (type=='value') {
+            this.arguments = {[key.map ? 'values' : 'value']: JSON.stringify(key)};
         } else {
             this.arguments = {key: JSON.stringify(key)};
         }
@@ -29,8 +31,14 @@ class QueryClosure {
     }
 
     setArgument(key, arg) {
-        if (key==='mapping') {
+        if (arg.map) {
+            // handle complex array argument serialization
             this.arguments[key] = `[ ${arg.map(a => toGqlObjectArg(a))} ]`
+            return this;
+        }
+        if (typeof(arg)==='object') {
+            // handle object arg serialization
+            this.arguments[key] = toGqlObjectArg(arg);
             return this;
         }
         this.arguments[key] = JSON.stringify(arg);

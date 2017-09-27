@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Statistic = exports.Variable = exports.Transpose = exports.All = exports.Axis = exports.Expand = exports.RetabulateProvider = exports.Tabulation = undefined;
+exports.Statistic = exports.Value = exports.Variable = exports.Transpose = exports.Header = exports.All = exports.Axis = exports.Expand = exports.RetabulateProvider = exports.Tabulation = undefined;
 
 var _Tabulation = require('./components/Tabulation');
 
@@ -33,17 +33,26 @@ var _Variable = require('./components/Variable');
 
 var _Variable2 = _interopRequireDefault(_Variable);
 
+var _Value = require('./components/Value');
+
+var _Value2 = _interopRequireDefault(_Value);
+
 var _Statistic = require('./components/Statistic');
 
 var _Statistic2 = _interopRequireDefault(_Statistic);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// alias
+var Header = _All2.default;
+
 exports.Tabulation = _Tabulation2.default;
 exports.RetabulateProvider = _RetabulateProvider2.default;
 exports.Expand = _Expand2.default;
 exports.Axis = _Axis2.default;
 exports.All = _All2.default;
+exports.Header = Header;
 exports.Transpose = _Transpose2.default;
 exports.Variable = _Variable2.default;
+exports.Value = _Value2.default;
 exports.Statistic = _Statistic2.default;

@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = require('react');
@@ -13,6 +15,10 @@ var _react2 = _interopRequireDefault(_react);
 var _QueryClosure = require('../classes/QueryClosure');
 
 var _QueryClosure2 = _interopRequireDefault(_QueryClosure);
+
+var _gatherChildConfig = require('../utils/gatherChildConfig');
+
+var _gatherChildConfig2 = _interopRequireDefault(_gatherChildConfig);
 
 var _makeRenderers2 = require('../utils/makeRenderers');
 
@@ -28,16 +34,16 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Statistic = function (_React$Component) {
-  _inherits(Statistic, _React$Component);
+var Header = function (_React$Component) {
+  _inherits(Header, _React$Component);
 
-  function Statistic() {
-    _classCallCheck(this, Statistic);
+  function Header() {
+    _classCallCheck(this, Header);
 
-    return _possibleConstructorReturn(this, (Statistic.__proto__ || Object.getPrototypeOf(Statistic)).apply(this, arguments));
+    return _possibleConstructorReturn(this, (Header.__proto__ || Object.getPrototypeOf(Header)).apply(this, arguments));
   }
 
-  _createClass(Statistic, [{
+  _createClass(Header, [{
     key: 'render',
     value: function render() {
       return _react2.default.createElement('span', null);
@@ -45,35 +51,38 @@ var Statistic = function (_React$Component) {
   }], [{
     key: 'serialize',
     value: function serialize(props, index, context) {
-      var method = props.method,
-          methods = props.methods,
+      var value = props.value,
+          values = props.values,
           label = props.label,
-          over = props.over,
-          diff = props.diff,
-          cellRenderer = props.cellRenderer,
           cellProps = props.cellProps,
           cellStyles = props.cellStyles,
-          formatter = props.formatter,
           labelRenderer = props.labelRenderer,
           labelProps = props.labelProps,
           labelStyles = props.labelStyles,
           children = props.children;
 
-      var useLabel = typeof label === 'undefined' ? method || methods.join(',') : label;
-
       var _makeRenderers = (0, _makeRenderers3.default)({
-        cellProps: cellProps, cellStyles: cellStyles, cellRenderer: cellRenderer, labelRenderer: labelRenderer, labelProps: labelProps, labelStyles: labelStyles, formatter: formatter
+        cellProps: cellProps, cellStyles: cellStyles, labelRenderer: labelRenderer, labelProps: labelProps, labelStyles: labelStyles
       }, context),
           renderId = _makeRenderers.renderId,
           renderers = _makeRenderers.renderers;
 
-      var Query = new _QueryClosure2.default('statistic', method || methods, label ? renderId : '__' + index, renderId, { over: over, diff: diff });
+      var Query = new _QueryClosure2.default('value', value || values, renderId, renderId);
+      var descendents = (0, _gatherChildConfig2.default)(children, context);
 
-      return { query: Query, renderers: renderers, labels: _defineProperty({}, '_' + renderId, useLabel) };
+      if (descendents.query) {
+        Query.inject(descendents.query);
+      }
+
+      return {
+        query: Query,
+        renderers: _extends({}, renderers, descendents.renderers),
+        labels: _extends(_defineProperty({}, '_' + renderId, label || value), descendents.labels)
+      };
     }
   }]);
 
-  return Statistic;
+  return Header;
 }(_react2.default.Component);
 
-exports.default = Statistic;
+exports.default = Header;

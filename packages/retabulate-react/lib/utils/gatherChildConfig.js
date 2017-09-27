@@ -1,14 +1,18 @@
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.callChildSerializers = undefined;
+
+var _react = require('react');
+
 var callChildSerializers = exports.callChildSerializers = function callChildSerializers(children, context) {
     if (!children) return [];
 
-    var childs = children.map ? children : [children];
+    var childs = children.map ? children : children ? [children] : [];
     // call serialize() method of all children
-    return childs.map(function (child, index) {
+    return _react.Children.toArray(childs).map(function (child, index) {
         return child.type.serialize(child.props, index, context);
     });
 };

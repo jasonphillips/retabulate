@@ -5,17 +5,22 @@ import makeRenderers from '../utils/makeRenderers';
 class Statistic extends React.Component {
   static serialize(props, index, context) {
     const {
-      method, label, over,
+      method, methods, label, over, diff,
       cellRenderer, cellProps, cellStyles,  formatter, 
       labelRenderer, labelProps, labelStyles,
       children
     } = props;
-    const useLabel = (typeof(label)==='undefined') ? method : label;
+    const useLabel = (typeof(label)==='undefined') ? (method || methods.join(',')) : label;
 
     const {renderId, renderers} = makeRenderers({
       cellProps, cellStyles, cellRenderer, labelRenderer, labelProps, labelStyles, formatter
     }, context);
-    const Query = new QueryClosure('statistic', method, renderId, renderId, {over});
+    const Query = new QueryClosure('statistic', 
+      method || methods, 
+      label ? renderId : `__${index}`, 
+      renderId, 
+      {over, diff}
+    );
 
     return {query: Query, renderers, labels: {[`_${renderId}`]: useLabel}};
   }

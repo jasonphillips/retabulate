@@ -1,9 +1,11 @@
+import {Children} from 'react';
+
 export const callChildSerializers = (children, context) => {
     if (!children) return [];
 
-    const childs = children.map ? children : [children];
+    const childs = children.map ? children : (children ? [children] : []);
     // call serialize() method of all children
-    return childs.map((child, index) => 
+    return Children.toArray(childs).map((child, index) => 
         child.type.serialize(child.props, index, context)
     );
 }
