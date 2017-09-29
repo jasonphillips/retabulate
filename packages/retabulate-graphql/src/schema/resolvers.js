@@ -1,9 +1,20 @@
 import _ from 'lodash';
-import gauss from 'gauss';
 import DataCollection from 'data-collection';
+const d3A = require('d3-array');
+const d3C = require('d3-collection');
 
-// gauss library has terrible import strategy on client
-const Vector = typeof(window!=='undefined') ? window.gauss.Vector : gauss.Vector;
+const distribution = (data) => d3C.nest()
+  .key(d => d)
+  .rollup(v => v.length)
+  .entries(data)
+  .reduce((all, {key, value}) => Object.assign(all, {[key]: value}), {});
+
+const distributionRatio = (data) => d3C.nest()
+  .key(d => d)
+  .rollup(v => v.length / data.length)
+  .entries(data)
+  .reduce((all, {key, value}) => Object.assign(all, {[key]: value}), {});
+
 const concat = (arr, val) => val ? arr.concat([val]) : arr;
 // distribute filter args if array
 const filterAny = (collection, filters) => Object.keys(filters).reduce((filtered, key) => 
@@ -45,14 +56,14 @@ const applyAggregations = (aggs, diff, diffOver) => {
 }
 
 const aggregations = {
-  distribution: (series, key) => new Vector(series.exclude({[key]:''}).values(key)).distribution(),
-  distributionRatio: (series, key) => new Vector(series.exclude({[key]:''}).values(key)).distribution('relative'),
+  distribution: (series, key) => distribution(series.exclude({[key]:''}).values(key)),
+  distributionRatio: (series, key) => distributionRatio(series.exclude({[key]:''}).values(key)),
   n: (series, key) => series.exclude({[key]:''}).count() || 0,
   pctn: (series, key, over) => series.exclude({[key]:''}).count() / over.exclude({[key]:''}).count() * 100,
   mean: (series, key) => series.count() ? series.exclude({[key]:''}).avg(key) : undefined,
-  median: (series, key) => new Vector(series.values(key)).median(),
+  median: (series, key) => d3A.median(series.values(key)),
   mode: (series, key) => series.mode(key),
-  stdev: (series, key) => new Vector(series.exclude({[key]:''}).values(key)).stdev(),
+  stdev: (series, key) => d3A.deviation(series.values(key)),
   min: (series, key) => series.exclude({[key]:''}).min(key),
   max: (series, key) => series.max(key),
   range: (series) => series.range(),
@@ -196,6 +207,13 @@ const resolvers = {
     }),
     statistic: (data, {method, methods, diff, over, renderId}) => ({
       ...data, _agg: method || methods, _over: over, _diff: diff, method, _renderIds: concat(data._renderIds, renderId)
+    }),
+    all: (data, {label, renderId}) => ({
+      ...data, 
+      renderId,
+      label,
+      _renderIds: concat(data._renderIds, renderId),
+      _aggIndex: data._aggIndex + 1,
     }),
     renderIds: ({_renderIds}) => _renderIds,
     leaf: (data, args, context) => generateLeaf(data, context),

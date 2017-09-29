@@ -26,6 +26,33 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+var d3C = require('d3-collection');
+
+
+var _distribution = function _distribution(data) {
+  return d3C.nest().key(function (d) {
+    return d;
+  }).rollup(function (v) {
+    return v.length;
+  }).entries(data).reduce(function (all, _ref) {
+    var key = _ref.key,
+        value = _ref.value;
+    return Object.assign(all, _defineProperty({}, key, value));
+  }, {});
+};
+
+var _distributionRatio = function _distributionRatio(data) {
+  return d3C.nest().key(function (d) {
+    return d;
+  }).rollup(function (v) {
+    return v.length / data.length;
+  }).entries(data).reduce(function (all, _ref2) {
+    var key = _ref2.key,
+        value = _ref2.value;
+    return Object.assign(all, _defineProperty({}, key, value));
+  }, {});
+};
+
 // gauss library has terrible import strategy on client
 var Vector = _typeof(window !== 'undefined') ? window.gauss.Vector : _gauss2.default.Vector;
 var concat = function concat(arr, val) {
@@ -89,11 +116,12 @@ var applyAggregations = function applyAggregations(aggs, diff, diffOver) {
 
 var aggregations = {
   distribution: function distribution(series, key) {
-    return new Vector(series.exclude(_defineProperty({}, key, '')).values(key)).distribution();
+    return _distribution(series.exclude(_defineProperty({}, key, '')).values(key));
   },
   distributionRatio: function distributionRatio(series, key) {
-    return new Vector(series.exclude(_defineProperty({}, key, '')).values(key)).distribution('relative');
+    return _distributionRatio(series.exclude(_defineProperty({}, key, '')).values(key));
   },
+  //new Vector(series.exclude({[key]:''}).values(key)).distribution('relative'),
   n: function n(series, key) {
     return series.exclude(_defineProperty({}, key, '')).count() || 0;
   },
@@ -128,9 +156,9 @@ var aggregations = {
 
 var resolvers = {
   Query: {
-    table: function table(root, _ref2, context) {
-      var set = _ref2.set,
-          where = _ref2.where;
+    table: function table(root, _ref4, context) {
+      var set = _ref4.set,
+          where = _ref4.where;
 
       return new Promise(function (resolve, reject) {
         context.getDataset(set).then(function (data) {
@@ -142,9 +170,9 @@ var resolvers = {
           context.tabulate = { iterator: 0 };
           var collection = new _dataCollection2.default(data).query();
 
-          if (where) collection = filterAny(collection, where.reduce(function (all, _ref3) {
-            var key = _ref3.key,
-                values = _ref3.values;
+          if (where) collection = filterAny(collection, where.reduce(function (all, _ref5) {
+            var key = _ref5.key,
+                values = _ref5.values;
             return _extends({}, all, _defineProperty({}, key, values));
           }, {}));
 
@@ -156,8 +184,8 @@ var resolvers = {
     }
   },
   Table: {
-    length: function length(_ref4) {
-      var _rows = _ref4._rows;
+    length: function length(_ref6) {
+      var _rows = _ref6._rows;
       return _rows.count();
     },
     top: function top(data, args) {
@@ -167,9 +195,9 @@ var resolvers = {
       return _extends({}, data, { key: null, _axis: 'y' });
     },
     // after delay of other resolvers, process cells grid
-    rows: function rows(_ref5) {
-      var _rows = _ref5._rows,
-          _grid = _ref5._grid;
+    rows: function rows(_ref7) {
+      var _rows = _ref7._rows,
+          _grid = _ref7._grid;
       return new Promise(function (resolve, rej) {
         return process.nextTick(function () {
           resolve(_lodash2.default.map(_lodash2.default.sortBy(_grid.y, 'id'), function (y) {
@@ -184,22 +212,22 @@ var resolvers = {
     }
   },
   Axis: {
-    label: function label(_ref6) {
-      var key = _ref6.key;
+    label: function label(_ref8) {
+      var key = _ref8.key;
       return key;
     },
-    length: function length(_ref7) {
-      var _rows = _ref7._rows;
+    length: function length(_ref9) {
+      var _rows = _ref9._rows;
       return _rows.count();
     },
-    classes: function classes(data, _ref8) {
-      var key = _ref8.key,
-          all = _ref8.all,
-          total = _ref8.total,
-          orderBy = _ref8.orderBy,
-          renderId = _ref8.renderId,
-          mapping = _ref8.mapping,
-          ordering = _ref8.ordering;
+    classes: function classes(data, _ref10) {
+      var key = _ref10.key,
+          all = _ref10.all,
+          total = _ref10.total,
+          orderBy = _ref10.orderBy,
+          renderId = _ref10.renderId,
+          mapping = _ref10.mapping,
+          ordering = _ref10.ordering;
 
       data._aggIndex++;
 
@@ -216,9 +244,9 @@ var resolvers = {
           return next.values ? all.concat(next.values) : all;
         }, []);
 
-        value = mapping.map(function (_ref9) {
-          var label = _ref9.label,
-              values = _ref9.values;
+        value = mapping.map(function (_ref11) {
+          var label = _ref11.label,
+              values = _ref11.values;
 
           var rows = values
           // filter 
@@ -264,10 +292,10 @@ var resolvers = {
 
       return value;
     },
-    transpose: function transpose(data, _ref12) {
-      var keys = _ref12.keys,
-          asKey = _ref12.asKey,
-          renderId = _ref12.renderId;
+    transpose: function transpose(data, _ref14) {
+      var keys = _ref14.keys,
+          asKey = _ref14.asKey,
+          renderId = _ref14.renderId;
 
       data._aggIndex++;
 
@@ -282,17 +310,17 @@ var resolvers = {
         });
       });
     },
-    all: function all(data, _ref13) {
-      var label = _ref13.label,
-          renderId = _ref13.renderId;
+    all: function all(data, _ref15) {
+      var label = _ref15.label,
+          renderId = _ref15.renderId;
       return _extends({}, data, {
         label: label, key: label,
         renderId: renderId, _renderIds: concat(data._renderIds, renderId),
         _aggIndex: data._aggIndex + 1
       });
     },
-    renderIds: function renderIds(_ref14) {
-      var _renderIds = _ref14._renderIds;
+    renderIds: function renderIds(_ref16) {
+      var _renderIds = _ref16._renderIds;
       return _renderIds;
     },
     node: function node(data) {
@@ -301,10 +329,10 @@ var resolvers = {
     leaf: function leaf(data, args, context) {
       return generateLeaf(data, context);
     },
-    variable: function variable(data, _ref15) {
-      var key = _ref15.key,
-          keys = _ref15.keys,
-          renderId = _ref15.renderId;
+    variable: function variable(data, _ref17) {
+      var key = _ref17.key,
+          keys = _ref17.keys,
+          renderId = _ref17.renderId;
       return _extends({}, data, { _variable: keys || key, key: key, _renderIds: concat(data._renderIds, renderId) });
     }
   },
@@ -317,33 +345,43 @@ var resolvers = {
     }
   },
   Variable: {
-    value: function value(data, _ref16) {
-      var _value2 = _ref16.value,
-          values = _ref16.values,
-          renderId = _ref16.renderId;
+    value: function value(data, _ref18) {
+      var _value2 = _ref18.value,
+          values = _ref18.values,
+          renderId = _ref18.renderId;
       return _extends({}, data, { _value: _value2 || values, _renderIds: concat(data._renderIds, renderId)
       });
     },
-    aggregation: function aggregation(data, _ref17) {
-      var method = _ref17.method,
-          methods = _ref17.methods,
-          diff = _ref17.diff,
-          over = _ref17.over,
-          renderId = _ref17.renderId;
+    aggregation: function aggregation(data, _ref19) {
+      var method = _ref19.method,
+          methods = _ref19.methods,
+          diff = _ref19.diff,
+          over = _ref19.over,
+          renderId = _ref19.renderId;
       return _extends({}, data, { _agg: method || methods, _over: over, _diff: diff, method: method, _renderIds: concat(data._renderIds, renderId)
       });
     },
-    statistic: function statistic(data, _ref18) {
-      var method = _ref18.method,
-          methods = _ref18.methods,
-          diff = _ref18.diff,
-          over = _ref18.over,
-          renderId = _ref18.renderId;
+    statistic: function statistic(data, _ref20) {
+      var method = _ref20.method,
+          methods = _ref20.methods,
+          diff = _ref20.diff,
+          over = _ref20.over,
+          renderId = _ref20.renderId;
       return _extends({}, data, { _agg: method || methods, _over: over, _diff: diff, method: method, _renderIds: concat(data._renderIds, renderId)
       });
     },
-    renderIds: function renderIds(_ref19) {
-      var _renderIds = _ref19._renderIds;
+    all: function all(data, _ref21) {
+      var label = _ref21.label,
+          renderId = _ref21.renderId;
+      return _extends({}, data, {
+        renderId: renderId,
+        label: label,
+        _renderIds: concat(data._renderIds, renderId),
+        _aggIndex: data._aggIndex + 1
+      });
+    },
+    renderIds: function renderIds(_ref22) {
+      var _renderIds = _ref22._renderIds;
       return _renderIds;
     },
     leaf: function leaf(data, args, context) {
@@ -354,8 +392,8 @@ var resolvers = {
     }
   },
   Aggregation: {
-    renderIds: function renderIds(_ref20) {
-      var _renderIds = _ref20._renderIds;
+    renderIds: function renderIds(_ref23) {
+      var _renderIds = _ref23._renderIds;
       return _renderIds;
     },
     leaf: function leaf(data, args, context) {
@@ -420,17 +458,17 @@ var resolvers = {
     }
   },
   Cell: {
-    value: function value(_ref21, _ref22) {
-      var query = _ref21.query,
-          detransposes = _ref21.detransposes,
-          variable = _ref21.variable,
-          agg = _ref21.agg,
-          diff = _ref21.diff,
-          diffOver = _ref21.diffOver,
-          over = _ref21.over,
-          rows = _ref21.rows,
-          fmt = _ref21.fmt;
-      var missing = _ref22.missing;
+    value: function value(_ref24, _ref25) {
+      var query = _ref24.query,
+          detransposes = _ref24.detransposes,
+          variable = _ref24.variable,
+          agg = _ref24.agg,
+          diff = _ref24.diff,
+          diffOver = _ref24.diffOver,
+          over = _ref24.over,
+          rows = _ref24.rows,
+          fmt = _ref24.fmt;
+      var missing = _ref25.missing;
 
       return JSON.stringify(diff
       // if diff: calculate this group, diff group
@@ -439,8 +477,8 @@ var resolvers = {
         diff: applyAggregations(agg)(diff, detransposes[variable] || variable, diffOver)
       } : applyAggregations(agg, diff, diffOver)(rows, detransposes[variable] || variable, over));
     },
-    queries: function queries(_ref23) {
-      var query = _ref23.query;
+    queries: function queries(_ref26) {
+      var query = _ref26.query;
       return _lodash2.default.map(_lodash2.default.keys(query), function (key) {
         return { key: key, value: query[key] };
       });

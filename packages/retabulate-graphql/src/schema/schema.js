@@ -54,6 +54,8 @@ export default `
       renderId:String
     ): Aggregation
     value(value: String, values: [String], renderId: String): Variable
+    all(label:String, renderId:String): Variable
+    label: String
     leaf: ID
     node: Node
   }
