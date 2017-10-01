@@ -1,7 +1,15 @@
 import _ from 'lodash';
-import DataCollection from 'data-collection';
 const d3A = require('d3-array');
 const d3C = require('d3-collection');
+
+const groupBy = (rows, col) => d3C.nest()
+  .key(row => row[col])
+  .entries(rows)
+  .reduce((all, {key, value}) => Object.assign(all, {[key]: value}), {});
+
+const colValues = (rows, col, excludeEmpty) => rows
+  .map(r => r[col])
+  .filter(r => excludeEmpty ? (r!=='' && r!==false && r!==null) : r);
 
 const distribution = (data) => d3C.nest()
   .key(d => d)
@@ -16,12 +24,16 @@ const distributionRatio = (data) => d3C.nest()
   .reduce((all, {key, value}) => Object.assign(all, {[key]: value}), {});
 
 const concat = (arr, val) => val ? arr.concat([val]) : arr;
-// distribute filter args if array
-const filterAny = (collection, filters) => Object.keys(filters).reduce((filtered, key) => 
-  filters[key].map 
-    ? filtered.filter.apply(filtered, filters[key].map(v => ({[key]:v})))
-    : filtered.filter({[key]: filters[key]})
-, collection)
+
+const filterAny = (collection, filters) => collection.filter(row => 
+  Object.keys(filters).reduce((passes,key) => {
+    if (!passes) return false;
+
+    return filters[key].map 
+      ? filters[key].indexOf(row[key]) > -1 
+      : row[key]===filters[key];
+  }, true)
+);
 
 const generateLeaf = (data, context) => {
   const {_aggIndex, _renderIds, _query, _exclude, _variable, _value, _agg, _diff, _over, _fmt, _grid, _axis, _detransposes} = data;
@@ -56,32 +68,32 @@ const applyAggregations = (aggs, diff, diffOver) => {
 }
 
 const aggregations = {
-  distribution: (series, key) => distribution(series.exclude({[key]:''}).values(key)),
-  distributionRatio: (series, key) => distributionRatio(series.exclude({[key]:''}).values(key)),
-  n: (series, key) => series.exclude({[key]:''}).count() || 0,
-  pctn: (series, key, over) => series.exclude({[key]:''}).count() / over.exclude({[key]:''}).count() * 100,
-  mean: (series, key) => series.count() ? series.exclude({[key]:''}).avg(key) : undefined,
+  distribution: (series, key) => distribution(colValues(series, key, true)),
+  distributionRatio: (series, key) => distributionRatio(colValues(series, key, true)),
+  n: (series, key) => colValues(series, key, true).length || 0,
+  pctn: (series, key, over) => colValues(series, key, true).length / colValues(over, key, true).length * 100,
+  mean: (series, key) => series.length ? d3A.mean(colValues(series, key, true)) : undefined,
   median: (series, key) => d3A.median(series.values(key)),
-  mode: (series, key) => series.mode(key),
+  mode: (series, key) => d3A.mode(colValues(series, key)),
   stdev: (series, key) => d3A.deviation(series.values(key)),
-  min: (series, key) => series.exclude({[key]:''}).min(key),
-  max: (series, key) => series.max(key),
-  range: (series) => series.range(),
-  sum: (series, key) => series.sum(key) || 0,
+  min: (series, key) => d3A.min(colValues(series, key)),
+  max: (series, key) => d3A.max(colValues(series, key)),
+  range: (series) => d3A.range(colValues(series, key)),
+  sum: (series, key) => d3A.sum(colValues(series, key)) || 0,
 }
 
 const resolvers = {
   Query: {
     table (root, {set, where}, context) {
       return new Promise((resolve, reject) => {
-        context.getDataset(set).then((data) => {
+        context.getDataset(set).then((collection) => {
 
-          if (!data) {
+          if (!collection) {
             throw new Error(`dataset ${set} not found`);
           }
 
           context.tabulate = {iterator: 0};
-          let collection = new DataCollection(data).query();
+          // let collection = new DataCollection(data).query();
 
           if (where) collection = filterAny(
             collection, where.reduce((all, {key, values}) => ({...all, [key]: values}), {})
@@ -95,7 +107,7 @@ const resolvers = {
     },
   },
   Table: {
-    length: ({_rows}) => _rows.count(),
+    length: ({_rows}) => _rows.length,
     top: (data, args) => ({...data, key:null, _axis:'x'}),
     left: (data, args) => ({...data, key:null, _axis:'y'}),
     // after delay of other resolvers, process cells grid
@@ -114,45 +126,65 @@ const resolvers = {
   },
   Axis: {
     label: ({key}) => key,
-    length: ({_rows}) => _rows.count(),
+    length: ({_rows}) => _rows.length,
     classes: (data, {key, all, total, orderBy, renderId, mapping, ordering}) => {
       data._aggIndex++;
-
       // total never groups again, just descends
       if (data._isTotal) {
         return [{...data, key: '_', _aggIndex:data._aggIndex, _isTotal: true}];
       }
 
-      let dataKey = data._detransposes[key] || key;
+      const dataKey = data._detransposes[key] || key;
+      const groups = groupBy(data._rows, dataKey);
       let value;
 
       if (mapping) {
-        const cumulative = mapping.reduce((all,next) => next.values ? all.concat(next.values) : all, []);
-        
+        // build list of possible values, to track umapped / remainder
+        const allGroups = Object.keys(groups).reduce((all,k) => ({...all, [k]:true}), {});
+        // iterate over mappings
         value = mapping.map(({label, values}) => {
-          const rows = values
-            // filter 
-            ? data._rows.filter.apply(data._rows, values.map(v => ({[dataKey]:v})))
-            // unfiltered remaining rows
-            : cumulative.reduce((remaining, filter) => remaining.exclude({[dataKey]:filter}), data._rows);
 
-          return {
+          const basics = {
             ...data,
             key: label,
-            _rows: rows,
             _aggIndex: data._aggIndex,
-            _query: values ? {...data._query, [dataKey]: values} : data.query,
             _exclude: values ? data._exclude : [...data._exclude, ...cumulative.map(v => ({[dataKey]:v}))],
             _renderIds: concat(data._renderIds, renderId),
             renderId
-          }
-        })
+          };
+
+          if (values) {
+            const rows = values.reduce((combined, val) => {
+              allGroups[val]==false;
+              return combined.concat(groups[val]);
+            }, []);
+
+            return {
+              ...basics, 
+              _rows: rows, 
+              _query: {...data._query, [dataKey]: values}
+            };
+          } 
+
+          // if no values, assume "group all remaining"
+          const remainingValues = Object.keys(allGroups).filter(k => !allGroups[k]);
+          const coveredValues = Object.keys(allGroups).filter(k => allGroups[k]);
+
+          return {
+            ...basics, 
+            _rows: remainingValues ? remainingValues.reduce((all,v) => all.concat(groups[v]), []): [],
+            _exclude: [...data._exclude, ...coveredValues.map(v => ({[dataKey]:v}))],
+          };
+        });
+
       } else {
-        const valuesSet = ordering ? ordering : data._rows.distinct(dataKey);
+        // no explicit mapping passed, group all, unless 'ordering' list passed
+        const valuesSet = ordering ? ordering : Object.keys(groups);
+
         value = valuesSet.map((groupValue) => ({
           ...data,
           key: groupValue,
-          _rows: data._rows.filter({[dataKey]:groupValue}),
+          _rows: groups[groupValue],
           _aggIndex: data._aggIndex,
           _query: {...data._query, [dataKey]:groupValue},
           _renderIds: concat(data._renderIds, renderId),
@@ -160,8 +192,10 @@ const resolvers = {
         }))
       }
 
-      if (orderBy) value = _.sortBy(value, (v) => v._rows.first()[orderBy]);
+      // apply optional ordering by another column
+      if (orderBy) value = _.sortBy(value, (v) => v._rows[0][orderBy]);
 
+      // add in the total group if all / total requested
       if (all || total) value.push(
         {...data, key:all, _aggIndex:data._aggIndex, renderIds: concat(data._renderIds, renderId), renderId}
       )

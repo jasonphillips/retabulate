@@ -6,19 +6,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
-
-var _gauss = require('gauss');
-
-var _gauss2 = _interopRequireDefault(_gauss);
-
-var _dataCollection = require('data-collection');
-
-var _dataCollection2 = _interopRequireDefault(_dataCollection);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26,17 +16,35 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+var d3A = require('d3-array');
 var d3C = require('d3-collection');
 
+var groupBy = function groupBy(rows, col) {
+  return d3C.nest().key(function (row) {
+    return row[col];
+  }).entries(rows).reduce(function (all, _ref) {
+    var key = _ref.key,
+        value = _ref.value;
+    return Object.assign(all, _defineProperty({}, key, value));
+  }, {});
+};
+
+var colValues = function colValues(rows, col, excludeEmpty) {
+  return rows.map(function (r) {
+    return r[col];
+  }).filter(function (r) {
+    return excludeEmpty ? r !== '' && r !== false && r !== null : r;
+  });
+};
 
 var _distribution = function _distribution(data) {
   return d3C.nest().key(function (d) {
     return d;
   }).rollup(function (v) {
     return v.length;
-  }).entries(data).reduce(function (all, _ref) {
-    var key = _ref.key,
-        value = _ref.value;
+  }).entries(data).reduce(function (all, _ref2) {
+    var key = _ref2.key,
+        value = _ref2.value;
     return Object.assign(all, _defineProperty({}, key, value));
   }, {});
 };
@@ -46,25 +54,25 @@ var _distributionRatio = function _distributionRatio(data) {
     return d;
   }).rollup(function (v) {
     return v.length / data.length;
-  }).entries(data).reduce(function (all, _ref2) {
-    var key = _ref2.key,
-        value = _ref2.value;
+  }).entries(data).reduce(function (all, _ref3) {
+    var key = _ref3.key,
+        value = _ref3.value;
     return Object.assign(all, _defineProperty({}, key, value));
   }, {});
 };
 
-// gauss library has terrible import strategy on client
-var Vector = _typeof(window !== 'undefined') ? window.gauss.Vector : _gauss2.default.Vector;
 var concat = function concat(arr, val) {
   return val ? arr.concat([val]) : arr;
 };
-// distribute filter args if array
+
 var filterAny = function filterAny(collection, filters) {
-  return Object.keys(filters).reduce(function (filtered, key) {
-    return filters[key].map ? filtered.filter.apply(filtered, filters[key].map(function (v) {
-      return _defineProperty({}, key, v);
-    })) : filtered.filter(_defineProperty({}, key, filters[key]));
-  }, collection);
+  return collection.filter(function (row) {
+    return Object.keys(filters).reduce(function (passes, key) {
+      if (!passes) return false;
+
+      return filters[key].map ? filters[key].indexOf(row[key]) > -1 : row[key] === filters[key];
+    }, true);
+  });
 };
 
 var generateLeaf = function generateLeaf(data, context) {
@@ -116,41 +124,40 @@ var applyAggregations = function applyAggregations(aggs, diff, diffOver) {
 
 var aggregations = {
   distribution: function distribution(series, key) {
-    return _distribution(series.exclude(_defineProperty({}, key, '')).values(key));
+    return _distribution(colValues(series, key, true));
   },
   distributionRatio: function distributionRatio(series, key) {
-    return _distributionRatio(series.exclude(_defineProperty({}, key, '')).values(key));
+    return _distributionRatio(colValues(series, key, true));
   },
-  //new Vector(series.exclude({[key]:''}).values(key)).distribution('relative'),
   n: function n(series, key) {
-    return series.exclude(_defineProperty({}, key, '')).count() || 0;
+    return colValues(series, key, true).length || 0;
   },
   pctn: function pctn(series, key, over) {
-    return series.exclude(_defineProperty({}, key, '')).count() / over.exclude(_defineProperty({}, key, '')).count() * 100;
+    return colValues(series, key, true).length / colValues(over, key, true).length * 100;
   },
   mean: function mean(series, key) {
-    return series.count() ? series.exclude(_defineProperty({}, key, '')).avg(key) : undefined;
+    return series.length ? d3A.mean(colValues(series, key, true)) : undefined;
   },
   median: function median(series, key) {
-    return new Vector(series.values(key)).median();
+    return d3A.median(series.values(key));
   },
   mode: function mode(series, key) {
-    return series.mode(key);
+    return d3A.mode(colValues(series, key));
   },
   stdev: function stdev(series, key) {
-    return new Vector(series.exclude(_defineProperty({}, key, '')).values(key)).stdev();
+    return d3A.deviation(series.values(key));
   },
   min: function min(series, key) {
-    return series.exclude(_defineProperty({}, key, '')).min(key);
+    return d3A.min(colValues(series, key));
   },
   max: function max(series, key) {
-    return series.max(key);
+    return d3A.max(colValues(series, key));
   },
   range: function range(series) {
-    return series.range();
+    return d3A.range(colValues(series, key));
   },
   sum: function sum(series, key) {
-    return series.sum(key) || 0;
+    return d3A.sum(colValues(series, key)) || 0;
   }
 };
 
@@ -161,14 +168,14 @@ var resolvers = {
           where = _ref4.where;
 
       return new Promise(function (resolve, reject) {
-        context.getDataset(set).then(function (data) {
+        context.getDataset(set).then(function (collection) {
 
-          if (!data) {
+          if (!collection) {
             throw new Error('dataset ' + set + ' not found');
           }
 
           context.tabulate = { iterator: 0 };
-          var collection = new _dataCollection2.default(data).query();
+          // let collection = new DataCollection(data).query();
 
           if (where) collection = filterAny(collection, where.reduce(function (all, _ref5) {
             var key = _ref5.key,
@@ -186,7 +193,7 @@ var resolvers = {
   Table: {
     length: function length(_ref6) {
       var _rows = _ref6._rows;
-      return _rows.count();
+      return _rows.length;
     },
     top: function top(data, args) {
       return _extends({}, data, { key: null, _axis: 'x' });
@@ -218,7 +225,7 @@ var resolvers = {
     },
     length: function length(_ref9) {
       var _rows = _ref9._rows;
-      return _rows.count();
+      return _rows.length;
     },
     classes: function classes(data, _ref10) {
       var key = _ref10.key,
@@ -230,52 +237,73 @@ var resolvers = {
           ordering = _ref10.ordering;
 
       data._aggIndex++;
-
       // total never groups again, just descends
       if (data._isTotal) {
         return [_extends({}, data, { key: '_', _aggIndex: data._aggIndex, _isTotal: true })];
       }
 
       var dataKey = data._detransposes[key] || key;
+      var groups = groupBy(data._rows, dataKey);
       var value = void 0;
 
       if (mapping) {
-        var cumulative = mapping.reduce(function (all, next) {
-          return next.values ? all.concat(next.values) : all;
-        }, []);
-
+        // build list of possible values, to track umapped / remainder
+        var allGroups = Object.keys(groups).reduce(function (all, k) {
+          return _extends({}, all, _defineProperty({}, k, true));
+        }, {});
+        // iterate over mappings
         value = mapping.map(function (_ref11) {
           var label = _ref11.label,
               values = _ref11.values;
 
-          var rows = values
-          // filter 
-          ? data._rows.filter.apply(data._rows, values.map(function (v) {
-            return _defineProperty({}, dataKey, v);
-          }))
-          // unfiltered remaining rows
-          : cumulative.reduce(function (remaining, filter) {
-            return remaining.exclude(_defineProperty({}, dataKey, filter));
-          }, data._rows);
 
-          return _extends({}, data, {
+          var basics = _extends({}, data, {
             key: label,
-            _rows: rows,
             _aggIndex: data._aggIndex,
-            _query: values ? _extends({}, data._query, _defineProperty({}, dataKey, values)) : data.query,
             _exclude: values ? data._exclude : [].concat(_toConsumableArray(data._exclude), _toConsumableArray(cumulative.map(function (v) {
               return _defineProperty({}, dataKey, v);
             }))),
             _renderIds: concat(data._renderIds, renderId),
             renderId: renderId
           });
+
+          if (values) {
+            var rows = values.reduce(function (combined, val) {
+              allGroups[val] == false;
+              return combined.concat(groups[val]);
+            }, []);
+
+            return _extends({}, basics, {
+              _rows: rows,
+              _query: _extends({}, data._query, _defineProperty({}, dataKey, values))
+            });
+          }
+
+          // if no values, assume "group all remaining"
+          var remainingValues = Object.keys(allGroups).filter(function (k) {
+            return !allGroups[k];
+          });
+          var coveredValues = Object.keys(allGroups).filter(function (k) {
+            return allGroups[k];
+          });
+
+          return _extends({}, basics, {
+            _rows: remainingValues ? remainingValues.reduce(function (all, v) {
+              return all.concat(groups[v]);
+            }, []) : [],
+            _exclude: [].concat(_toConsumableArray(data._exclude), _toConsumableArray(coveredValues.map(function (v) {
+              return _defineProperty({}, dataKey, v);
+            })))
+          });
         });
       } else {
-        var valuesSet = ordering ? ordering : data._rows.distinct(dataKey);
+        // no explicit mapping passed, group all, unless 'ordering' list passed
+        var valuesSet = ordering ? ordering : Object.keys(groups);
+
         value = valuesSet.map(function (groupValue) {
           return _extends({}, data, {
             key: groupValue,
-            _rows: data._rows.filter(_defineProperty({}, dataKey, groupValue)),
+            _rows: groups[groupValue],
             _aggIndex: data._aggIndex,
             _query: _extends({}, data._query, _defineProperty({}, dataKey, groupValue)),
             _renderIds: concat(data._renderIds, renderId),
@@ -284,10 +312,12 @@ var resolvers = {
         });
       }
 
+      // apply optional ordering by another column
       if (orderBy) value = _lodash2.default.sortBy(value, function (v) {
-        return v._rows.first()[orderBy];
+        return v._rows[0][orderBy];
       });
 
+      // add in the total group if all / total requested
       if (all || total) value.push(_extends({}, data, { key: all, _aggIndex: data._aggIndex, renderIds: concat(data._renderIds, renderId), renderId: renderId }));
 
       return value;
