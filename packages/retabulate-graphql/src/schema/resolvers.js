@@ -25,15 +25,24 @@ const distributionRatio = (data) => d3C.nest()
 
 const concat = (arr, val) => val ? arr.concat([val]) : arr;
 
-const filterAny = (collection, filters) => collection.filter(row => 
-  Object.keys(filters).reduce((passes,key) => {
+const addFilters = (objA, key, values) => ({
+  ...objA,
+  [key]: objA[key] 
+    ? (objA[key].map ? objA[key] : [objA[key]]).concat(values)
+    : values
+});
+
+const filterAny = (collection, filters, invert) => collection.filter(row => {
+  const test = Object.keys(filters).reduce((passes,key) => {
     if (!passes) return false;
 
     return filters[key].map 
       ? filters[key].indexOf(row[key]) > -1 
       : row[key]===filters[key];
-  }, true)
-);
+  }, true);
+
+  return invert ? !test : test;
+});
 
 const generateLeaf = (data, context) => {
   const {_aggIndex, _renderIds, _query, _exclude, _variable, _value, _agg, _diff, _over, _fmt, _grid, _axis, _detransposes} = data;
@@ -101,7 +110,7 @@ const resolvers = {
 
           resolve({
             _rows: collection, 
-            _query:{}, _grid:{}, _renderIds:[], _transposes:{}, _detransposes:{}, _exclude:[], _aggIndex:0});
+            _query:{}, _grid:{}, _renderIds:[], _transposes:{}, _detransposes:{}, _exclude:{}, _aggIndex:0});
         });
       });
     },
@@ -148,14 +157,13 @@ const resolvers = {
             ...data,
             key: label,
             _aggIndex: data._aggIndex,
-            _exclude: values ? data._exclude : [...data._exclude, ...cumulative.map(v => ({[dataKey]:v}))],
             _renderIds: concat(data._renderIds, renderId),
             renderId
           };
 
           if (values) {
             const rows = values.reduce((combined, val) => {
-              allGroups[val]==false;
+              allGroups[val] = false;
               return combined.concat(groups[val]);
             }, []);
 
@@ -167,13 +175,13 @@ const resolvers = {
           } 
 
           // if no values, assume "group all remaining"
-          const remainingValues = Object.keys(allGroups).filter(k => !allGroups[k]);
-          const coveredValues = Object.keys(allGroups).filter(k => allGroups[k]);
+          const remainingValues = Object.keys(allGroups).filter(k => allGroups[k]);
+          const coveredValues = Object.keys(allGroups).filter(k => !allGroups[k]);
 
           return {
             ...basics, 
             _rows: remainingValues ? remainingValues.reduce((all,v) => all.concat(groups[v]), []): [],
-            _exclude: [...data._exclude, ...coveredValues.map(v => ({[dataKey]:v}))],
+            _exclude: addFilters(data._exclude, dataKey, coveredValues),
           };
         });
 
@@ -263,7 +271,7 @@ const resolvers = {
       const detransposes = {...x.detransposes, ...y.detransposes};
       const variable = detransposes[y.variable] || y.variable || detransposes[x.variable] || x.variable || null;
       const value = y.value || x.value || null;
-      const exclude = (y.exclude.length || x.exclude.length) ? [...y.exclude, ...x.exclude] : null;
+      const exclude = {...x.exclude, ...y.exclude};
 
       let query = {...y.query, ...x.query};
       let cellFilter = x.query;
@@ -299,7 +307,7 @@ const resolvers = {
         detransposes,
         colID: x.id,
         rowID: y.id,
-        rows: exclude ? exclude.reduce((r,e) => r.exclude(e), rows) : rows,
+        rows: Object.keys(exclude).length ? filterAny(rows, exclude, true) : rows,
         over: over ? filterAny(y._all, overQuery) : null,
         diff: diffRows,
         diffOver: diffOver,

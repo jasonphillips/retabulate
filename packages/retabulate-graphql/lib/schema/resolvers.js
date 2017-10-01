@@ -12,8 +12,6 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var d3A = require('d3-array');
@@ -65,13 +63,19 @@ var concat = function concat(arr, val) {
   return val ? arr.concat([val]) : arr;
 };
 
-var filterAny = function filterAny(collection, filters) {
+var addFilters = function addFilters(objA, key, values) {
+  return _extends({}, objA, _defineProperty({}, key, objA[key] ? (objA[key].map ? objA[key] : [objA[key]]).concat(values) : values));
+};
+
+var filterAny = function filterAny(collection, filters, invert) {
   return collection.filter(function (row) {
-    return Object.keys(filters).reduce(function (passes, key) {
+    var test = Object.keys(filters).reduce(function (passes, key) {
       if (!passes) return false;
 
       return filters[key].map ? filters[key].indexOf(row[key]) > -1 : row[key] === filters[key];
     }, true);
+
+    return invert ? !test : test;
   });
 };
 
@@ -185,7 +189,7 @@ var resolvers = {
 
           resolve({
             _rows: collection,
-            _query: {}, _grid: {}, _renderIds: [], _transposes: {}, _detransposes: {}, _exclude: [], _aggIndex: 0 });
+            _query: {}, _grid: {}, _renderIds: [], _transposes: {}, _detransposes: {}, _exclude: {}, _aggIndex: 0 });
         });
       });
     }
@@ -260,16 +264,13 @@ var resolvers = {
           var basics = _extends({}, data, {
             key: label,
             _aggIndex: data._aggIndex,
-            _exclude: values ? data._exclude : [].concat(_toConsumableArray(data._exclude), _toConsumableArray(cumulative.map(function (v) {
-              return _defineProperty({}, dataKey, v);
-            }))),
             _renderIds: concat(data._renderIds, renderId),
             renderId: renderId
           });
 
           if (values) {
             var rows = values.reduce(function (combined, val) {
-              allGroups[val] == false;
+              allGroups[val] = false;
               return combined.concat(groups[val]);
             }, []);
 
@@ -281,19 +282,17 @@ var resolvers = {
 
           // if no values, assume "group all remaining"
           var remainingValues = Object.keys(allGroups).filter(function (k) {
-            return !allGroups[k];
+            return allGroups[k];
           });
           var coveredValues = Object.keys(allGroups).filter(function (k) {
-            return allGroups[k];
+            return !allGroups[k];
           });
 
           return _extends({}, basics, {
             _rows: remainingValues ? remainingValues.reduce(function (all, v) {
               return all.concat(groups[v]);
             }, []) : [],
-            _exclude: [].concat(_toConsumableArray(data._exclude), _toConsumableArray(coveredValues.map(function (v) {
-              return _defineProperty({}, dataKey, v);
-            })))
+            _exclude: addFilters(data._exclude, dataKey, coveredValues)
           });
         });
       } else {
@@ -322,10 +321,10 @@ var resolvers = {
 
       return value;
     },
-    transpose: function transpose(data, _ref14) {
-      var keys = _ref14.keys,
-          asKey = _ref14.asKey,
-          renderId = _ref14.renderId;
+    transpose: function transpose(data, _ref12) {
+      var keys = _ref12.keys,
+          asKey = _ref12.asKey,
+          renderId = _ref12.renderId;
 
       data._aggIndex++;
 
@@ -340,17 +339,17 @@ var resolvers = {
         });
       });
     },
-    all: function all(data, _ref15) {
-      var label = _ref15.label,
-          renderId = _ref15.renderId;
+    all: function all(data, _ref13) {
+      var label = _ref13.label,
+          renderId = _ref13.renderId;
       return _extends({}, data, {
         label: label, key: label,
         renderId: renderId, _renderIds: concat(data._renderIds, renderId),
         _aggIndex: data._aggIndex + 1
       });
     },
-    renderIds: function renderIds(_ref16) {
-      var _renderIds = _ref16._renderIds;
+    renderIds: function renderIds(_ref14) {
+      var _renderIds = _ref14._renderIds;
       return _renderIds;
     },
     node: function node(data) {
@@ -359,10 +358,10 @@ var resolvers = {
     leaf: function leaf(data, args, context) {
       return generateLeaf(data, context);
     },
-    variable: function variable(data, _ref17) {
-      var key = _ref17.key,
-          keys = _ref17.keys,
-          renderId = _ref17.renderId;
+    variable: function variable(data, _ref15) {
+      var key = _ref15.key,
+          keys = _ref15.keys,
+          renderId = _ref15.renderId;
       return _extends({}, data, { _variable: keys || key, key: key, _renderIds: concat(data._renderIds, renderId) });
     }
   },
@@ -375,34 +374,34 @@ var resolvers = {
     }
   },
   Variable: {
-    value: function value(data, _ref18) {
-      var _value2 = _ref18.value,
-          values = _ref18.values,
-          renderId = _ref18.renderId;
+    value: function value(data, _ref16) {
+      var _value2 = _ref16.value,
+          values = _ref16.values,
+          renderId = _ref16.renderId;
       return _extends({}, data, { _value: _value2 || values, _renderIds: concat(data._renderIds, renderId)
       });
     },
-    aggregation: function aggregation(data, _ref19) {
-      var method = _ref19.method,
-          methods = _ref19.methods,
-          diff = _ref19.diff,
-          over = _ref19.over,
+    aggregation: function aggregation(data, _ref17) {
+      var method = _ref17.method,
+          methods = _ref17.methods,
+          diff = _ref17.diff,
+          over = _ref17.over,
+          renderId = _ref17.renderId;
+      return _extends({}, data, { _agg: method || methods, _over: over, _diff: diff, method: method, _renderIds: concat(data._renderIds, renderId)
+      });
+    },
+    statistic: function statistic(data, _ref18) {
+      var method = _ref18.method,
+          methods = _ref18.methods,
+          diff = _ref18.diff,
+          over = _ref18.over,
+          renderId = _ref18.renderId;
+      return _extends({}, data, { _agg: method || methods, _over: over, _diff: diff, method: method, _renderIds: concat(data._renderIds, renderId)
+      });
+    },
+    all: function all(data, _ref19) {
+      var label = _ref19.label,
           renderId = _ref19.renderId;
-      return _extends({}, data, { _agg: method || methods, _over: over, _diff: diff, method: method, _renderIds: concat(data._renderIds, renderId)
-      });
-    },
-    statistic: function statistic(data, _ref20) {
-      var method = _ref20.method,
-          methods = _ref20.methods,
-          diff = _ref20.diff,
-          over = _ref20.over,
-          renderId = _ref20.renderId;
-      return _extends({}, data, { _agg: method || methods, _over: over, _diff: diff, method: method, _renderIds: concat(data._renderIds, renderId)
-      });
-    },
-    all: function all(data, _ref21) {
-      var label = _ref21.label,
-          renderId = _ref21.renderId;
       return _extends({}, data, {
         renderId: renderId,
         label: label,
@@ -410,8 +409,8 @@ var resolvers = {
         _aggIndex: data._aggIndex + 1
       });
     },
-    renderIds: function renderIds(_ref22) {
-      var _renderIds = _ref22._renderIds;
+    renderIds: function renderIds(_ref20) {
+      var _renderIds = _ref20._renderIds;
       return _renderIds;
     },
     leaf: function leaf(data, args, context) {
@@ -422,8 +421,8 @@ var resolvers = {
     }
   },
   Aggregation: {
-    renderIds: function renderIds(_ref23) {
-      var _renderIds = _ref23._renderIds;
+    renderIds: function renderIds(_ref21) {
+      var _renderIds = _ref21._renderIds;
       return _renderIds;
     },
     leaf: function leaf(data, args, context) {
@@ -439,7 +438,7 @@ var resolvers = {
         var detransposes = _extends({}, x.detransposes, y.detransposes);
         var variable = detransposes[y.variable] || y.variable || detransposes[x.variable] || x.variable || null;
         var value = y.value || x.value || null;
-        var exclude = y.exclude.length || x.exclude.length ? [].concat(_toConsumableArray(y.exclude), _toConsumableArray(x.exclude)) : null;
+        var exclude = _extends({}, x.exclude, y.exclude);
 
         var query = _extends({}, y.query, x.query);
         var cellFilter = x.query;
@@ -475,9 +474,7 @@ var resolvers = {
           detransposes: detransposes,
           colID: x.id,
           rowID: y.id,
-          rows: exclude ? exclude.reduce(function (r, e) {
-            return r.exclude(e);
-          }, rows) : rows,
+          rows: Object.keys(exclude).length ? filterAny(rows, exclude, true) : rows,
           over: over ? filterAny(y._all, overQuery) : null,
           diff: diffRows,
           diffOver: diffOver,
@@ -488,17 +485,17 @@ var resolvers = {
     }
   },
   Cell: {
-    value: function value(_ref24, _ref25) {
-      var query = _ref24.query,
-          detransposes = _ref24.detransposes,
-          variable = _ref24.variable,
-          agg = _ref24.agg,
-          diff = _ref24.diff,
-          diffOver = _ref24.diffOver,
-          over = _ref24.over,
-          rows = _ref24.rows,
-          fmt = _ref24.fmt;
-      var missing = _ref25.missing;
+    value: function value(_ref22, _ref23) {
+      var query = _ref22.query,
+          detransposes = _ref22.detransposes,
+          variable = _ref22.variable,
+          agg = _ref22.agg,
+          diff = _ref22.diff,
+          diffOver = _ref22.diffOver,
+          over = _ref22.over,
+          rows = _ref22.rows,
+          fmt = _ref22.fmt;
+      var missing = _ref23.missing;
 
       return JSON.stringify(diff
       // if diff: calculate this group, diff group
@@ -507,8 +504,8 @@ var resolvers = {
         diff: applyAggregations(agg)(diff, detransposes[variable] || variable, diffOver)
       } : applyAggregations(agg, diff, diffOver)(rows, detransposes[variable] || variable, over));
     },
-    queries: function queries(_ref26) {
-      var query = _ref26.query;
+    queries: function queries(_ref24) {
+      var query = _ref24.query;
       return _lodash2.default.map(_lodash2.default.keys(query), function (key) {
         return { key: key, value: query[key] };
       });
