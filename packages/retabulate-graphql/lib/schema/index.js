@@ -1,22 +1,16 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var _graphqlSchema = require('./graphqlSchema');
 
-var _graphqlTools = require('graphql-tools');
-
-var _schema = require('./schema');
-
-var _schema2 = _interopRequireDefault(_schema);
-
-var _resolvers = require('./resolvers');
-
-var _resolvers2 = _interopRequireDefault(_resolvers);
+var _graphqlSchema2 = _interopRequireDefault(_graphqlSchema);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = (0, _graphqlTools.makeExecutableSchema)({
-  typeDefs: _schema2.default,
-  resolvers: _resolvers2.default
-});
+module.exports = _graphqlSchema2.default; /*import { makeExecutableSchema } from 'graphql-tools';
+                                          import schema from './schema';
+                                          import resolvers from './resolvers';
+                                          
+                                          export default makeExecutableSchema({
+                                            typeDefs: schema,
+                                            resolvers,
+                                          }); */
