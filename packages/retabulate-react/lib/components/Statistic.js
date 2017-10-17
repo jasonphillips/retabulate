@@ -67,7 +67,7 @@ var Statistic = function (_React$Component) {
           renderId = _makeRenderers.renderId,
           renderers = _makeRenderers.renderers;
 
-      var Query = new _QueryClosure2.default('statistic', method || methods, label ? renderId : '__' + index, renderId, { over: over, diff: diff });
+      var Query = new _QueryClosure2.default('statistic', method || methods, label ? renderId : 'skip_' + index, renderId, { over: over, diff: diff });
 
       return { query: Query, renderers: renderers, labels: _defineProperty({}, '_' + renderId, useLabel) };
     }

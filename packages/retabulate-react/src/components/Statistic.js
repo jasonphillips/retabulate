@@ -17,7 +17,7 @@ class Statistic extends React.Component {
     }, context);
     const Query = new QueryClosure('statistic', 
       method || methods, 
-      label ? renderId : `__${index}`, 
+      label ? renderId : `skip_${index}`, 
       renderId, 
       {over, diff}
     );

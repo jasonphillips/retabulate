@@ -15,7 +15,7 @@ class Transpose extends React.Component {
     const {renderId, renderers} = makeRenderers({
       cellProps, cellStyles, labelRenderer, labelProps, labelStyles
     }, context);
-    const Query = new QueryClosure('transpose', columns, label ? renderId : `__${index}`, renderId, {asKey: as});
+    const Query = new QueryClosure('transpose', columns, label ? renderId : `skip_${index}`, renderId, {asKey: as});
     const descendents = gatherChildConfig(children, context);
     
     if (descendents.query) {

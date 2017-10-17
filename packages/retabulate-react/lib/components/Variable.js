@@ -67,7 +67,7 @@ var Variable = function (_React$Component) {
           renderId = _makeRenderers.renderId,
           renderers = _makeRenderers.renderers;
 
-      var Query = new _QueryClosure2.default('variable', columns || column, label ? renderId : '__' + index, renderId);
+      var Query = new _QueryClosure2.default('variable', columns || column, label ? renderId : 'skip_' + index, renderId);
       var descendents = (0, _gatherChildConfig2.default)(children, context);
 
       if (descendents.query) {

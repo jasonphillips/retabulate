@@ -69,7 +69,7 @@ var Expand = function (_React$Component) {
           renderId = _makeRenderers.renderId,
           renderers = _makeRenderers.renderers;
 
-      var Query = new _QueryClosure2.default('classes', column, label ? renderId : '__' + index, renderId, { all: total, mapping: mapping, ordering: ordering });
+      var Query = new _QueryClosure2.default('classes', column, label ? renderId : 'skip_' + index, renderId, { all: total, mapping: mapping, ordering: ordering });
       var descendents = (0, _gatherChildConfig2.default)(children, context);
 
       if (descendents.query) {

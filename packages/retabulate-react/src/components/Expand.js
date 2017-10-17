@@ -15,7 +15,7 @@ class Expand extends React.Component {
     const {renderId, renderers} = makeRenderers({
       cellProps, cellStyles, labelRenderer, labelProps, labelStyles
     }, context);
-    const Query = new QueryClosure('classes', column, label ? renderId : `__${index}`, renderId, {all:total, mapping, ordering});
+    const Query = new QueryClosure('classes', column, label ? renderId : `skip_${index}`, renderId, {all:total, mapping, ordering});
     const descendents = gatherChildConfig(children, context);
     
     if (descendents.query) {

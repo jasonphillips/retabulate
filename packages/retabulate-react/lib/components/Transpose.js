@@ -68,7 +68,7 @@ var Transpose = function (_React$Component) {
           renderId = _makeRenderers.renderId,
           renderers = _makeRenderers.renderers;
 
-      var Query = new _QueryClosure2.default('transpose', columns, label ? renderId : '__' + index, renderId, { asKey: as });
+      var Query = new _QueryClosure2.default('transpose', columns, label ? renderId : 'skip_' + index, renderId, { asKey: as });
       var descendents = (0, _gatherChildConfig2.default)(children, context);
 
       if (descendents.query) {

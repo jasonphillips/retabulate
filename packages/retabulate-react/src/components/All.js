@@ -15,7 +15,7 @@ class All extends React.Component {
     const {renderId, renderers} = makeRenderers({
       cellProps, cellStyles, labelRenderer, labelProps, labelStyles
     }, context);
-    const Query = new QueryClosure('all', label, `__${index}`, renderId);
+    const Query = new QueryClosure('all', label, `skip_${index}`, renderId);
     const descendents = gatherChildConfig(children, context);
     
     if (descendents.query) {

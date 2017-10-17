@@ -15,7 +15,7 @@ class Variable extends React.Component {
     const {renderId, renderers} = makeRenderers({
       cellProps, cellStyles, labelRenderer, labelProps, labelStyles
     }, context);
-    const Query = new QueryClosure('variable', columns || column, label ? renderId : `__${index}`, renderId);
+    const Query = new QueryClosure('variable', columns || column, label ? renderId : `skip_${index}`, renderId);
     const descendents = gatherChildConfig(children, context);
 
     if (descendents.query) {

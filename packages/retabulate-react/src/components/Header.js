@@ -15,7 +15,7 @@ class Header extends React.Component {
     const {renderId, renderers} = makeRenderers({
       cellProps, cellStyles, labelRenderer, labelProps, labelStyles
     }, context);
-    const Query = new QueryClosure('node', label, `__${index}`, renderId);
+    const Query = new QueryClosure('node', label, `skip_${index}`, renderId);
     const descendents = gatherChildConfig(children, context);
     
     if (descendents.query) {
