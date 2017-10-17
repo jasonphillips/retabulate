@@ -3,10 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.RootType = exports.tableField = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _type = require('graphql/type');
+var _graphql = require('graphql');
 
 var _helpers = require('./helpers');
 
@@ -18,96 +19,94 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var ConditionType = new _type.GraphQLInputObjectType({
+var ConditionType = new _graphql.GraphQLInputObjectType({
   name: 'ConditionType',
   fields: {
     key: {
-      type: _type.GraphQLString
+      type: _graphql.GraphQLString
     },
     values: {
-      type: new _type.GraphQLList(_type.GraphQLString)
+      type: new _graphql.GraphQLList(_graphql.GraphQLString)
     }
   }
 });
 
-var QueryConditionType = new _type.GraphQLObjectType({
+var QueryConditionType = new _graphql.GraphQLObjectType({
   name: 'QueryConditionType',
   fields: {
     key: {
-      type: _type.GraphQLString
+      type: _graphql.GraphQLString
     },
     value: {
-      type: _type.GraphQLString
+      type: _graphql.GraphQLString
     }
   }
 });
 
-var GroupMapType = new _type.GraphQLInputObjectType({
+var GroupMapType = new _graphql.GraphQLInputObjectType({
   name: 'GroupMapType',
   fields: {
     label: {
-      type: new _type.GraphQLNonNull(_type.GraphQLString)
+      type: new _graphql.GraphQLNonNull(_graphql.GraphQLString)
     },
     values: {
-      type: new _type.GraphQLList(_type.GraphQLString)
+      type: new _graphql.GraphQLList(_graphql.GraphQLString)
     }
   }
 });
 
-var NodeType = new _type.GraphQLObjectType({
+var NodeType = new _graphql.GraphQLObjectType({
   name: 'NodeType',
   fields: function fields() {
     return {
       leaf: {
-        type: _type.GraphQLID,
+        type: _graphql.GraphQLID,
         resolve: function resolve(data, args, context) {
           return (0, _helpers.generateLeaf)(data, context);
         }
-      },
-      node: {
-        type: NodeType,
-        resolve: function resolve(data) {
-          return data;
-        }
       }
+      /*node: {
+        type: NodeType,
+        resolve: (data) => data,
+      }*/
     };
   }
 });
 
-var AggregationType = new _type.GraphQLObjectType({
+var AggregationType = new _graphql.GraphQLObjectType({
   name: 'AggregationType',
   fields: function fields() {
     return {
       method: {
-        type: _type.GraphQLString,
+        type: _graphql.GraphQLString,
         resolve: function resolve(_ref) {
           var method = _ref.method;
           return method;
         }
       },
       methods: {
-        type: new _type.GraphQLList(_type.GraphQLString),
+        type: new _graphql.GraphQLList(_graphql.GraphQLString),
         resolve: function resolve(_ref2) {
           var methods = _ref2.methods;
           return methods;
         }
       },
       renderId: {
-        type: _type.GraphQLString,
+        type: _graphql.GraphQLString,
         resolve: function resolve(_ref3) {
           var renderId = _ref3.renderId;
           return renderId;
         }
       },
       renderIds: {
-        type: new _type.GraphQLList(_type.GraphQLString),
+        type: new _graphql.GraphQLList(_graphql.GraphQLString),
         resolve: function resolve(_ref4) {
           var _renderIds = _ref4._renderIds;
           return _renderIds;
         }
       },
       leaf: {
-        type: _type.GraphQLID,
+        type: _graphql.GraphQLID,
         resolve: function resolve(data, args, context) {
           return (0, _helpers.generateLeaf)(data, context);
         }
@@ -122,40 +121,40 @@ var AggregationType = new _type.GraphQLObjectType({
   }
 });
 
-var VariableType = new _type.GraphQLObjectType({
+var VariableType = new _graphql.GraphQLObjectType({
   name: 'VariableType',
   fields: function fields() {
     return {
       key: {
-        type: _type.GraphQLString,
+        type: _graphql.GraphQLString,
         resolve: function resolve(_ref5) {
           var key = _ref5.key;
           return key;
         }
       },
       keys: {
-        type: new _type.GraphQLList(_type.GraphQLString),
+        type: new _graphql.GraphQLList(_graphql.GraphQLString),
         resolve: function resolve(_ref6) {
           var keys = _ref6.keys;
           return keys;
         }
       },
       renderId: {
-        type: _type.GraphQLString,
+        type: _graphql.GraphQLString,
         resolve: function resolve(_ref7) {
           var renderId = _ref7.renderId;
           return renderId;
         }
       },
       renderIds: {
-        type: new _type.GraphQLList(_type.GraphQLString),
+        type: new _graphql.GraphQLList(_graphql.GraphQLString),
         resolve: function resolve(_ref8) {
           var _renderIds = _ref8._renderIds;
           return _renderIds;
         }
       },
       label: {
-        type: _type.GraphQLString,
+        type: _graphql.GraphQLString,
         resolve: function resolve(_ref9) {
           var label = _ref9.label;
           return label;
@@ -164,12 +163,12 @@ var VariableType = new _type.GraphQLObjectType({
       statistic: {
         type: AggregationType,
         args: {
-          method: { type: _type.GraphQLString },
-          methods: { type: new _type.GraphQLList(_type.GraphQLString) },
+          method: { type: _graphql.GraphQLString },
+          methods: { type: new _graphql.GraphQLList(_graphql.GraphQLString) },
           diff: { type: ConditionType },
-          format: { type: _type.GraphQLString },
-          over: { type: _type.GraphQLString },
-          renderId: { type: _type.GraphQLString }
+          format: { type: _graphql.GraphQLString },
+          over: { type: _graphql.GraphQLString },
+          renderId: { type: _graphql.GraphQLString }
         },
         resolve: function resolve(data, _ref10) {
           var method = _ref10.method,
@@ -184,9 +183,9 @@ var VariableType = new _type.GraphQLObjectType({
       value: {
         type: VariableType,
         args: {
-          value: { type: _type.GraphQLString },
-          values: { type: new _type.GraphQLList(_type.GraphQLString) },
-          renderId: { type: _type.GraphQLString }
+          value: { type: _graphql.GraphQLString },
+          values: { type: new _graphql.GraphQLList(_graphql.GraphQLString) },
+          renderId: { type: _graphql.GraphQLString }
         },
         resolve: function resolve(data, _ref11) {
           var value = _ref11.value,
@@ -199,8 +198,8 @@ var VariableType = new _type.GraphQLObjectType({
       all: {
         type: VariableType,
         args: {
-          label: { type: _type.GraphQLString },
-          renderId: { type: _type.GraphQLString }
+          label: { type: _graphql.GraphQLString },
+          renderId: { type: _graphql.GraphQLString }
         },
         resolve: function resolve(data, _ref12) {
           var label = _ref12.label,
@@ -214,7 +213,7 @@ var VariableType = new _type.GraphQLObjectType({
         }
       },
       leaf: {
-        type: _type.GraphQLID,
+        type: _graphql.GraphQLID,
         resolve: function resolve(data, args, context) {
           return (0, _helpers.generateLeaf)(data, context);
         }
@@ -229,39 +228,39 @@ var VariableType = new _type.GraphQLObjectType({
   }
 });
 
-var AxisType = new _type.GraphQLObjectType({
+var AxisType = new _graphql.GraphQLObjectType({
   name: 'AxisType',
   fields: function fields() {
     return {
       label: {
-        type: _type.GraphQLString,
+        type: _graphql.GraphQLString,
         resolve: function resolve(_ref13) {
           var key = _ref13.key;
           return key;
         }
       },
       length: {
-        type: _type.GraphQLInt,
+        type: _graphql.GraphQLInt,
         resolve: function resolve(_ref14) {
           var _rows = _ref14._rows;
           return _rows.length;
         }
       },
       leaf: {
-        type: _type.GraphQLID,
+        type: _graphql.GraphQLID,
         resolve: function resolve(data, args, context) {
           return (0, _helpers.generateLeaf)(data, context);
         }
       },
       renderId: {
-        type: _type.GraphQLString,
+        type: _graphql.GraphQLString,
         resolve: function resolve(_ref15) {
           var renderId = _ref15.renderId;
           return renderId;
         }
       },
       renderIds: {
-        type: new _type.GraphQLList(_type.GraphQLString),
+        type: new _graphql.GraphQLList(_graphql.GraphQLString),
         resolve: function resolve(_ref16) {
           var _renderIds = _ref16._renderIds;
           return _renderIds;
@@ -276,8 +275,8 @@ var AxisType = new _type.GraphQLObjectType({
       all: {
         type: AxisType,
         args: {
-          label: { type: _type.GraphQLString },
-          renderId: { type: _type.GraphQLString }
+          label: { type: _graphql.GraphQLString },
+          renderId: { type: _graphql.GraphQLString }
         },
         resolve: function resolve(data, _ref17) {
           var label = _ref17.label,
@@ -292,9 +291,9 @@ var AxisType = new _type.GraphQLObjectType({
       variable: {
         type: VariableType,
         args: {
-          key: { type: _type.GraphQLString },
-          keys: { type: new _type.GraphQLList(_type.GraphQLString) },
-          renderId: { type: _type.GraphQLString }
+          key: { type: _graphql.GraphQLString },
+          keys: { type: new _graphql.GraphQLList(_graphql.GraphQLString) },
+          renderId: { type: _graphql.GraphQLString }
         },
         resolve: function resolve(data, _ref18) {
           var key = _ref18.key,
@@ -304,11 +303,11 @@ var AxisType = new _type.GraphQLObjectType({
         }
       },
       transpose: {
-        type: new _type.GraphQLList(AxisType),
+        type: new _graphql.GraphQLList(AxisType),
         args: {
-          keys: { type: new _type.GraphQLList(_type.GraphQLString) },
-          asKey: { type: _type.GraphQLString },
-          renderId: { type: _type.GraphQLString }
+          keys: { type: new _graphql.GraphQLList(_graphql.GraphQLString) },
+          asKey: { type: _graphql.GraphQLString },
+          renderId: { type: _graphql.GraphQLString }
         },
         resolve: function resolve(data, _ref19) {
           var keys = _ref19.keys,
@@ -330,15 +329,15 @@ var AxisType = new _type.GraphQLObjectType({
         }
       },
       classes: {
-        type: new _type.GraphQLList(AxisType),
+        type: new _graphql.GraphQLList(AxisType),
         args: {
-          key: { type: _type.GraphQLString },
-          all: { type: _type.GraphQLString },
-          total: { type: _type.GraphQLString },
-          orderBy: { type: _type.GraphQLString },
-          renderId: { type: _type.GraphQLString },
-          mapping: { type: new _type.GraphQLList(GroupMapType) },
-          ordering: { type: new _type.GraphQLList(_type.GraphQLString) }
+          key: { type: _graphql.GraphQLString },
+          all: { type: _graphql.GraphQLString },
+          total: { type: _graphql.GraphQLString },
+          orderBy: { type: _graphql.GraphQLString },
+          renderId: { type: _graphql.GraphQLString },
+          mapping: { type: new _graphql.GraphQLList(GroupMapType) },
+          ordering: { type: new _graphql.GraphQLList(_graphql.GraphQLString) }
         },
         resolve: function resolve(data, _ref20) {
           var key = _ref20.key,
@@ -456,55 +455,55 @@ var AxisType = new _type.GraphQLObjectType({
   }
 });
 
-var CellType = new _type.GraphQLObjectType({
+var CellType = new _graphql.GraphQLObjectType({
   name: 'CellType',
   fields: {
     agg: {
-      type: _type.GraphQLString,
+      type: _graphql.GraphQLString,
       agg: function agg(_ref22) {
         var _agg = _ref22.agg;
         return _agg;
       }
     },
     variable: {
-      type: _type.GraphQLString,
+      type: _graphql.GraphQLString,
       agg: function agg(_ref23) {
         var variable = _ref23.variable;
         return variable;
       }
     },
     renderId: {
-      type: _type.GraphQLString,
+      type: _graphql.GraphQLString,
       resolve: function resolve(_ref24) {
         var renderId = _ref24.renderId;
         return renderId;
       }
     },
     renderIds: {
-      type: new _type.GraphQLList(_type.GraphQLString),
+      type: new _graphql.GraphQLList(_graphql.GraphQLString),
       resolve: function resolve(_ref25) {
         var renderIds = _ref25.renderIds;
         return renderIds;
       }
     },
     rowID: {
-      type: _type.GraphQLID,
+      type: _graphql.GraphQLID,
       resolve: function resolve(_ref26) {
         var rowID = _ref26.rowID;
         return rowID;
       }
     },
     colID: {
-      type: _type.GraphQLID,
+      type: _graphql.GraphQLID,
       resolve: function resolve(_ref27) {
         var colID = _ref27.colID;
         return colID;
       }
     },
     value: {
-      type: _type.GraphQLString,
+      type: _graphql.GraphQLString,
       args: {
-        missing: { type: _type.GraphQLString }
+        missing: { type: _graphql.GraphQLString }
       },
       resolve: function resolve(_ref28, _ref29) {
         var query = _ref28.query,
@@ -527,7 +526,7 @@ var CellType = new _type.GraphQLObjectType({
       }
     },
     queries: {
-      type: new _type.GraphQLList(QueryConditionType),
+      type: new _graphql.GraphQLList(QueryConditionType),
       resolve: function resolve(_ref30) {
         var query = _ref30.query;
         return _lodash2.default.map(_lodash2.default.keys(query), function (key) {
@@ -538,11 +537,18 @@ var CellType = new _type.GraphQLObjectType({
   }
 });
 
-var RowType = new _type.GraphQLObjectType({
+var RowType = new _graphql.GraphQLObjectType({
   name: 'RowType',
   fields: {
+    length: {
+      type: _graphql.GraphQLInt,
+      resolve: function resolve(_ref31) {
+        var _grid = _ref31._grid;
+        return _grid.x.length;
+      }
+    },
     cells: {
-      type: new _type.GraphQLList(CellType),
+      type: new _graphql.GraphQLList(CellType),
       resolve: function resolve(y, args) {
         return _lodash2.default.map(y._grid.x, function (x) {
           var detransposes = _extends({}, x.detransposes, y.detransposes);
@@ -594,7 +600,7 @@ var RowType = new _type.GraphQLObjectType({
   }
 });
 
-var TableType = new _type.GraphQLObjectType({
+var TableType = new _graphql.GraphQLObjectType({
   name: 'TableType',
   fields: {
     top: {
@@ -610,17 +616,17 @@ var TableType = new _type.GraphQLObjectType({
       }
     },
     length: {
-      type: _type.GraphQLInt,
-      resolve: function resolve(_ref31) {
-        var _rows = _ref31._rows;
+      type: _graphql.GraphQLInt,
+      resolve: function resolve(_ref32) {
+        var _rows = _ref32._rows;
         return _rows.length;
       }
     },
     rows: {
-      type: new _type.GraphQLList(RowType),
-      resolve: function resolve(_ref32) {
-        var _rows = _ref32._rows,
-            _grid = _ref32._grid;
+      type: new _graphql.GraphQLList(RowType),
+      resolve: function resolve(_ref33) {
+        var _rows = _ref33._rows,
+            _grid = _ref33._grid;
         return new Promise(function (resolve, rej) {
           return process.nextTick(function () {
             resolve(_lodash2.default.map(_lodash2.default.sortBy(_grid.y, 'id'), function (y) {
@@ -637,45 +643,50 @@ var TableType = new _type.GraphQLObjectType({
   }
 });
 
-var RootType = new _type.GraphQLObjectType({
+/*
+  For inclusion in other schemas
+*/
+var tableField = exports.tableField = {
+  type: TableType,
+  args: {
+    set: { type: _graphql.GraphQLString },
+    where: { type: new _graphql.GraphQLList(ConditionType) }
+  },
+  resolve: function resolve(root, _ref34, context) {
+    var set = _ref34.set,
+        where = _ref34.where;
+    return new Promise(function (resolve, reject) {
+      context.getDataset(set).then(function (data) {
+
+        if (!data) {
+          throw new Error('dataset ' + set + ' not found');
+        }
+
+        var collection = new _helpers.CollectionMap(data);
+        context.tabulate = { iterator: 0 };
+
+        if (where) collection = collection.filterAny(where.reduce(function (all, _ref35) {
+          var key = _ref35.key,
+              values = _ref35.values;
+          return _extends({}, all, _defineProperty({}, key, values));
+        }, {}));
+
+        resolve({
+          _rows: collection,
+          _query: {}, _grid: {}, _renderIds: [], _transposes: {}, _detransposes: {}, _exclude: {}, _aggIndex: 0 });
+      });
+    });
+  }
+};
+
+var RootType = exports.RootType = new _graphql.GraphQLObjectType({
   name: 'RootType',
   fields: {
-    table: {
-      type: TableType,
-      args: {
-        set: { type: _type.GraphQLString },
-        where: { type: new _type.GraphQLList(ConditionType) }
-      },
-      resolve: function resolve(root, _ref33, context) {
-        var set = _ref33.set,
-            where = _ref33.where;
-        return new Promise(function (resolve, reject) {
-          context.getDataset(set).then(function (data) {
-
-            if (!data) {
-              throw new Error('dataset ' + set + ' not found');
-            }
-
-            var collection = new _helpers.CollectionMap(data);
-            context.tabulate = { iterator: 0 };
-
-            if (where) collection = collection.filterAny(where.reduce(function (all, _ref34) {
-              var key = _ref34.key,
-                  values = _ref34.values;
-              return _extends({}, all, _defineProperty({}, key, values));
-            }, {}));
-
-            resolve({
-              _rows: collection,
-              _query: {}, _grid: {}, _renderIds: [], _transposes: {}, _detransposes: {}, _exclude: {}, _aggIndex: 0 });
-          });
-        });
-      }
-    }
+    table: tableField
   }
 });
 
-var schema = new _type.GraphQLSchema({
+var schema = new _graphql.GraphQLSchema({
   query: RootType
 });
 

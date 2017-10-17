@@ -7,7 +7,7 @@ import {
   GraphQLID,
   GraphQLNonNull,
   GraphQLInputObjectType
-} from 'graphql/type';
+} from 'graphql';
 
 import {
   CollectionMap,
@@ -384,6 +384,10 @@ const CellType = new GraphQLObjectType({
 const RowType = new GraphQLObjectType({
   name: 'RowType',
   fields: {
+    length: {
+      type: GraphQLInt,
+      resolve: ({_grid}) => _grid.x.length,
+    },
     cells: {
       type: new GraphQLList(CellType),
       resolve: (y, args) => _.map(y._grid.x, (x) => {
@@ -468,35 +472,40 @@ const TableType = new GraphQLObjectType({
   }
 });
 
-const RootType = new GraphQLObjectType({
+/*
+  For inclusion in other schemas
+*/
+export const tableField = {
+  type: TableType,
+  args: {
+    set: { type: GraphQLString },
+    where: { type: new GraphQLList(ConditionType) },
+  },
+  resolve: (root, {set, where}, context) => new Promise((resolve, reject) => {
+      context.getDataset(set).then((data) => {
+
+      if (!data) {
+        throw new Error(`dataset ${set} not found`);
+      }
+
+      let collection = new CollectionMap(data);
+      context.tabulate = {iterator: 0};
+
+      if (where) collection = collection.filterAny(
+        where.reduce((all, {key, values}) => ({...all, [key]: values}), {})
+      );
+
+      resolve({
+        _rows: collection, 
+        _query:{}, _grid:{}, _renderIds:[], _transposes:{}, _detransposes:{}, _exclude:{}, _aggIndex:0});
+      });
+  })
+}
+
+export const RootType = new GraphQLObjectType({
   name: 'RootType',
   fields: {
-    table: {
-      type: TableType,
-      args: {
-        set: { type: GraphQLString },
-        where: { type: new GraphQLList(ConditionType) },
-      },
-      resolve: (root, {set, where}, context) => new Promise((resolve, reject) => {
-          context.getDataset(set).then((data) => {
-  
-          if (!data) {
-            throw new Error(`dataset ${set} not found`);
-          }
-
-          let collection = new CollectionMap(data);
-          context.tabulate = {iterator: 0};
-
-          if (where) collection = collection.filterAny(
-            where.reduce((all, {key, values}) => ({...all, [key]: values}), {})
-          );
-
-          resolve({
-            _rows: collection, 
-            _query:{}, _grid:{}, _renderIds:[], _transposes:{}, _detransposes:{}, _exclude:{}, _aggIndex:0});
-          });
-      })
-    }
+    table: tableField
   }
 });
 
