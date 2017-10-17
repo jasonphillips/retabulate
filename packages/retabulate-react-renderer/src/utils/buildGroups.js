@@ -13,8 +13,8 @@ export default function buildGroups(nestedObject) {
 
   applyTransforms(groups, transforms);
 
-  // strip levels beginning with __
-  return {labels, groups: groups.map((group) => _.filter(group, item => item.slice(0,2)!=='__'))};
+  // strip levels beginning with _skip_
+  return {labels, groups: groups.map((group) => _.filter(group, item => item.slice(0,6)!=='_skip_'))};
 }
 
 function extractLabels(dotted) {

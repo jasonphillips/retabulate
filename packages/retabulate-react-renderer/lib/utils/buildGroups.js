@@ -34,10 +34,10 @@ function buildGroups(nestedObject) {
 
   applyTransforms(groups, transforms);
 
-  // strip levels beginning with __
+  // strip levels beginning with _skip_
   return { labels: labels, groups: groups.map(function (group) {
       return _lodash2.default.filter(group, function (item) {
-        return item.slice(0, 2) !== '__';
+        return item.slice(0, 6) !== '_skip_';
       });
     }) };
 }
