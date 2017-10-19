@@ -15,7 +15,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 // serialize obj {"key": "value", "another": "value"} to gql {key: "value", another: "value"}
 // -- quotes around keys (normal JSON stringify) are rejected in gql args
 var toGqlObjectArg = exports.toGqlObjectArg = function toGqlObjectArg(obj) {
-    return '{' + Object.keys(obj).map(function (k) {
+    return obj.map ? JSON.stringify(obj) : '{' + Object.keys(obj).map(function (k) {
         return k + ': ' + JSON.stringify(obj[k]);
     }) + '}';
 };

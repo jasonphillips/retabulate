@@ -65,13 +65,6 @@ var Tabulation = function (_React$Component) {
   }
 
   _createClass(Tabulation, [{
-    key: 'shouldComponentUpdate',
-    value: function shouldComponentUpdate(nextProps, nextState) {
-      if (nextState.data !== this.state.data) return true;
-
-      return false;
-    }
-  }, {
     key: 'render',
     value: function render() {
       var _state = this.state,
@@ -83,7 +76,8 @@ var Tabulation = function (_React$Component) {
           placeholder = _props.placeholder,
           cellRenderer = _props.cellRenderer,
           name = _props.name,
-          config = _props.config;
+          config = _props.config,
+          watchedProps = _props.watchedProps;
 
       var rootPath = config ? config.rootType : '';
 
@@ -98,7 +92,8 @@ var Tabulation = function (_React$Component) {
           tabulated: tableData,
           renderers: _extends({}, renderers, { cellRenderer: cellRenderer }),
           labels: labels,
-          pending: false
+          pending: false,
+          watchedProps: watchedProps
         })
       );
     }

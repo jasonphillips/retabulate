@@ -31,14 +31,6 @@ class Tabulation extends React.Component {
     };
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    if (
-        nextState.data !== this.state.data
-    ) return true;
-    
-    return false;
-  }
-
   static getRenderers(props) {
     const {dataset, where, children, name, config} = props;
 
@@ -70,7 +62,7 @@ class Tabulation extends React.Component {
 
   render() {
     const {renderers, labels} = this.state;
-    const {tabs, data, placeholder, cellRenderer, name, config} = this.props;
+    const {tabs, data, placeholder, cellRenderer, name, config, watchedProps} = this.props;
     const rootPath = config ? config.rootType : '';
 
     if (!data && !tabs) return placeholder ? React.createElement(placeholder, {}) : <div />;
@@ -84,6 +76,7 @@ class Tabulation extends React.Component {
                 renderers={{...renderers, cellRenderer}} 
                 labels={labels}
                 pending={false}
+                watchedProps={watchedProps}
             />
         </div>
     );
