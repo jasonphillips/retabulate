@@ -181,7 +181,7 @@ var generateLeaf = exports.generateLeaf = function generateLeaf(data, context) {
   return id;
 };
 
-var applyAggregations = exports.applyAggregations = function applyAggregations(aggs, diff, diffOver) {
+var applyAggregations = exports.applyAggregations = function applyAggregations(aggs) {
   // single method
   if (!aggs.map) return aggregations[aggs];
   // mutliple: return as key => value

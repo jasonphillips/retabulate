@@ -64,11 +64,13 @@ var NodeType = new _graphql.GraphQLObjectType({
         resolve: function resolve(data, args, context) {
           return (0, _helpers.generateLeaf)(data, context);
         }
-      }
-      /*node: {
+      },
+      node: {
         type: NodeType,
-        resolve: (data) => data,
-      }*/
+        resolve: function resolve(data) {
+          return data;
+        }
+      }
     };
   }
 });
@@ -508,6 +510,7 @@ var CellType = new _graphql.GraphQLObjectType({
       resolve: function resolve(_ref28, _ref29) {
         var query = _ref28.query,
             detransposes = _ref28.detransposes,
+            diffDetransposes = _ref28.diffDetransposes,
             variable = _ref28.variable,
             agg = _ref28.agg,
             diff = _ref28.diff,
@@ -521,8 +524,8 @@ var CellType = new _graphql.GraphQLObjectType({
         // if diff: calculate this group, diff group
         ? {
           group: (0, _helpers.applyAggregations)(agg)(rows, detransposes[variable] || variable, over),
-          diff: (0, _helpers.applyAggregations)(agg)(diff, detransposes[variable] || variable, diffOver)
-        } : (0, _helpers.applyAggregations)(agg, diff, diffOver)(rows, detransposes[variable] || variable, over));
+          diff: (0, _helpers.applyAggregations)(agg)(diff, diffDetransposes[variable] || variable, diffOver)
+        } : (0, _helpers.applyAggregations)(agg)(rows, detransposes[variable] || variable, over));
       }
     },
     queries: {
@@ -552,10 +555,11 @@ var RowType = new _graphql.GraphQLObjectType({
       resolve: function resolve(y, args) {
         return _lodash2.default.map(y._grid.x, function (x) {
           var detransposes = _extends({}, x.detransposes, y.detransposes);
-          var variable = detransposes[y.variable] || y.variable || detransposes[x.variable] || x.variable || null;
+          var variable = y.variable || x.variable || null; //detransposes[y.variable] || y.variable || detransposes[x.variable] || x.variable || null;
           var value = y.value || x.value || null;
 
           var query = _extends({}, y.query, x.query);
+          var diffDetransposes = void 0;
           var diffRows = void 0;
           var diffOver = void 0;
 
@@ -571,20 +575,29 @@ var RowType = new _graphql.GraphQLObjectType({
 
           if (y.diff || x.diff) {
             var diff = x.diff || y.diff;
-            diffRows = y._all.filterAny(_lodash2.default.omit(query, diff.key));
-            diffOver = y._all.filterAny(_lodash2.default.omit(query, [diff.key, over]));
 
-            if (diff.values) {
-              diffRows = diffRows.filterAny(_defineProperty({}, diff.key, diff.values));
-              diffOver = diffOver.filterAny(_defineProperty({}, diff.key, diff.values));
+            if (detransposes[diff.key]) {
+              diffDetransposes = _extends({}, detransposes, _defineProperty({}, diff.key, diff.values[0]));
+              diffRows = rows;
+            } else {
+              diffRows = y._all.filterAny(_lodash2.default.omit(query, diff.key));
+              diffOver = y._all.filterAny(_lodash2.default.omit(query, [diff.key, over]));
+
+              if (diff.values) {
+                diffRows = diffRows.filterAny(_defineProperty({}, diff.key, diff.values));
+                diffOver = diffOver.filterAny(_defineProperty({}, diff.key, diff.values));
+              }
             }
           }
+
+          console.log('dddf', detransposes, diffDetransposes);
 
           return {
             query: query,
             variable: variable,
             agg: agg,
             detransposes: detransposes,
+            diffDetransposes: diffDetransposes ? diffDetransposes : detransposes,
             colID: x.id,
             rowID: y.id,
             rows: rows.data,

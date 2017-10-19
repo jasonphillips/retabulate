@@ -105,7 +105,7 @@ export const generateLeaf = (data, context) => {
   return id;
 }
 
-export const applyAggregations = (aggs, diff, diffOver) => {
+export const applyAggregations = (aggs) => {
   // single method
   if (!aggs.map) return aggregations[aggs];
   // mutliple: return as key => value

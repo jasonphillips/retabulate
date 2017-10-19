@@ -363,14 +363,14 @@ const CellType = new GraphQLObjectType({
       args: {
         missing: { type: GraphQLString },
       },
-      resolve: ({query, detransposes, variable, agg, diff, diffOver, over, rows, fmt}, {missing}) => {
+      resolve: ({query, detransposes, diffDetransposes, variable, agg, diff, diffOver, over, rows, fmt}, {missing}) => {
         return JSON.stringify(diff
           // if diff: calculate this group, diff group
           ? {
               group: applyAggregations(agg)(rows, detransposes[variable] || variable, over),
-              diff: applyAggregations(agg)(diff, detransposes[variable] || variable, diffOver)
+              diff: applyAggregations(agg)(diff, diffDetransposes[variable] || variable, diffOver)
             }
-          : applyAggregations(agg, diff, diffOver)(rows, detransposes[variable] || variable, over)
+          : applyAggregations(agg)(rows, detransposes[variable] || variable, over)
         );
       },
     },
@@ -392,10 +392,11 @@ const RowType = new GraphQLObjectType({
       type: new GraphQLList(CellType),
       resolve: (y, args) => _.map(y._grid.x, (x) => {
         const detransposes = {...x.detransposes, ...y.detransposes};
-        const variable = detransposes[y.variable] || y.variable || detransposes[x.variable] || x.variable || null;
+        const variable = y.variable || x.variable || null;//detransposes[y.variable] || y.variable || detransposes[x.variable] || x.variable || null;
         const value = y.value || x.value || null;
   
         let query = {...y.query, ...x.query};
+        let diffDetransposes;
         let diffRows;
         let diffOver;
   
@@ -411,12 +412,18 @@ const RowType = new GraphQLObjectType({
   
         if (y.diff || x.diff) {
           const diff = x.diff || y.diff;
-          diffRows = y._all.filterAny(_.omit(query, diff.key));
-          diffOver = y._all.filterAny(_.omit(query, [diff.key, over]));
-  
-          if (diff.values) {
-            diffRows = diffRows.filterAny({[diff.key]: diff.values});
-            diffOver = diffOver.filterAny({[diff.key]: diff.values});
+
+          if (detransposes[diff.key]) {
+            diffDetransposes = {...detransposes, [diff.key]: diff.values[0]};
+            diffRows = rows;
+          } else {
+            diffRows = y._all.filterAny(_.omit(query, diff.key));
+            diffOver = y._all.filterAny(_.omit(query, [diff.key, over]));
+    
+            if (diff.values) {
+              diffRows = diffRows.filterAny({[diff.key]: diff.values});
+              diffOver = diffOver.filterAny({[diff.key]: diff.values});
+            }
           }
         }
         
@@ -424,7 +431,8 @@ const RowType = new GraphQLObjectType({
           query: query,
           variable,
           agg: agg,
-          detransposes,
+          detransposes: detransposes,
+          diffDetransposes: diffDetransposes ? diffDetransposes : detransposes,
           colID: x.id,
           rowID: y.id,
           rows: rows.data,
