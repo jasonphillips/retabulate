@@ -590,8 +590,6 @@ var RowType = new _graphql.GraphQLObjectType({
             }
           }
 
-          console.log('dddf', detransposes, diffDetransposes);
-
           return {
             query: query,
             variable: variable,
