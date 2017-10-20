@@ -1,6 +1,6 @@
 {
   "name": "retabulate-react",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "react interface for retabulate",
   "main": "lib/index.js",
   "scripts": {

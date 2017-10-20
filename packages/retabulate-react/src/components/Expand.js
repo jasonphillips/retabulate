@@ -6,7 +6,7 @@ import makeRenderers from '../utils/makeRenderers';
 class Expand extends React.Component {
   static serialize(props, index, context) {
     const {
-      column, label, total, mapping, ordering,
+      column, label, total, mapping, ordering, orderBy,
       cellProps, cellStyles, 
       labelRenderer, labelProps, labelStyles,
       children
@@ -15,7 +15,7 @@ class Expand extends React.Component {
     const {renderId, renderers} = makeRenderers({
       cellProps, cellStyles, labelRenderer, labelProps, labelStyles
     }, context);
-    const Query = new QueryClosure('classes', column, label ? renderId : `skip_${index}`, renderId, {all:total, mapping, ordering});
+    const Query = new QueryClosure('classes', column, label ? renderId : `skip_${index}`, renderId, {all:total, mapping, ordering, orderBy});
     const descendents = gatherChildConfig(children, context);
     
     if (descendents.query) {
