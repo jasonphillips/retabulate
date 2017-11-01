@@ -15,7 +15,7 @@ const Th = ({cellProps, data}) => <th {...cellProps}>{data.label}</th>;
 
 class NestedTable extends React.PureComponent {
   render() {
-    const {tabulated, pending, renderers, labels} = this.props;
+    const {tabulated, pending, renderers, labels, className} = this.props;
 
     const topGrouped = buildGroups(tabulated.top);
     const leftGrouped = buildGroups(tabulated.left);
@@ -27,7 +27,7 @@ class NestedTable extends React.PureComponent {
     const leftRows = buildRows(leftGrouped.groups, true);
 
     return (
-        <table className="table table-bordered" style={{opacity: pending ? '0.25' : '1'}}>
+        <table className={`retabulate-table ${className || ''}`} style={{opacity: pending ? '0.25' : '1'}}>
           <thead>
             {topRows.map((row,i) =>
               <tr key={i}>

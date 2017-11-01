@@ -75,7 +75,8 @@ var NestedTable = function (_React$PureComponent) {
           tabulated = _props.tabulated,
           pending = _props.pending,
           renderers = _props.renderers,
-          labels = _props.labels;
+          labels = _props.labels,
+          className = _props.className;
 
 
       var topGrouped = (0, _buildGroups2.default)(tabulated.top);
@@ -89,7 +90,7 @@ var NestedTable = function (_React$PureComponent) {
 
       return _react2.default.createElement(
         'table',
-        { className: 'table table-bordered', style: { opacity: pending ? '0.25' : '1' } },
+        { className: 'retabulate-table ' + (className || ''), style: { opacity: pending ? '0.25' : '1' } },
         _react2.default.createElement(
           'thead',
           null,
