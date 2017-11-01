@@ -167,7 +167,9 @@ var Tabulation = function (_React$Component) {
                 pending = _state.pending,
                 renderers = _state.renderers,
                 labels = _state.labels;
-            var cellRenderer = this.props.cellRenderer;
+            var _props = this.props,
+                cellRenderer = _props.cellRenderer,
+                className = _props.className;
 
 
             return _react2.default.createElement(
@@ -177,7 +179,8 @@ var Tabulation = function (_React$Component) {
                     tabulated: data.data.table,
                     renderers: _extends({}, renderers, { cellRenderer: cellRenderer }),
                     labels: labels,
-                    pending: pending
+                    pending: pending,
+                    className: className
                 })
             );
         }

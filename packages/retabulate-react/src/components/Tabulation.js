@@ -103,7 +103,7 @@ class Tabulation extends React.Component {
 
   render() {
     const {data, pending, renderers, labels} = this.state;
-    const {cellRenderer} = this.props;
+    const {cellRenderer, className} = this.props;
 
     return (
         <div>
@@ -113,6 +113,7 @@ class Tabulation extends React.Component {
                     renderers={{...renderers, cellRenderer}} 
                     labels={labels}
                     pending={pending}
+                    className={className}
                 />
             }
         </div>

@@ -7,17 +7,17 @@ import {callChildSerializers} from '../utils/gatherChildConfig';
 import get from 'lodash.get';
 
 const fragmentTemplate = (rootType, name, dataset, where, axes) => `
-    fragment ${name}Fragment on ${rootType} {
-        ${name}: table(set:"${dataset}" ${where}) {
-            ${axes}
-            rows {
-              cells {
-                value colID rowID variable agg renderIds
-                queries { key value }
-              }
-            }
+  fragment ${name}Fragment on ${rootType} {
+    ${name}: table(set:"${dataset}" ${where}) {
+      ${axes}
+      rows {
+        cells {
+          value colID rowID variable agg renderIds
+          queries { key value }
         }
+      }
     }
+  }
 `;
 
 class Tabulation extends React.Component {
@@ -74,7 +74,7 @@ class Tabulation extends React.Component {
 
   render() {
     const {renderers, labels} = this.state;
-    const {tabs, data, placeholder, cellRenderer, name, config, watchedProps} = this.props;
+    const {className, tabs, data, placeholder, cellRenderer, name, config, watchedProps} = this.props;
     const rootPath = config ? config.rootType : '';
 
     if (!data && !tabs) return placeholder ? React.createElement(placeholder, {}) : <div />;
@@ -82,15 +82,16 @@ class Tabulation extends React.Component {
     const tableData = tabs ? Tabulation.getData(tabs, name, rootPath) : Tabulation.getData(data);
 
     return (
-        <div>
-            <NestedTable 
-                tabulated={tableData}
-                renderers={{...renderers, cellRenderer}} 
-                labels={labels}
-                pending={false}
-                watchedProps={watchedProps}
-            />
-        </div>
+      <div>
+        <NestedTable 
+          tabulated={tableData}
+          renderers={{...renderers, cellRenderer}} 
+          labels={labels}
+          pending={false}
+          watchedProps={watchedProps}
+          className={className}
+        />
+      </div>
     );
   }
 }

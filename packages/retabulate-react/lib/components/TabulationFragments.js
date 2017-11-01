@@ -41,7 +41,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var fragmentTemplate = function fragmentTemplate(rootType, name, dataset, where, axes) {
-  return '\n    fragment ' + name + 'Fragment on ' + rootType + ' {\n        ' + name + ': table(set:"' + dataset + '" ' + where + ') {\n            ' + axes + '\n            rows {\n              cells {\n                value colID rowID variable agg renderIds\n                queries { key value }\n              }\n            }\n        }\n    }\n';
+  return '\n  fragment ' + name + 'Fragment on ' + rootType + ' {\n    ' + name + ': table(set:"' + dataset + '" ' + where + ') {\n      ' + axes + '\n      rows {\n        cells {\n          value colID rowID variable agg renderIds\n          queries { key value }\n        }\n      }\n    }\n  }\n';
 };
 
 var Tabulation = function (_React$Component) {
@@ -88,6 +88,7 @@ var Tabulation = function (_React$Component) {
           renderers = _state.renderers,
           labels = _state.labels;
       var _props = this.props,
+          className = _props.className,
           tabs = _props.tabs,
           data = _props.data,
           placeholder = _props.placeholder,
@@ -110,7 +111,8 @@ var Tabulation = function (_React$Component) {
           renderers: _extends({}, renderers, { cellRenderer: cellRenderer }),
           labels: labels,
           pending: false,
-          watchedProps: watchedProps
+          watchedProps: watchedProps,
+          className: className
         })
       );
     }
