@@ -53,7 +53,6 @@ var Tabulation = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (Tabulation.__proto__ || Object.getPrototypeOf(Tabulation)).call(this, props));
 
     var _Tabulation$getRender = Tabulation.getRenderers(props),
-        query = _Tabulation$getRender.query,
         renderers = _Tabulation$getRender.renderers,
         labels = _Tabulation$getRender.labels;
 
@@ -65,6 +64,24 @@ var Tabulation = function (_React$Component) {
   }
 
   _createClass(Tabulation, [{
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      var _this2 = this;
+
+      if (this.props.watchedProps) {
+        var changed = Object.keys(this.props.watchedProps).reduce(function (should, prop) {
+          return _this2.props.watchedProps[prop] !== nextProps.watchedProps[prop] ? true : should;
+        }, false);
+        if (changed) {
+          var _Tabulation$getRender2 = Tabulation.getRenderers(nextProps),
+              renderers = _Tabulation$getRender2.renderers,
+              labels = _Tabulation$getRender2.labels;
+
+          this.setState({ renderers: renderers, labels: labels });
+        }
+      }
+    }
+  }, {
     key: 'render',
     value: function render() {
       var _state = this.state,

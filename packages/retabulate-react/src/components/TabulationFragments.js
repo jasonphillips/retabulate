@@ -23,7 +23,7 @@ const fragmentTemplate = (rootType, name, dataset, where, axes) => `
 class Tabulation extends React.Component {
   constructor(props, context) {
     super(props);
-    const {query, renderers, labels} = Tabulation.getRenderers(props);
+    const {renderers, labels} = Tabulation.getRenderers(props);
 
     this.state = { 
         renderers: renderers || {},
@@ -58,6 +58,18 @@ class Tabulation extends React.Component {
     const parsedSource = typeof(source)==='string' ? JSON.parse(source) : source;
     if (!tableName) return parsedSource;
     return get(parsedSource, rootPath.map ? rootPath.concat([tableName]) : rootPath + tableName);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.watchedProps) {
+      const changed = Object.keys(this.props.watchedProps).reduce((should,prop) => 
+          (this.props.watchedProps[prop] !== nextProps.watchedProps[prop]) ? true : should
+      , false);
+      if (changed) {
+        const {renderers, labels} = Tabulation.getRenderers(nextProps);
+        this.setState({ renderers, labels });
+      }
+    }
   }
 
   render() {
