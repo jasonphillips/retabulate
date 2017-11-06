@@ -205,6 +205,9 @@ var aggregations = exports.aggregations = {
   pctn: function pctn(series, key, over) {
     return colValues(series, key, true).length / colValues(over, key, true).length * 100;
   },
+  pctsum: function pctsum(series, key, over) {
+    return d3A.sum(colValues(series, key, true)) / d3A.sum(colValues(over, key, true)) * 100;
+  },
   mean: function mean(series, key) {
     return series.length ? d3A.mean(colValues(series, key, true)) : undefined;
   },

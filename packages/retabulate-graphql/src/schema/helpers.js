@@ -119,6 +119,7 @@ export const aggregations = {
   distributionRatio: (series, key) => distributionRatio(colValues(series, key, true)),
   n: (series, key) => colValues(series, key, true).length || 0,
   pctn: (series, key, over) => colValues(series, key, true).length / colValues(over, key, true).length * 100,
+  pctsum: (series, key, over) => d3A.sum(colValues(series, key, true)) / d3A.sum(colValues(over, key, true)) * 100,
   mean: (series, key) => series.length ? d3A.mean(colValues(series, key, true)) : undefined,
   median: (series, key) => d3A.median(series.values(key)),
   mode: (series, key) => d3A.mode(colValues(series, key)),
