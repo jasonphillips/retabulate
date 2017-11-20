@@ -29,7 +29,7 @@ const findCells = (tabs, rowOrCol, ids) => cellsToCollection(
 const cellsToCollection = (cells) => cells.map(
   c => ({
     ...c.queries.reduce((combined, {key,value}) => ({...combined, [key]: value}), {}),
-    value: c.value,
+    value: JSON.parse(c.value),
     agg: c.agg,
     variable: c.variable,
   })

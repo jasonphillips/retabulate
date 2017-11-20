@@ -82,7 +82,7 @@ var cellsToCollection = function cellsToCollection(cells) {
           value = _ref3.value;
       return _extends({}, combined, _defineProperty({}, key, value));
     }, {}), {
-      value: c.value,
+      value: JSON.parse(c.value),
       agg: c.agg,
       variable: c.variable
     });
