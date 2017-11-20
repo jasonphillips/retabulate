@@ -26,6 +26,10 @@ var _retabulateReactRenderer = require('retabulate-react-renderer');
 
 var _retabulateReactRenderer2 = _interopRequireDefault(_retabulateReactRenderer);
 
+var _WrapRenderer = require('./WrapRenderer');
+
+var _WrapRenderer2 = _interopRequireDefault(_WrapRenderer);
+
 var _QueryClosure = require('../classes/QueryClosure');
 
 var _gatherChildConfig = require('../utils/gatherChildConfig');
@@ -100,6 +104,7 @@ var Tabulation = function (_React$Component) {
     }, {
         key: 'shouldComponentUpdate',
         value: function shouldComponentUpdate(nextProps, nextState) {
+            if (this.props.collectionRenderer) return true;
             // network pending status or data object change
             if (nextState.pending !== this.state.pending || nextState.data !== this.state.data) return true;
 
@@ -169,13 +174,14 @@ var Tabulation = function (_React$Component) {
                 labels = _state.labels;
             var _props = this.props,
                 cellRenderer = _props.cellRenderer,
-                className = _props.className;
+                className = _props.className,
+                collectionRenderer = _props.collectionRenderer;
 
 
             return _react2.default.createElement(
                 'div',
                 null,
-                data && _react2.default.createElement(_retabulateReactRenderer2.default, {
+                data && collectionRenderer ? _react2.default.createElement(_WrapRenderer2.default, { renderer: collectionRenderer, data: data.data.table }) : _react2.default.createElement(_retabulateReactRenderer2.default, {
                     tabulated: data.data.table,
                     renderers: _extends({}, renderers, { cellRenderer: cellRenderer }),
                     labels: labels,

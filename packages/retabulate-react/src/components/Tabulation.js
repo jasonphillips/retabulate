@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import gql from 'graphql-tag';
 import NestedTable from 'retabulate-react-renderer';
+import WrapRenderer from './WrapRenderer';
 import {toGqlObjectArg} from '../classes/QueryClosure';
 import {callChildSerializers} from '../utils/gatherChildConfig';
 
@@ -53,6 +54,7 @@ class Tabulation extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.collectionRenderer) return true;
     // network pending status or data object change
     if (
         nextState.pending !== this.state.pending ||
@@ -103,18 +105,20 @@ class Tabulation extends React.Component {
 
   render() {
     const {data, pending, renderers, labels} = this.state;
-    const {cellRenderer, className} = this.props;
+    const {cellRenderer, className, collectionRenderer} = this.props;
 
     return (
         <div>
             {data && 
-                <NestedTable 
-                    tabulated={data.data.table}
-                    renderers={{...renderers, cellRenderer}} 
-                    labels={labels}
-                    pending={pending}
-                    className={className}
-                />
+                collectionRenderer
+                    ? <WrapRenderer renderer={collectionRenderer} data={data.data.table} />
+                    : <NestedTable 
+                        tabulated={data.data.table}
+                        renderers={{...renderers, cellRenderer}} 
+                        labels={labels}
+                        pending={pending}
+                        className={className}
+                    />
             }
         </div>
     );

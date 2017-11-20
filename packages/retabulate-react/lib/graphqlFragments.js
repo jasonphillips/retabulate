@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.TableWithFragment = exports.Statistic = exports.Value = exports.Variable = exports.Transpose = exports.Header = exports.All = exports.Axis = exports.Expand = exports.Tabulation = undefined;
+exports.TableWithFragment = exports.Statistic = exports.Value = exports.Variable = exports.Transpose = exports.Header = exports.All = exports.Axis = exports.Filter = exports.Expand = exports.Tabulation = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 /*
@@ -23,6 +23,10 @@ var _TabulationFragments2 = _interopRequireDefault(_TabulationFragments);
 var _Expand = require('./components/Expand');
 
 var _Expand2 = _interopRequireDefault(_Expand);
+
+var _Filter = require('./components/Filter');
+
+var _Filter2 = _interopRequireDefault(_Filter);
 
 var _All = require('./components/All');
 
@@ -68,6 +72,7 @@ var TableWithFragment = function TableWithFragment(component) {
 
 exports.Tabulation = _TabulationFragments2.default;
 exports.Expand = _Expand2.default;
+exports.Filter = _Filter2.default;
 exports.Axis = _Axis2.default;
 exports.All = _All2.default;
 exports.Header = Header;

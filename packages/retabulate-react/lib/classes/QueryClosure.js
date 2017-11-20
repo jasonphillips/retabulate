@@ -4,9 +4,9 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -15,7 +15,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 // serialize obj {"key": "value", "another": "value"} to gql {key: "value", another: "value"}
 // -- quotes around keys (normal JSON stringify) are rejected in gql args
 var toGqlObjectArg = exports.toGqlObjectArg = function toGqlObjectArg(obj) {
-    return obj.map ? JSON.stringify(obj) : '{' + Object.keys(obj).map(function (k) {
+    return (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) !== 'object' ? JSON.stringify(obj) : obj.map ? JSON.stringify(obj) : '{' + Object.keys(obj).map(function (k) {
         return k + ': ' + JSON.stringify(obj[k]);
     }) + '}';
 };

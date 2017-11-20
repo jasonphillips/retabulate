@@ -1,9 +1,11 @@
 // serialize obj {"key": "value", "another": "value"} to gql {key: "value", another: "value"}
 // -- quotes around keys (normal JSON stringify) are rejected in gql args
 export const toGqlObjectArg = (obj) => 
-    obj.map 
-        ? JSON.stringify(obj) 
-        : '{' + Object.keys(obj).map(k => `${k}: ${JSON.stringify(obj[k])}`)  + '}'
+    typeof(obj)!=='object'
+        ? JSON.stringify(obj)
+        : obj.map 
+            ? JSON.stringify(obj) 
+            : '{' + Object.keys(obj).map(k => `${k}: ${JSON.stringify(obj[k])}`)  + '}'
 ;
 
 class QueryClosure {

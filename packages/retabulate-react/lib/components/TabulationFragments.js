@@ -24,6 +24,10 @@ var _retabulateReactRenderer = require('retabulate-react-renderer');
 
 var _retabulateReactRenderer2 = _interopRequireDefault(_retabulateReactRenderer);
 
+var _WrapRenderer = require('./WrapRenderer');
+
+var _WrapRenderer2 = _interopRequireDefault(_WrapRenderer);
+
 var _QueryClosure = require('../classes/QueryClosure');
 
 var _gatherChildConfig = require('../utils/gatherChildConfig');
@@ -88,6 +92,7 @@ var Tabulation = function (_React$Component) {
           renderers = _state.renderers,
           labels = _state.labels;
       var _props = this.props,
+          collectionRenderer = _props.collectionRenderer,
           className = _props.className,
           tabs = _props.tabs,
           data = _props.data,
@@ -100,8 +105,9 @@ var Tabulation = function (_React$Component) {
       var rootPath = config ? config.rootType : '';
 
       if (!data && !tabs) return placeholder ? _react2.default.createElement(placeholder, {}) : _react2.default.createElement('div', null);
-
       var tableData = tabs ? Tabulation.getData(tabs, name, rootPath) : Tabulation.getData(data);
+
+      if (collectionRenderer) return _react2.default.createElement(_WrapRenderer2.default, { renderer: collectionRenderer, data: tableData });
 
       return _react2.default.createElement(
         'div',

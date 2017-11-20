@@ -7,6 +7,7 @@ import React from 'react';
 
 import Tabulation from './components/TabulationFragments';
 import Expand from './components/Expand';
+import Filter from './components/Filter';
 import All from './components/All';
 import Transpose from './components/Transpose';
 import Axis from './components/Axis';
@@ -28,4 +29,4 @@ const TableWithFragment = (component) => {
     }
 }
 
-export {Tabulation, Expand, Axis, All, Header, Transpose, Variable, Value, Statistic, TableWithFragment};
+export {Tabulation, Expand, Filter, Axis, All, Header, Transpose, Variable, Value, Statistic, TableWithFragment};

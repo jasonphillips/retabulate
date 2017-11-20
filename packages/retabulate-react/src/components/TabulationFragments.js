@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import gql from 'graphql-tag';
 import NestedTable from 'retabulate-react-renderer';
+import WrapRenderer from './WrapRenderer';
 import {toGqlObjectArg} from '../classes/QueryClosure';
 import {callChildSerializers} from '../utils/gatherChildConfig';
 import get from 'lodash.get';
@@ -74,12 +75,15 @@ class Tabulation extends React.Component {
 
   render() {
     const {renderers, labels} = this.state;
-    const {className, tabs, data, placeholder, cellRenderer, name, config, watchedProps} = this.props;
+    const {
+      collectionRenderer, className, tabs, data, placeholder, cellRenderer, name, config, watchedProps
+    } = this.props;
     const rootPath = config ? config.rootType : '';
 
     if (!data && !tabs) return placeholder ? React.createElement(placeholder, {}) : <div />;
-
     const tableData = tabs ? Tabulation.getData(tabs, name, rootPath) : Tabulation.getData(data);
+
+    if (collectionRenderer) return <WrapRenderer renderer={collectionRenderer} data={tableData} />
 
     return (
       <div>
