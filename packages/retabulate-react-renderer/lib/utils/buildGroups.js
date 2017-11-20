@@ -18,6 +18,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function buildGroups(nestedObject) {
   var dotted = _dotObject2.default.dot(nestedObject);
   var groups = [];
+  var leaves = [];
 
   var _extractLabels = extractLabels(dotted),
       labels = _extractLabels.labels,
@@ -30,12 +31,13 @@ function buildGroups(nestedObject) {
     groups.push(_lodash2.default.filter(pathArray, function (p) {
       return !p.match(/^(node)$/);
     }).slice(0, -1));
+    leaves.push(dotted[paths]);
   });
 
   applyTransforms(groups, transforms);
 
   // strip levels beginning with _skip_
-  return { labels: labels, groups: groups.map(function (group) {
+  return { labels: labels, leaves: leaves, groups: groups.map(function (group) {
       return _lodash2.default.filter(group, function (item) {
         return item.slice(0, 6) !== '_skip_';
       });

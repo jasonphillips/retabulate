@@ -1,6 +1,18 @@
 import _ from 'lodash';
 
-export default function buildRows(groups, pivoted) {
+const filterWithIndices = (arr, condition) => {
+    const matching = []
+    const indices = []
+    arr.forEach((item,i) => {
+        if (condition(item)) {
+            matching.push(item)
+            indices.push(i)
+        }
+    })
+    return {matching, indices}
+}
+
+export default function buildRows({groups, leaves}, pivoted) {
   const maxDepth = _.max(groups.map(g => g.length))
   const pathTo = (group, depth) => group.slice(0,depth).join('.')
   const rows = []
@@ -15,24 +27,29 @@ export default function buildRows(groups, pivoted) {
 
       // for each parent path, gather unique items
       _.map(parentPaths, parentPath => {
-          const matchingGroups = _.filter(groups, g => pathTo(g,i)===parentPath)
-          const uniqValues = _.uniq(_.map(matchingGroups, group => group[i]))
+          const {matching, indices} = filterWithIndices(groups, g => pathTo(g,i)===parentPath)
+          const uniqValues = _.uniq(_.map(matching, group => group[i]))
 
           // for each unique item, create a cell
           _.forEach(uniqValues, value => {
-              const span = _.filter(matchingGroups, group => group[i]===value).length
+              // gather the leaf descendents, to later target cells
+              const descendents = filterWithIndices(groups, 
+                group => pathTo(group,i)===parentPath && group[i]===value
+              )
+              const span = descendents.indices.length
 
               cells.push(
                 {
                     path: parentPath,
                     label: value,
                     [spanKey]: span,
+                    leaves: descendents.indices.map(l => leaves[l])
                 }
               )
 
               if (pivoted) _.range(1, span).forEach(i => cells.push(null))
           })
-      });      
+      })
 
       rows.push(cells)
   }

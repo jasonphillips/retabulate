@@ -12,6 +12,28 @@ const BasicCell = ({cell: {value, queries, variable, agg}, cellID, cellProps}) =
 
 const Th = ({cellProps, data}) => <th {...cellProps}>{data.label}</th>;
 
+// fetches flat array of all cells matching row or colid
+const findCells = (tabs, rowOrCol, ids) => cellsToCollection(
+  rowOrCol==='row'
+    ? tabs.rows.filter(r => ids.indexOf(r.cells[0].rowID)>-1)
+        .reduce((all,r) => all.concat(r.cells), [])
+    : tabs.rows[0].cells.reduce((found,c,i) => found.concat(
+        ids.indexOf(c.colID)>-1 
+          ? tabs.rows.map(r => r.cells[i])
+          : []
+        )
+      , [])
+)
+
+// given array of cells, converts to clean collection 
+const cellsToCollection = (cells) => cells.map(
+  c => ({
+    ...c.queries.reduce((combined, {key,value}) => ({...combined, [key]: value}), {}),
+    value: c.value,
+    agg: c.agg,
+    variable: c.variable,
+  })
+)
 
 class NestedTable extends React.PureComponent {
   render() {
@@ -23,8 +45,10 @@ class NestedTable extends React.PureComponent {
     Object.assign(labels, topGrouped.labels);
     Object.assign(labels, leftGrouped.labels);
 
-    const topRows = buildRows(topGrouped.groups);
-    const leftRows = buildRows(leftGrouped.groups, true);
+    const topRows = buildRows(topGrouped);
+    const leftRows = buildRows(leftGrouped, true);
+
+    this.findCells = findCells.bind(null, tabulated);
 
     return (
         <table className={`retabulate-table ${className || ''}`} style={{opacity: pending ? '0.25' : '1'}}>
@@ -45,7 +69,8 @@ class NestedTable extends React.PureComponent {
                     React.createElement(LabelRenderer || Th, {
                       key: j,
                       cellProps: mergedProps,
-                      data: {...cell, label: labels[cell.label] || cell.label}
+                      data: {...cell, label: labels[cell.label] || cell.label},
+                      getCells: this.findCells.bind(null, 'col', cell.leaves),
                     })
                   );
                 })}
@@ -70,7 +95,8 @@ class NestedTable extends React.PureComponent {
                       React.createElement(LabelRenderer || Th, {
                         key: j,
                         cellProps: mergedProps,
-                        data: {...cell, label: labels[cell.label] || cell.label}
+                        data: {...cell, label: labels[cell.label] || cell.label},
+                        getCells: this.findCells.bind(null, 'row', cell.leaves),
                       })
                     );
                 })}

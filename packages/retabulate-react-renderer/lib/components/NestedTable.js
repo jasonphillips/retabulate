@@ -34,6 +34,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var BasicCell = function BasicCell(_ref) {
   var _ref$cell = _ref.cell,
       value = _ref$cell.value,
@@ -59,6 +61,34 @@ var Th = function Th(_ref2) {
   );
 };
 
+// fetches flat array of all cells matching row or colid
+var findCells = function findCells(tabs, rowOrCol, ids) {
+  return cellsToCollection(rowOrCol === 'row' ? tabs.rows.filter(function (r) {
+    return ids.indexOf(r.cells[0].rowID) > -1;
+  }).reduce(function (all, r) {
+    return all.concat(r.cells);
+  }, []) : tabs.rows[0].cells.reduce(function (found, c, i) {
+    return found.concat(ids.indexOf(c.colID) > -1 ? tabs.rows.map(function (r) {
+      return r.cells[i];
+    }) : []);
+  }, []));
+};
+
+// given array of cells, converts to clean collection 
+var cellsToCollection = function cellsToCollection(cells) {
+  return cells.map(function (c) {
+    return _extends({}, c.queries.reduce(function (combined, _ref3) {
+      var key = _ref3.key,
+          value = _ref3.value;
+      return _extends({}, combined, _defineProperty({}, key, value));
+    }, {}), {
+      value: c.value,
+      agg: c.agg,
+      variable: c.variable
+    });
+  });
+};
+
 var NestedTable = function (_React$PureComponent) {
   _inherits(NestedTable, _React$PureComponent);
 
@@ -71,6 +101,8 @@ var NestedTable = function (_React$PureComponent) {
   _createClass(NestedTable, [{
     key: 'render',
     value: function render() {
+      var _this2 = this;
+
       var _props = this.props,
           tabulated = _props.tabulated,
           pending = _props.pending,
@@ -85,8 +117,10 @@ var NestedTable = function (_React$PureComponent) {
       Object.assign(labels, topGrouped.labels);
       Object.assign(labels, leftGrouped.labels);
 
-      var topRows = (0, _buildRows2.default)(topGrouped.groups);
-      var leftRows = (0, _buildRows2.default)(leftGrouped.groups, true);
+      var topRows = (0, _buildRows2.default)(topGrouped);
+      var leftRows = (0, _buildRows2.default)(leftGrouped, true);
+
+      this.findCells = findCells.bind(null, tabulated);
 
       return _react2.default.createElement(
         'table',
@@ -115,7 +149,8 @@ var NestedTable = function (_React$PureComponent) {
                 return _react2.default.createElement(LabelRenderer || Th, {
                   key: j,
                   cellProps: mergedProps,
-                  data: _extends({}, cell, { label: labels[cell.label] || cell.label })
+                  data: _extends({}, cell, { label: labels[cell.label] || cell.label }),
+                  getCells: _this2.findCells.bind(null, 'col', cell.leaves)
                 });
               })
             );
@@ -141,7 +176,8 @@ var NestedTable = function (_React$PureComponent) {
                 return _react2.default.createElement(LabelRenderer || Th, {
                   key: j,
                   cellProps: mergedProps,
-                  data: _extends({}, cell, { label: labels[cell.label] || cell.label })
+                  data: _extends({}, cell, { label: labels[cell.label] || cell.label }),
+                  getCells: _this2.findCells.bind(null, 'row', cell.leaves)
                 });
               }),
               tabulated.rows[i].cells.map(function (cell, j) {

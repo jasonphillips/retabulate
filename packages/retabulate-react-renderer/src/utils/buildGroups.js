@@ -4,17 +4,19 @@ import dot from 'dot-object';
 export default function buildGroups(nestedObject) {
   const dotted = dot.dot(nestedObject)
   const groups = []
+  const leaves = []
   const {labels, transforms} = extractLabels(dotted);
 
   _.forEach(_.filter(_.keys(dotted), p=>p.split('.').slice(-1)=='leaf'), (paths) =>{
       let pathArray = paths.split('.')
       groups.push(_.filter(pathArray, p => !p.match(/^(node)$/)).slice(0,-1))
+      leaves.push(dotted[paths])
   });
 
   applyTransforms(groups, transforms);
 
   // strip levels beginning with _skip_
-  return {labels, groups: groups.map((group) => _.filter(group, item => item.slice(0,6)!=='_skip_'))};
+  return {labels, leaves, groups: groups.map((group) => _.filter(group, item => item.slice(0,6)!=='_skip_'))};
 }
 
 function extractLabels(dotted) {

@@ -13,7 +13,22 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-function buildRows(groups, pivoted) {
+var filterWithIndices = function filterWithIndices(arr, condition) {
+    var matching = [];
+    var indices = [];
+    arr.forEach(function (item, i) {
+        if (condition(item)) {
+            matching.push(item);
+            indices.push(i);
+        }
+    });
+    return { matching: matching, indices: indices };
+};
+
+function buildRows(_ref, pivoted) {
+    var groups = _ref.groups,
+        leaves = _ref.leaves;
+
     var maxDepth = _lodash2.default.max(groups.map(function (g) {
         return g.length;
     }));
@@ -35,23 +50,32 @@ function buildRows(groups, pivoted) {
 
         // for each parent path, gather unique items
         _lodash2.default.map(parentPaths, function (parentPath) {
-            var matchingGroups = _lodash2.default.filter(groups, function (g) {
+            var _filterWithIndices = filterWithIndices(groups, function (g) {
                 return pathTo(g, i) === parentPath;
-            });
-            var uniqValues = _lodash2.default.uniq(_lodash2.default.map(matchingGroups, function (group) {
+            }),
+                matching = _filterWithIndices.matching,
+                indices = _filterWithIndices.indices;
+
+            var uniqValues = _lodash2.default.uniq(_lodash2.default.map(matching, function (group) {
                 return group[i];
             }));
 
             // for each unique item, create a cell
             _lodash2.default.forEach(uniqValues, function (value) {
-                var span = _lodash2.default.filter(matchingGroups, function (group) {
-                    return group[i] === value;
-                }).length;
+                var _cells$push;
 
-                cells.push(_defineProperty({
+                // gather the leaf descendents, to later target cells
+                var descendents = filterWithIndices(groups, function (group) {
+                    return pathTo(group, i) === parentPath && group[i] === value;
+                });
+                var span = descendents.indices.length;
+
+                cells.push((_cells$push = {
                     path: parentPath,
                     label: value
-                }, spanKey, span));
+                }, _defineProperty(_cells$push, spanKey, span), _defineProperty(_cells$push, 'leaves', descendents.indices.map(function (l) {
+                    return leaves[l];
+                })), _cells$push));
 
                 if (pivoted) _lodash2.default.range(1, span).forEach(function (i) {
                     return cells.push(null);
