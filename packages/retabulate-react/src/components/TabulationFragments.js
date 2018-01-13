@@ -14,7 +14,7 @@ const fragmentTemplate = (rootType, name, dataset, where, axes) => `
       rows {
         cells {
           value colID rowID variable agg renderIds
-          queries { key value }
+          queries { key values }
         }
       }
     }

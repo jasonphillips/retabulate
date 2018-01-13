@@ -12,8 +12,8 @@ const queryTemplate = (dataset, where, axes) => gql`
             ${axes}
             rows {
               cells {
-                value colID rowID variable agg renderIds
-                queries { key value }
+                value colID rowID variable detransposed agg renderIds
+                queries { key values }
               }
             }
         }
@@ -96,9 +96,16 @@ class Tabulation extends React.Component {
   }
 
   startQuery(query) {
+    if (typeof(this.props.queryLogger)==='function') this.props.queryLogger('query', query);
+
     return new Promise((res, rej) => 
         this.client.query({query, fetchPolicy:'network-only'})
-          .then(data => res(data))
+          .then(data => {
+              if (typeof(this.props.queryLogger)==='function') {
+                  this.props.queryLogger('data', data);
+              }
+              res(data);
+           })
           .catch(console.error)
     );
   }
@@ -109,7 +116,7 @@ class Tabulation extends React.Component {
 
     return (
         <div>
-            {data && 
+            {data && (
                 collectionRenderer
                     ? <WrapRenderer renderer={collectionRenderer} data={data.data.table} />
                     : <NestedTable 
@@ -119,7 +126,7 @@ class Tabulation extends React.Component {
                         pending={pending}
                         className={className}
                     />
-            }
+            )}
         </div>
     );
   }

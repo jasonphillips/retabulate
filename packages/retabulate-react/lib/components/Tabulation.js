@@ -8,7 +8,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(['\n    query tabulate {\n        table(set:"', '" ', ') {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable agg renderIds\n                queries { key value }\n              }\n            }\n        }\n    }\n'], ['\n    query tabulate {\n        table(set:"', '" ', ') {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable agg renderIds\n                queries { key value }\n              }\n            }\n        }\n    }\n']);
+var _templateObject = _taggedTemplateLiteral(['\n    query tabulate {\n        table(set:"', '" ', ') {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable detransposed agg renderIds\n                queries { key values }\n              }\n            }\n        }\n    }\n'], ['\n    query tabulate {\n        table(set:"', '" ', ') {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable detransposed agg renderIds\n                queries { key values }\n              }\n            }\n        }\n    }\n']);
 
 var _react = require('react');
 
@@ -158,9 +158,14 @@ var Tabulation = function (_React$Component) {
         value: function startQuery(query) {
             var _this4 = this;
 
+            if (typeof this.props.queryLogger === 'function') this.props.queryLogger('query', query);
+
             return new Promise(function (res, rej) {
                 return _this4.client.query({ query: query, fetchPolicy: 'network-only' }).then(function (data) {
-                    return res(data);
+                    if (typeof _this4.props.queryLogger === 'function') {
+                        _this4.props.queryLogger('data', data);
+                    }
+                    res(data);
                 }).catch(console.error);
             });
         }
@@ -181,13 +186,13 @@ var Tabulation = function (_React$Component) {
             return _react2.default.createElement(
                 'div',
                 null,
-                data && collectionRenderer ? _react2.default.createElement(_WrapRenderer2.default, { renderer: collectionRenderer, data: data.data.table }) : _react2.default.createElement(_retabulateReactRenderer2.default, {
+                data && (collectionRenderer ? _react2.default.createElement(_WrapRenderer2.default, { renderer: collectionRenderer, data: data.data.table }) : _react2.default.createElement(_retabulateReactRenderer2.default, {
                     tabulated: data.data.table,
                     renderers: _extends({}, renderers, { cellRenderer: cellRenderer }),
                     labels: labels,
                     pending: pending,
                     className: className
-                })
+                }))
             );
         }
     }]);

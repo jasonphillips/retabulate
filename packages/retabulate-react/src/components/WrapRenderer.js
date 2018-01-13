@@ -6,7 +6,7 @@ const WrapRenderer = ({data, renderer}) => {
 
   const collection = cells.map(
     c => ({
-      ...c.queries.reduce((combined, {key,value}) => ({...combined, [key]: value}), {}),
+      ...c.queries.reduce((combined, {key, values}) => ({...combined, [key]: values}), {}),
       value: JSON.parse(c.value),
       agg: c.agg,
       variable: c.variable,

@@ -28,8 +28,8 @@ var WrapRenderer = function WrapRenderer(_ref) {
   var collection = cells.map(function (c) {
     return _extends({}, c.queries.reduce(function (combined, _ref2) {
       var key = _ref2.key,
-          value = _ref2.value;
-      return _extends({}, combined, _defineProperty({}, key, value));
+          values = _ref2.values;
+      return _extends({}, combined, _defineProperty({}, key, values));
     }, {}), {
       value: JSON.parse(c.value),
       agg: c.agg,
