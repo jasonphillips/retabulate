@@ -117,7 +117,7 @@ var colValues = exports.colValues = function colValues(rows, col, excludeEmpty) 
   return rows.map(function (r) {
     return r[col];
   }).filter(function (r) {
-    return excludeEmpty ? r !== '' && r !== false && r !== null : r;
+    return excludeEmpty ? r !== '' && r !== false && r !== null && typeof r !== 'undefined' : r;
   });
 };
 
@@ -218,7 +218,7 @@ var aggregations = exports.aggregations = {
     return d3A.mode(colValues(series, key));
   },
   stdev: function stdev(series, key) {
-    return d3A.deviation(series.values(key));
+    return d3A.deviation(colValues(series, key));
   },
   min: function min(series, key) {
     return d3A.min(colValues(series, key));

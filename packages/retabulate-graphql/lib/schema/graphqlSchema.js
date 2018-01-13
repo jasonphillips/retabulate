@@ -5,6 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.RootType = exports.tableField = undefined;
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _graphql = require('graphql');
@@ -37,8 +39,8 @@ var QueryConditionType = new _graphql.GraphQLObjectType({
     key: {
       type: _graphql.GraphQLString
     },
-    value: {
-      type: _graphql.GraphQLString
+    values: {
+      type: new _graphql.GraphQLList(_graphql.GraphQLString)
     }
   }
 });
@@ -462,43 +464,51 @@ var CellType = new _graphql.GraphQLObjectType({
   fields: {
     agg: {
       type: _graphql.GraphQLString,
-      agg: function agg(_ref22) {
-        var _agg = _ref22.agg;
-        return _agg;
+      resolve: function resolve(_ref22) {
+        var agg = _ref22.agg;
+        return agg && agg.join ? agg.join(',') : agg;
       }
     },
     variable: {
       type: _graphql.GraphQLString,
-      agg: function agg(_ref23) {
+      resolve: function resolve(_ref23) {
         var variable = _ref23.variable;
         return variable;
       }
     },
-    renderId: {
+    detransposed: {
       type: _graphql.GraphQLString,
       resolve: function resolve(_ref24) {
-        var renderId = _ref24.renderId;
+        var detransposes = _ref24.detransposes,
+            variable = _ref24.variable;
+        return detransposes ? detransposes[variable] : null;
+      }
+    },
+    renderId: {
+      type: _graphql.GraphQLString,
+      resolve: function resolve(_ref25) {
+        var renderId = _ref25.renderId;
         return renderId;
       }
     },
     renderIds: {
       type: new _graphql.GraphQLList(_graphql.GraphQLString),
-      resolve: function resolve(_ref25) {
-        var renderIds = _ref25.renderIds;
+      resolve: function resolve(_ref26) {
+        var renderIds = _ref26.renderIds;
         return renderIds;
       }
     },
     rowID: {
       type: _graphql.GraphQLID,
-      resolve: function resolve(_ref26) {
-        var rowID = _ref26.rowID;
+      resolve: function resolve(_ref27) {
+        var rowID = _ref27.rowID;
         return rowID;
       }
     },
     colID: {
       type: _graphql.GraphQLID,
-      resolve: function resolve(_ref27) {
-        var colID = _ref27.colID;
+      resolve: function resolve(_ref28) {
+        var colID = _ref28.colID;
         return colID;
       }
     },
@@ -507,18 +517,18 @@ var CellType = new _graphql.GraphQLObjectType({
       args: {
         missing: { type: _graphql.GraphQLString }
       },
-      resolve: function resolve(_ref28, _ref29) {
-        var query = _ref28.query,
-            detransposes = _ref28.detransposes,
-            diffDetransposes = _ref28.diffDetransposes,
-            variable = _ref28.variable,
-            agg = _ref28.agg,
-            diff = _ref28.diff,
-            diffOver = _ref28.diffOver,
-            over = _ref28.over,
-            rows = _ref28.rows,
-            fmt = _ref28.fmt;
-        var missing = _ref29.missing;
+      resolve: function resolve(_ref29, _ref30) {
+        var query = _ref29.query,
+            detransposes = _ref29.detransposes,
+            diffDetransposes = _ref29.diffDetransposes,
+            variable = _ref29.variable,
+            agg = _ref29.agg,
+            diff = _ref29.diff,
+            diffOver = _ref29.diffOver,
+            over = _ref29.over,
+            rows = _ref29.rows,
+            fmt = _ref29.fmt;
+        var missing = _ref30.missing;
 
         return JSON.stringify(diff
         // if diff: calculate this group, diff group
@@ -530,10 +540,13 @@ var CellType = new _graphql.GraphQLObjectType({
     },
     queries: {
       type: new _graphql.GraphQLList(QueryConditionType),
-      resolve: function resolve(_ref30) {
-        var query = _ref30.query;
+      resolve: function resolve(_ref31) {
+        var query = _ref31.query;
         return _lodash2.default.map(_lodash2.default.keys(query), function (key) {
-          return { key: key, value: query[key] };
+          return {
+            key: key,
+            values: _typeof(query[key]) !== 'object' ? [query[key]] : query[key]
+          };
         });
       }
     }
@@ -545,8 +558,8 @@ var RowType = new _graphql.GraphQLObjectType({
   fields: {
     length: {
       type: _graphql.GraphQLInt,
-      resolve: function resolve(_ref31) {
-        var _grid = _ref31._grid;
+      resolve: function resolve(_ref32) {
+        var _grid = _ref32._grid;
         return _grid.x.length;
       }
     },
@@ -564,7 +577,7 @@ var RowType = new _graphql.GraphQLObjectType({
           var diffOver = void 0;
 
           if (variable && value !== null) {
-            query = _extends({}, query, _defineProperty({}, variable, value));
+            query = _extends({}, query, _defineProperty({}, detransposes[variable] || variable, value));
           }
 
           var agg = y.agg || x.agg || 'n';
@@ -628,16 +641,16 @@ var TableType = new _graphql.GraphQLObjectType({
     },
     length: {
       type: _graphql.GraphQLInt,
-      resolve: function resolve(_ref32) {
-        var _rows = _ref32._rows;
+      resolve: function resolve(_ref33) {
+        var _rows = _ref33._rows;
         return _rows.length;
       }
     },
     rows: {
       type: new _graphql.GraphQLList(RowType),
-      resolve: function resolve(_ref33) {
-        var _rows = _ref33._rows,
-            _grid = _ref33._grid;
+      resolve: function resolve(_ref34) {
+        var _rows = _ref34._rows,
+            _grid = _ref34._grid;
         return new Promise(function (resolve, rej) {
           return process.nextTick(function () {
             resolve(_lodash2.default.map(_lodash2.default.sortBy(_grid.y, 'id'), function (y) {
@@ -663,9 +676,9 @@ var tableField = exports.tableField = {
     set: { type: _graphql.GraphQLString },
     where: { type: new _graphql.GraphQLList(ConditionType) }
   },
-  resolve: function resolve(root, _ref34, context) {
-    var set = _ref34.set,
-        where = _ref34.where;
+  resolve: function resolve(root, _ref35, context) {
+    var set = _ref35.set,
+        where = _ref35.where;
     return new Promise(function (resolve, reject) {
       context.getDataset(set).then(function (data) {
 
@@ -676,9 +689,9 @@ var tableField = exports.tableField = {
         var collection = new _helpers.CollectionMap(data);
         context.tabulate = { iterator: 0 };
 
-        if (where) collection = collection.filterAny(where.reduce(function (all, _ref35) {
-          var key = _ref35.key,
-              values = _ref35.values;
+        if (where) collection = collection.filterAny(where.reduce(function (all, _ref36) {
+          var key = _ref36.key,
+              values = _ref36.values;
           return _extends({}, all, _defineProperty({}, key, values));
         }, {}));
 

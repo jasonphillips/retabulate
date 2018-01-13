@@ -36,9 +36,9 @@ const QueryConditionType = new GraphQLObjectType({
     key: {
       type: GraphQLString
     },
-    value: {
-      type: GraphQLString
-    },
+    values: {
+      type: new GraphQLList(GraphQLString)
+    }
   }
 });
 
@@ -336,11 +336,15 @@ const CellType = new GraphQLObjectType({
   fields: {
     agg: {
       type: GraphQLString,
-      agg: ({agg}) => agg,
+      resolve: ({agg}) => (agg && agg.join) ? agg.join(',') : agg,
     },
     variable: {
       type: GraphQLString,
-      agg: ({variable}) => variable,
+      resolve: ({variable}) => variable,
+    },
+    detransposed: {
+      type: GraphQLString,
+      resolve: ({detransposes, variable}) => detransposes ? detransposes[variable] : null,
     },
     renderId: {
       type: GraphQLString,
@@ -376,7 +380,10 @@ const CellType = new GraphQLObjectType({
     },
     queries: {
       type: new GraphQLList(QueryConditionType),
-      resolve: ({query}) => _.map(_.keys(query), (key) => ({key, value: query[key]})),
+      resolve: ({query}) => _.map(_.keys(query), (key) => ({
+        key, 
+        values: typeof(query[key])!=='object' ? [query[key]] : query[key],
+      })),
     }
   }
 });
@@ -401,7 +408,7 @@ const RowType = new GraphQLObjectType({
         let diffOver;
   
         if (variable && value!==null) {
-          query = {...query, [variable]: value};
+          query = {...query, [detransposes[variable] || variable]: value};
         }
   
         const agg = y.agg || x.agg || 'n';

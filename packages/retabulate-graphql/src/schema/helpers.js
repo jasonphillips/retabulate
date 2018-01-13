@@ -62,7 +62,7 @@ export const groupBy = (rows, col) => d3C.nest()
 
 export const colValues = (rows, col, excludeEmpty) => rows
   .map(r => r[col])
-  .filter(r => excludeEmpty ? (r!=='' && r!==false && r!==null) : r);
+  .filter(r => excludeEmpty ? (r!=='' && r!==false && r!==null && typeof(r)!=='undefined') : r);
 
 export const distribution = (data) => d3C.nest()
   .key(d => d)
@@ -123,7 +123,7 @@ export const aggregations = {
   mean: (series, key) => series.length ? d3A.mean(colValues(series, key, true)) : undefined,
   median: (series, key) => d3A.median(series.values(key)),
   mode: (series, key) => d3A.mode(colValues(series, key)),
-  stdev: (series, key) => d3A.deviation(series.values(key)),
+  stdev: (series, key) => d3A.deviation(colValues(series, key)),
   min: (series, key) => d3A.min(colValues(series, key)),
   max: (series, key) => d3A.max(colValues(series, key)),
   range: (series) => d3A.range(colValues(series, key)),
