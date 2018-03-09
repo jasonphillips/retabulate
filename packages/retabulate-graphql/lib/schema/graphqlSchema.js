@@ -674,13 +674,27 @@ var tableField = exports.tableField = {
   type: TableType,
   args: {
     set: { type: _graphql.GraphQLString },
+    queryId: { type: _graphql.GraphQLString },
     where: { type: new _graphql.GraphQLList(ConditionType) }
   },
   resolve: function resolve(root, _ref35, context) {
     var set = _ref35.set,
-        where = _ref35.where;
+        where = _ref35.where,
+        queryId = _ref35.queryId;
+
+    // allow cache retrieval, if available
+    if (typeof context.getCached === 'function' && queryId) {
+      var tryCache = context.getCached(queryId);
+
+      if (tryCache && tryCache.then !== 'undefined') {
+        // the promise will resolve from here
+        return tryCache;
+      }
+    }
+
+    // else, get the dataset and begin
     return new Promise(function (resolve, reject) {
-      context.getDataset(set).then(function (data) {
+      return context.getDataset(set, queryId).then(function (data) {
 
         if (!data) {
           throw new Error('dataset ' + set + ' not found');
@@ -697,7 +711,8 @@ var tableField = exports.tableField = {
 
         resolve({
           _rows: collection,
-          _query: {}, _grid: {}, _renderIds: [], _transposes: {}, _detransposes: {}, _exclude: {}, _aggIndex: 0 });
+          _query: {}, _grid: {}, _renderIds: [], _transposes: {}, _detransposes: {}, _exclude: {}, _aggIndex: 0
+        });
       });
     });
   }

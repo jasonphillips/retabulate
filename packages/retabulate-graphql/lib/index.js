@@ -3,11 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.makeNetworkInterface = exports.makeLocalExecution = undefined;
+exports.tableField = exports.makeNetworkInterface = exports.makeLocalExecution = undefined;
 
-var _schema = require('./schema');
+var _graphqlSchema = require('./schema/graphqlSchema');
 
-var _schema2 = _interopRequireDefault(_schema);
+var _graphqlSchema2 = _interopRequireDefault(_graphqlSchema);
 
 var _local = require('./local');
 
@@ -15,4 +15,5 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.makeLocalExecution = _local.makeLocalExecution;
 exports.makeNetworkInterface = _local.makeNetworkInterface;
-exports.default = _schema2.default;
+exports.tableField = _graphqlSchema.tableField;
+exports.default = _graphqlSchema2.default;

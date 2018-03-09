@@ -494,10 +494,22 @@ export const tableField = {
   type: TableType,
   args: {
     set: { type: GraphQLString },
+    queryId: { type: GraphQLString },
     where: { type: new GraphQLList(ConditionType) },
   },
-  resolve: (root, {set, where}, context) => new Promise((resolve, reject) => {
-      context.getDataset(set).then((data) => {
+  resolve: (root, { set, where, queryId }, context) => {
+    // allow cache retrieval, if available
+    if (typeof(context.getCached)==='function' && queryId) {
+      const tryCache = context.getCached(queryId);
+
+      if (tryCache && tryCache.then!=='undefined') {
+        // the promise will resolve from here
+        return tryCache;
+      }
+    }
+
+    // else, get the dataset and begin
+    return new Promise((resolve, reject) => context.getDataset(set, queryId).then((data) => {
 
       if (!data) {
         throw new Error(`dataset ${set} not found`);
@@ -512,9 +524,10 @@ export const tableField = {
 
       resolve({
         _rows: collection, 
-        _query:{}, _grid:{}, _renderIds:[], _transposes:{}, _detransposes:{}, _exclude:{}, _aggIndex:0});
+        _query:{}, _grid:{}, _renderIds:[], _transposes:{}, _detransposes:{}, _exclude:{}, _aggIndex:0
       });
-  })
+    }));
+  }
 }
 
 export const RootType = new GraphQLObjectType({
