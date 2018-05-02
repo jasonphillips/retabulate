@@ -1,4 +1,3 @@
-import _ from 'lodash';
 const d3A = require('d3-array');
 const d3C = require('d3-collection');
 
@@ -76,6 +75,16 @@ export const distributionRatio = (data) => d3C.nest()
 
 export const concat = (arr, val) => val ? arr.concat([val]) : arr;
 
+export const omit = (obj, omitProps) => 
+    Object.keys(obj)
+    .filter(key => omitProps.indexOf(key)===-1)
+    .reduce((returnObj, key) => ({
+        ...returnObj, 
+        [key]: obj[key]
+        }),
+    {}
+    )
+
 export const addFilters = (objA, key, values) => ({
   ...objA,
   [key]: objA[key] 
@@ -86,6 +95,8 @@ export const addFilters = (objA, key, values) => ({
 export const generateLeaf = (data, context) => {
   const {_aggIndex, _renderIds, _query, _variable, _value, _agg, _diff, _over, _fmt, _grid, _axis, _detransposes} = data;
   context.tabulate.iterator++;
+
+  // 
   const id = ('00000000' + context.tabulate.iterator).slice(-8) + 't';
   if (!_grid[_axis]) _grid[_axis] = [];
 

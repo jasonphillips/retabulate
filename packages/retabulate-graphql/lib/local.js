@@ -5,8 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.makeNetworkInterface = exports.makeLocalExecution = undefined;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _graphql = require('graphql');
 
 var _graphql2 = _interopRequireDefault(_graphql);
@@ -24,47 +22,36 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *  @returns {function}
 **/
 
-function makeLocalExecution() {
-    var initialContext = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+function makeLocalExecution(initialContext = {}) {
+    return (query, { variables, context }) => new Promise((resolve, reject) => {
+        let result;
 
-    return function (query, _ref) {
-        var variables = _ref.variables,
-            context = _ref.context;
-        return new Promise(function (resolve, reject) {
-            var result = void 0;
+        try {
+            result = (0, _graphql.execute)(_schema2.default, query, null, Object.assign({}, initialContext, context, { isService: true }), variables, null);
+        } catch (err) {
+            console.log(`Local GraphQL error: ${err.message}`);
+            return reject(err);
+        }
 
-            try {
-                result = (0, _graphql.execute)(_schema2.default, query, null, _extends({}, initialContext, context, { isService: true }), variables, null);
-            } catch (err) {
-                console.log('Local GraphQL error: ' + err.message);
-                return reject(err);
+        result.then(({ data, errors }) => {
+            if (errors) {
+                reject(errors);
+                return;
             }
-
-            result.then(function (_ref2) {
-                var data = _ref2.data,
-                    errors = _ref2.errors;
-
-                if (errors) {
-                    reject(errors);
-                    return;
-                }
-                resolve(data);
-            });
+            resolve(data);
         });
-    };
+    });
 }
 
-var makeNetworkInterface = function makeNetworkInterface(context) {
-    var localQuery = makeLocalExecution(context);
+const makeNetworkInterface = context => {
+    const localQuery = makeLocalExecution(context);
 
     return {
-        query: function query(r) {
-            return new Promise(function (resolve, reject) {
-                localQuery(r.query, { variables: r.variables }, {}).then(function (data, errors) {
-                    resolve({ data: data, errors: errors });
-                });
+        query: r => new Promise((resolve, reject) => {
+            localQuery(r.query, { variables: r.variables }, {}).then((data, errors) => {
+                resolve({ data, errors });
             });
-        }
+        })
     };
 };
 
