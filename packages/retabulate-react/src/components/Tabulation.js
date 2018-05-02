@@ -5,10 +5,12 @@ import NestedTable from 'retabulate-react-renderer';
 import WrapRenderer from './WrapRenderer';
 import {toGqlObjectArg} from '../classes/QueryClosure';
 import {callChildSerializers} from '../utils/gatherChildConfig';
+import get from 'lodash.get';
 
-const queryTemplate = (dataset, where, axes) => gql`
+const queryTemplate = (dataset, where, axes, queryPrefix, tableName) => gql`
     query tabulate {
-        table(set:"${dataset}" ${where}) {
+        ${queryPrefix.concat([null]).join(' { ')}
+        ${tableName ? tableName+':' : ''} table(set:"${dataset}" ${where}) {
             ${axes}
             rows {
               cells {
@@ -17,6 +19,7 @@ const queryTemplate = (dataset, where, axes) => gql`
               }
             }
         }
+        ${queryPrefix.map(p => '}').join(' ')}
     }
 `;
 
@@ -26,6 +29,7 @@ class Tabulation extends React.Component {
     this.startQuery = this.startQuery.bind(this);
     this.updateQuery = this.updateQuery.bind(this);
     this.client = context.RetabulateClient;
+    this.queryPrefix = context.RetabulateQueryPrefix;
     
     const {query, renderers, labels} = this.getQuery(props);
 
@@ -80,7 +84,7 @@ class Tabulation extends React.Component {
   }
 
   getQuery(props) {
-    const {dataset, where, children} = props;
+    const {dataset, where, name, children} = props;
     const axes = callChildSerializers(children, {iterator:0});
     const renderers =axes.reduce((r,a) => ({...r, ...a.renderers}), {});
     const labels = axes.reduce((r,a) => ({...r, ...a.labels}), {});
@@ -89,7 +93,13 @@ class Tabulation extends React.Component {
     const whereArg = where ? `where: [${where.map(condition => toGqlObjectArg(condition))}]` : '';
     
     return {
-        query: queryTemplate(dataset, whereArg, axes.map(a => a.queryFragment).join(' ')),
+        query: queryTemplate(
+            dataset, 
+            whereArg, 
+            axes.map(a => a.queryFragment).join(' '), 
+            this.queryPrefix || [],
+            name,
+        ),
         renderers,
         labels
     }
@@ -112,15 +122,20 @@ class Tabulation extends React.Component {
 
   render() {
     const {data, pending, renderers, labels} = this.state;
-    const {cellRenderer, className, collectionRenderer} = this.props;
+    const {cellRenderer, className, name, collectionRenderer} = this.props;
+    const tableData = get(data, [
+        'data', 
+        ...this.queryPrefix.map(q => q.replace(/\(.*?\)/,'')),
+        name || 'table'
+    ]);
 
     return (
         <div>
-            {data && (
+            {tableData && (
                 collectionRenderer
-                    ? <WrapRenderer renderer={collectionRenderer} data={data.data.table} />
+                    ? <WrapRenderer renderer={collectionRenderer} data={tableData} />
                     : <NestedTable 
-                        tabulated={data.data.table}
+                        tabulated={tableData}
                         renderers={{...renderers, cellRenderer}} 
                         labels={labels}
                         pending={pending}
@@ -133,7 +148,8 @@ class Tabulation extends React.Component {
 }
 
 Tabulation.contextTypes = {
-    RetabulateClient: PropTypes.object
+    RetabulateClient: PropTypes.object,
+    RetabulateQueryPrefix: PropTypes.array,
 }
 
 export default Tabulation;

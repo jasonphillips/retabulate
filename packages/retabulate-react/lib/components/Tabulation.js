@@ -8,7 +8,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(['\n    query tabulate {\n        table(set:"', '" ', ') {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable detransposed agg renderIds\n                queries { key values }\n              }\n            }\n        }\n    }\n'], ['\n    query tabulate {\n        table(set:"', '" ', ') {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable detransposed agg renderIds\n                queries { key values }\n              }\n            }\n        }\n    }\n']);
+var _templateObject = _taggedTemplateLiteral(['\n    query tabulate {\n        ', '\n        ', ' table(set:"', '" ', ') {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable detransposed agg renderIds\n                queries { key values }\n              }\n            }\n        }\n        ', '\n    }\n'], ['\n    query tabulate {\n        ', '\n        ', ' table(set:"', '" ', ') {\n            ', '\n            rows {\n              cells {\n                value colID rowID variable detransposed agg renderIds\n                queries { key values }\n              }\n            }\n        }\n        ', '\n    }\n']);
 
 var _react = require('react');
 
@@ -34,7 +34,13 @@ var _QueryClosure = require('../classes/QueryClosure');
 
 var _gatherChildConfig = require('../utils/gatherChildConfig');
 
+var _lodash = require('lodash.get');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -44,8 +50,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
-var queryTemplate = function queryTemplate(dataset, where, axes) {
-    return (0, _graphqlTag2.default)(_templateObject, dataset, where, axes);
+var queryTemplate = function queryTemplate(dataset, where, axes, queryPrefix, tableName) {
+    return (0, _graphqlTag2.default)(_templateObject, queryPrefix.concat([null]).join(' { '), tableName ? tableName + ':' : '', dataset, where, axes, queryPrefix.map(function (p) {
+        return '}';
+    }).join(' '));
 };
 
 var Tabulation = function (_React$Component) {
@@ -59,6 +67,7 @@ var Tabulation = function (_React$Component) {
         _this.startQuery = _this.startQuery.bind(_this);
         _this.updateQuery = _this.updateQuery.bind(_this);
         _this.client = context.RetabulateClient;
+        _this.queryPrefix = context.RetabulateQueryPrefix;
 
         var _this$getQuery = _this.getQuery(props),
             query = _this$getQuery.query,
@@ -130,6 +139,7 @@ var Tabulation = function (_React$Component) {
         value: function getQuery(props) {
             var dataset = props.dataset,
                 where = props.where,
+                name = props.name,
                 children = props.children;
 
             var axes = (0, _gatherChildConfig.callChildSerializers)(children, { iterator: 0 });
@@ -148,7 +158,7 @@ var Tabulation = function (_React$Component) {
             return {
                 query: queryTemplate(dataset, whereArg, axes.map(function (a) {
                     return a.queryFragment;
-                }).join(' ')),
+                }).join(' '), this.queryPrefix || [], name),
                 renderers: renderers,
                 labels: labels
             };
@@ -180,14 +190,18 @@ var Tabulation = function (_React$Component) {
             var _props = this.props,
                 cellRenderer = _props.cellRenderer,
                 className = _props.className,
+                name = _props.name,
                 collectionRenderer = _props.collectionRenderer;
 
+            var tableData = (0, _lodash2.default)(data, ['data'].concat(_toConsumableArray(this.queryPrefix.map(function (q) {
+                return q.replace(/\(.*?\)/, '');
+            })), [name || 'table']));
 
             return _react2.default.createElement(
                 'div',
                 null,
-                data && (collectionRenderer ? _react2.default.createElement(_WrapRenderer2.default, { renderer: collectionRenderer, data: data.data.table }) : _react2.default.createElement(_retabulateReactRenderer2.default, {
-                    tabulated: data.data.table,
+                tableData && (collectionRenderer ? _react2.default.createElement(_WrapRenderer2.default, { renderer: collectionRenderer, data: tableData }) : _react2.default.createElement(_retabulateReactRenderer2.default, {
+                    tabulated: tableData,
                     renderers: _extends({}, renderers, { cellRenderer: cellRenderer }),
                     labels: labels,
                     pending: pending,
@@ -201,7 +215,8 @@ var Tabulation = function (_React$Component) {
 }(_react2.default.Component);
 
 Tabulation.contextTypes = {
-    RetabulateClient: _propTypes2.default.object
+    RetabulateClient: _propTypes2.default.object,
+    RetabulateQueryPrefix: _propTypes2.default.array
 };
 
 exports.default = Tabulation;
