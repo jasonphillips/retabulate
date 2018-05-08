@@ -8,6 +8,8 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _templateObject = _taggedTemplateLiteral(['\n  fragment ', 'Fragment on ', ' {\n    ', ': table(set:"', '" ', ') {\n      ', '\n      rows {\n        cells {\n          value colID rowID variable agg renderIds\n          queries { key values }\n        }\n      }\n    }\n  }\n'], ['\n  fragment ', 'Fragment on ', ' {\n    ', ': table(set:"', '" ', ') {\n      ', '\n      rows {\n        cells {\n          value colID rowID variable agg renderIds\n          queries { key values }\n        }\n      }\n    }\n  }\n']);
+
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -44,8 +46,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
 var fragmentTemplate = function fragmentTemplate(rootType, name, dataset, where, axes) {
-  return '\n  fragment ' + name + 'Fragment on ' + rootType + ' {\n    ' + name + ': table(set:"' + dataset + '" ' + where + ') {\n      ' + axes + '\n      rows {\n        cells {\n          value colID rowID variable agg renderIds\n          queries { key values }\n        }\n      }\n    }\n  }\n';
+  return (0, _graphqlTag2.default)(_templateObject, name, rootType, name, dataset, where, axes);
 };
 
 var Tabulation = function (_React$Component) {

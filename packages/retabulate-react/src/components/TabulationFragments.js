@@ -7,7 +7,7 @@ import {toGqlObjectArg} from '../classes/QueryClosure';
 import {callChildSerializers} from '../utils/gatherChildConfig';
 import get from 'lodash.get';
 
-const fragmentTemplate = (rootType, name, dataset, where, axes) => `
+const fragmentTemplate = (rootType, name, dataset, where, axes) => gql`
   fragment ${name}Fragment on ${rootType} {
     ${name}: table(set:"${dataset}" ${where}) {
       ${axes}
