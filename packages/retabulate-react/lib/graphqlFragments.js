@@ -65,7 +65,7 @@ var TableWithFragment = function TableWithFragment(component) {
     return {
         fragment: fragment,
         Component: function Component(props) {
-            return _react2.default.cloneElement(component, _extends({}, component.props, { props: props }));
+            return _react2.default.cloneElement(component, _extends({}, component.props, props));
         }
     };
 };

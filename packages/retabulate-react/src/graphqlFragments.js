@@ -25,7 +25,7 @@ const TableWithFragment = (component) => {
     const fragment = component.type.getFragment(component.props);
     return {
         fragment,
-        Component: (props) => React.cloneElement(component, {...component.props, props}),
+        Component: (props) => React.cloneElement(component, {...component.props, ...props}),
     }
 }
 
