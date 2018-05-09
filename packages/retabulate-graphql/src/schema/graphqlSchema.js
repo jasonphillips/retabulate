@@ -21,18 +21,7 @@ export const tableField = {
     where: { type: new GraphQLList(ConditionType) },
   },
   resolve: (root, { set, where, queryId }, context) => {
-
-    // allow cache retrieval, if available
-    if (typeof(context.getCached)==='function' && queryId) {
-      const tryCache = context.getCached(queryId);
-
-      if (tryCache && tryCache.then!=='undefined') {
-        // the promise will resolve from here
-        return tryCache;
-      }
-    }
-
-    // else, get the dataset and begin
+    // get the dataset and begin
     return new Promise((resolve, reject) => context.getDataset(set, queryId).then((data) => {
       if (!data) {
         throw new Error(`dataset ${set} not found`);

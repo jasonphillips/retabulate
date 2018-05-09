@@ -76,7 +76,16 @@ class Tabulation extends React.Component {
   render() {
     const {renderers, labels} = this.state;
     const {
-      collectionRenderer, className, tabs, data, placeholder, cellRenderer, name, config, watchedProps
+      collectionRenderer,
+      className,
+      tabs,
+      data,
+      placeholder,
+      cellRenderer,
+      name,
+      config,
+      watchedProps,
+      corner
     } = this.props;
     const rootPath = config ? config.rootType : '';
 
@@ -94,6 +103,7 @@ class Tabulation extends React.Component {
           pending={false}
           watchedProps={watchedProps}
           className={className}
+          corner={corner}
         />
       </div>
     );

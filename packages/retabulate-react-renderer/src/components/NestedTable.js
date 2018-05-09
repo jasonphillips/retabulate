@@ -37,7 +37,7 @@ const cellsToCollection = (cells) => cells.map(
 
 class NestedTable extends React.PureComponent {
   render() {
-    const {tabulated, pending, renderers, labels, className} = this.props;
+    const {tabulated, pending, renderers, labels, className, corner} = this.props;
 
     const topGrouped = buildGroups(tabulated.top);
     const leftGrouped = buildGroups(tabulated.left);
@@ -57,7 +57,7 @@ class NestedTable extends React.PureComponent {
               <tr key={i}>
                 {i===0 && <td rowSpan={topRows.length}
                             colSpan={leftRows.length}
-                            className="corner"> </td>}
+                            className="corner">{corner || ' '}</td>}
                 {row.map((cell, j) => {
                   const cellProps = _.pick(cell, 'colSpan');
                   const renderId = cell.label && cell.label.split('|')[0];

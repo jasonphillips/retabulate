@@ -108,7 +108,8 @@ var NestedTable = function (_React$PureComponent) {
           pending = _props.pending,
           renderers = _props.renderers,
           labels = _props.labels,
-          className = _props.className;
+          className = _props.className,
+          corner = _props.corner;
 
 
       var topGrouped = (0, _buildGroups2.default)(tabulated.top);
@@ -137,7 +138,7 @@ var NestedTable = function (_React$PureComponent) {
                 { rowSpan: topRows.length,
                   colSpan: leftRows.length,
                   className: 'corner' },
-                ' '
+                corner || ' '
               ),
               row.map(function (cell, j) {
                 var cellProps = _lodash2.default.pick(cell, 'colSpan');

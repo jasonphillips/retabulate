@@ -191,7 +191,8 @@ var Tabulation = function (_React$Component) {
                 cellRenderer = _props.cellRenderer,
                 className = _props.className,
                 name = _props.name,
-                collectionRenderer = _props.collectionRenderer;
+                collectionRenderer = _props.collectionRenderer,
+                corner = _props.corner;
 
             var tableData = (0, _lodash2.default)(data, ['data'].concat(_toConsumableArray(this.queryPrefix.map(function (q) {
                 return q.replace(/\(.*?\)/, '');
@@ -205,7 +206,8 @@ var Tabulation = function (_React$Component) {
                     renderers: _extends({}, renderers, { cellRenderer: cellRenderer }),
                     labels: labels,
                     pending: pending,
-                    className: className
+                    className: className,
+                    corner: corner
                 }))
             );
         }

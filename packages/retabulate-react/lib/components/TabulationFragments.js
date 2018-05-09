@@ -104,7 +104,8 @@ var Tabulation = function (_React$Component) {
           cellRenderer = _props.cellRenderer,
           name = _props.name,
           config = _props.config,
-          watchedProps = _props.watchedProps;
+          watchedProps = _props.watchedProps,
+          corner = _props.corner;
 
       var rootPath = config ? config.rootType : '';
 
@@ -122,7 +123,8 @@ var Tabulation = function (_React$Component) {
           labels: labels,
           pending: false,
           watchedProps: watchedProps,
-          className: className
+          className: className,
+          corner: corner
         })
       );
     }

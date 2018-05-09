@@ -122,7 +122,7 @@ class Tabulation extends React.Component {
 
   render() {
     const {data, pending, renderers, labels} = this.state;
-    const {cellRenderer, className, name, collectionRenderer} = this.props;
+    const {cellRenderer, className, name, collectionRenderer, corner} = this.props;
     const tableData = get(data, [
         'data', 
         ...this.queryPrefix.map(q => q.replace(/\(.*?\)/,'')),
@@ -140,6 +140,7 @@ class Tabulation extends React.Component {
                         labels={labels}
                         pending={pending}
                         className={className}
+                        corner={corner}
                     />
             )}
         </div>
