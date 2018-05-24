@@ -1,6 +1,6 @@
 {
   "name": "retabulate-react",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "description": "react interface for retabulate",
   "main": "lib/index.js",
   "scripts": {
@@ -13,7 +13,7 @@
     "prop-types": "^15.5.10",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
-    "retabulate-graphql": "^1.7.1",
+    "retabulate-graphql": "^1.7.2",
     "retabulate-react-renderer": "^0.10.1"
   },
   "peerDependencies": {
