@@ -1,6 +1,6 @@
 {
   "name": "retabulate-local-provider",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "provider for retabulate-react for use without a remote graphql endpoint",
   "main": "lib/index.js",
   "author": "Jason Phillips",
@@ -9,7 +9,7 @@
     "apollo-cache-inmemory": "^1.1.9",
     "apollo-client": "^2.2.5",
     "apollo-link-schema": "^1.0.6",
-    "retabulate-graphql": "^1.6.0"
+    "retabulate-graphql": "^1.7.3"
   },
   "peerDependencies": {
     "react": "^15.0.0 || ^16.0.0"
