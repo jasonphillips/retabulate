@@ -1,0 +1,27 @@
+{
+  "name": "retabulate-local-provider",
+  "version": "0.5.0",
+  "description": "provider for retabulate-react for use without a remote graphql endpoint",
+  "main": "lib/index.js",
+  "author": "Jason Phillips",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-cache-inmemory": "^1.1.9",
+    "apollo-client": "^2.2.5",
+    "apollo-link-schema": "^1.0.6",
+    "retabulate-graphql": "^1.6.0"
+  },
+  "peerDependencies": {
+    "react": "^15.0.0 || ^16.0.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.0",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-preset-react": "^6.23.0",
+    "babel-preset-stage-0": "^6.16.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel -d lib/ src/"
+  }
+}

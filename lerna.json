@@ -3,7 +3,8 @@
   "packages": [
     "packages/retabulate-graphql",
     "packages/retabulate-react",
-    "packages/retabulate-react-renderer"
+    "packages/retabulate-react-renderer",
+    "packages/retabulate-local-provider"
   ],
   "version": "independent"
 }
