@@ -3,15 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Statistic = exports.Value = exports.Variable = exports.Transpose = exports.Header = exports.All = exports.Axis = exports.Filter = exports.Expand = exports.RetabulateProvider = exports.Tabulation = undefined;
+exports.Statistic = exports.Value = exports.Variable = exports.Transpose = exports.Header = exports.All = exports.Axis = exports.Filter = exports.Expand = exports.Tabulation = undefined;
 
 var _Tabulation = require('./components/Tabulation');
 
 var _Tabulation2 = _interopRequireDefault(_Tabulation);
-
-var _RetabulateProvider = require('./components/RetabulateProvider');
-
-var _RetabulateProvider2 = _interopRequireDefault(_RetabulateProvider);
 
 var _Expand = require('./components/Expand');
 
@@ -51,7 +47,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var Header = _All2.default;
 
 exports.Tabulation = _Tabulation2.default;
-exports.RetabulateProvider = _RetabulateProvider2.default;
 exports.Expand = _Expand2.default;
 exports.Filter = _Filter2.default;
 exports.Axis = _Axis2.default;
