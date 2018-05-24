@@ -147,8 +147,21 @@ const AxisType = new GraphQLObjectType({
           description: 'Explicit ordering of values',
           type: new GraphQLList(GraphQLString),
         },
+        minimum: {
+          description: 'Do not include groups with count under this threshold',
+          type: GraphQLInt,
+        }
       },
-      resolve: (data, {key, all, total, orderBy, renderId, mapping, ordering}) => {
+      resolve: (data, {
+        key, 
+        all, 
+        total, 
+        orderBy, 
+        renderId, 
+        mapping, 
+        ordering, 
+        minimum,
+      }) => {
         data._aggIndex++;
 
         // a 'total' never groups again, just descends
@@ -167,7 +180,9 @@ const AxisType = new GraphQLObjectType({
           const allGroups = groups.keys().reduce((all, k) => ({...all, [k]:true}), {});
 
           // iterate over mappings
-          value = mapping.map(({label, values}) => {
+          value = []
+
+          mapping.forEach(({label, values}) => {
             const basics = {
               ...data,
               key: label,
@@ -178,38 +193,59 @@ const AxisType = new GraphQLObjectType({
   
             if (values) {
               const rows = groups.keys(values);
+              
+              // drop this one from the remaining 'all' grouping
               for (let val of values) allGroups[val] = false;
+              // if minimum provide, ensure group passes it, or return empty
+              if (minimum && rows.length < minimum) 
+                return value.push({
+                  ...basics, 
+                  _rows: [], 
+                  _redacted: true,
+                  _query: {...data._query, [dataKey]: values}
+                });
   
-              return {
+              return value.push({
                 ...basics, 
                 _rows: rows, 
+                _redacted: false, 
                 _query: {...data._query, [dataKey]: values}
-              };
+              });
             } 
   
             // if no values, assume "group all remaining"
             const remainingValues = Object.keys(allGroups).filter(k => allGroups[k]);
             const coveredValues = Object.keys(allGroups).filter(k => !allGroups[k]);
   
-            return {
+            value.push({
               ...basics, 
+              _redacted: false, 
               _rows: remainingValues ? remainingValues.reduce((all,v) => all.concat(groups[v]), []): [],
               _query: {...data._query, [dataKey]: remainingValues}
-            };
+            });
           });
         } else {
-          // no explicit mapping passed, group all, unless 'ordering' list passed
+          // no explicit mapping passed: group all, unless 'ordering' list passed
           const valuesSet = ordering ? ordering : groups.keys();
-  
-          value = valuesSet.map((groupValue) => ({
-            ...data,
-            key: groupValue,
-            _rows: groups.keys(groupValue),
-            _aggIndex: data._aggIndex,
-            _query: { ...data._query, [dataKey]:groupValue },
-            _renderIds: concat(data._renderIds, renderId),
-            renderId
-          }))
+
+          value = valuesSet.map((groupValue) => {
+            const rows = groups.keys(groupValue);
+
+            return {
+              ...data,
+              key: groupValue,
+              _rows: minimum 
+                ? rows.length >= minimum ? rows : []
+                : rows,
+              _redacted: data._redacted
+                ? true
+                : !minimum || rows.length >= minimum ? false : true,
+              _aggIndex: data._aggIndex,
+              _query: { ...data._query, [dataKey]: groupValue },
+              _renderIds: concat(data._renderIds, renderId),
+              renderId
+            }
+          })
         }
   
         // apply optional ordering by another column

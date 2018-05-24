@@ -3,6 +3,7 @@ import {
   GraphQLString,
   GraphQLList,
   GraphQLID,  
+  GraphQLBoolean,
 } from 'graphql';
 
 import QueryConditionType from './QueryCondition';
@@ -46,6 +47,11 @@ const CellType = new GraphQLObjectType({
       description: 'Id of the column',
       type: GraphQLID,
       resolve: ({colID}) => colID,
+    },
+    redacted: {
+      description: 'Data is redacted (below a minimum)',
+      type: GraphQLBoolean,
+      resolve: ({redacted}) => redacted,
     },
     value: {
       description: 'Value (stringified data)',

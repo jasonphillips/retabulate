@@ -71,10 +71,11 @@ const RowType = new _graphql.GraphQLObjectType({
           diffDetransposes: diffDetransposes ? diffDetransposes : detransposes,
           colID: x.id,
           rowID: y.id,
-          rows: rows.data,
+          rows: x.redacted || y.redacted ? [] : rows.data,
           over: over ? y._all.filterAny(overQuery).data : null,
           diff: diffRows ? diffRows.data : null,
           diffOver: diffOver ? diffOver.data : null,
+          redacted: x.redacted || y.redacted,
           fmt: y.fmt || x.fmt || '',
           renderIds: x.renderIds.concat(y.renderIds)
         };

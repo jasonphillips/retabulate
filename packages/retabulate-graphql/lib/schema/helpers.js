@@ -78,10 +78,23 @@ const addFilters = exports.addFilters = (objA, key, values) => Object.assign({},
 });
 
 const generateLeaf = exports.generateLeaf = (data, context) => {
-  const { _aggIndex, _renderIds, _query, _variable, _value, _agg, _diff, _over, _fmt, _grid, _axis, _detransposes } = data;
+  const {
+    _aggIndex,
+    _renderIds,
+    _query,
+    _variable,
+    _value,
+    _agg,
+    _diff,
+    _over,
+    _fmt,
+    _grid,
+    _axis,
+    _detransposes,
+    _redacted
+  } = data;
   context.tabulate.iterator++;
 
-  // 
   const id = ('00000000' + context.tabulate.iterator).slice(-8) + 't';
   if (!_grid[_axis]) _grid[_axis] = [];
 
@@ -96,6 +109,7 @@ const generateLeaf = exports.generateLeaf = (data, context) => {
     over: _over,
     fmt: _fmt,
     value: _value,
+    redacted: !!_redacted,
     renderIds: _renderIds
   });
   return id;

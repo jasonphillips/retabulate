@@ -53,6 +53,11 @@ const CellType = new _graphql.GraphQLObjectType({
       type: _graphql.GraphQLID,
       resolve: ({ colID }) => colID
     },
+    redacted: {
+      description: 'Data is redacted (below a minimum)',
+      type: _graphql.GraphQLBoolean,
+      resolve: ({ redacted }) => redacted
+    },
     value: {
       description: 'Value (stringified data)',
       type: _graphql.GraphQLString,

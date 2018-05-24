@@ -57,6 +57,7 @@ var Expand = function (_React$Component) {
           mapping = props.mapping,
           ordering = props.ordering,
           orderBy = props.orderBy,
+          minimum = props.minimum,
           cellProps = props.cellProps,
           cellStyles = props.cellStyles,
           labelRenderer = props.labelRenderer,
@@ -70,7 +71,13 @@ var Expand = function (_React$Component) {
           renderId = _makeRenderers.renderId,
           renderers = _makeRenderers.renderers;
 
-      var Query = new _QueryClosure2.default('classes', column, label ? renderId : 'skip_' + index, renderId, { all: total, mapping: mapping, ordering: ordering, orderBy: orderBy });
+      var Query = new _QueryClosure2.default('classes', column, label ? renderId : 'skip_' + index, renderId, {
+        all: total,
+        mapping: mapping,
+        ordering: ordering,
+        orderBy: orderBy,
+        minimum: minimum
+      });
       var descendents = (0, _gatherChildConfig2.default)(children, context);
 
       if (descendents.query) {
