@@ -20,7 +20,12 @@ export class CollectionMap {
               const memoKey = keys.map ? keys.sort().join('||') : keys;
               if (!memo[memoKey]) {
                   const rows = keys.map
-                      ? keys.reduce((rows,key) => rows.concat(groups[key]), [])
+                      ? keys.reduce(
+                          (rows, key) => groups.hasOwnProperty(key)
+                            ? rows.concat(groups[key])
+                            : rows
+                          , []
+                        )
                       : groups[keys];
 
                   memo[memoKey] = new CollectionMap(rows);
