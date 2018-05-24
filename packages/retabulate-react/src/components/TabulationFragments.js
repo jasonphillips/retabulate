@@ -13,7 +13,7 @@ const fragmentTemplate = (rootType, name, dataset, where, axes) => gql`
       ${axes}
       rows {
         cells {
-          value colID rowID variable agg renderIds
+          value colID rowID variable detransposed agg renderIds redacted
           queries { key values }
         }
       }

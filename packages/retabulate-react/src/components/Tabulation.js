@@ -14,7 +14,7 @@ const queryTemplate = (dataset, where, axes, queryPrefix, tableName) => gql`
             ${axes}
             rows {
               cells {
-                value colID rowID variable detransposed agg renderIds
+                value colID rowID variable detransposed agg renderIds redacted
                 queries { key values }
               }
             }
