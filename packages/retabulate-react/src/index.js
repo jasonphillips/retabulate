@@ -1,5 +1,4 @@
 import Tabulation from './components/Tabulation';
-import RetabulateProvider from './components/RetabulateProvider';
 import Expand from './components/Expand';
 import Filter from './components/Filter';
 import All from './components/All';
@@ -12,4 +11,4 @@ import Statistic from './components/Statistic';
 // alias
 const Header = All;
 
-export {Tabulation, RetabulateProvider, Expand, Filter, Axis, All, Header, Transpose, Variable, Value, Statistic};
+export {Tabulation, Expand, Filter, Axis, All, Header, Transpose, Variable, Value, Statistic};
