@@ -44,9 +44,9 @@ describe('retabulate schema', function () {
     return require(resolve(dir, testFile))
   })
 
-  testData.map(({ test, query, output }) => { 
+  testData.map(({ test, query, output, retabulateOptions = {} }) => { 
     it(test, done => {
-      execute(query, {})
+      execute(query, { context: { retabulateOptions } })
         .then(data => {
           // log(data)
           expect(data).toMatchObject(output)

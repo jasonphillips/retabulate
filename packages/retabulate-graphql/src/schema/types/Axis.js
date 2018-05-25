@@ -147,10 +147,6 @@ const AxisType = new GraphQLObjectType({
           description: 'Explicit ordering of values',
           type: new GraphQLList(GraphQLString),
         },
-        minimum: {
-          description: 'Do not include groups with count under this threshold',
-          type: GraphQLInt,
-        }
       },
       resolve: (data, {
         key, 
@@ -160,9 +156,10 @@ const AxisType = new GraphQLObjectType({
         renderId, 
         mapping, 
         ordering, 
-        minimum,
-      }) => {
+      }, context) => {
         data._aggIndex++;
+        const options = context.retabulateOptions || {};
+        const { minimum, showRedacted } = options;
 
         // a 'total' never groups again, just descends
         if (data._isTotal) {
@@ -173,14 +170,11 @@ const AxisType = new GraphQLObjectType({
         const dataKey = data._detransposes[key] || key;
 
         const groups = data._rows.descend(dataKey);
-        let value;
+        const value = [];
   
         if (mapping) {
-          // build list of possible values, to track umapped / remainder
+          // build list of possible values, to track umapped keys left over
           const allGroups = groups.keys().reduce((all, k) => ({...all, [k]:true}), {});
-
-          // iterate over mappings
-          value = []
 
           mapping.forEach(({label, values}) => {
             const basics = {
@@ -196,14 +190,18 @@ const AxisType = new GraphQLObjectType({
               
               // drop this one from the remaining 'all' grouping
               for (let val of values) allGroups[val] = false;
-              // if minimum provide, ensure group passes it, or return empty
-              if (minimum && rows.length < minimum) 
-                return value.push({
+
+              // if minimum provide, ensure group passes it
+              if (minimum && rows.length < minimum) {
+                // if showRedacted, pass empty set but flag as redacted
+                if (showRedacted) return value.push({
                   ...basics, 
                   _rows: [], 
                   _redacted: true,
                   _query: {...data._query, [dataKey]: values}
                 });
+                return;
+              }
   
               return value.push({
                 ...basics, 
@@ -213,7 +211,7 @@ const AxisType = new GraphQLObjectType({
               });
             } 
   
-            // if no values, assume "group all remaining"
+            // if no values provided with label, assume "group all remaining"
             const remainingValues = Object.keys(allGroups).filter(k => allGroups[k]);
             const coveredValues = Object.keys(allGroups).filter(k => !allGroups[k]);
   
@@ -228,23 +226,34 @@ const AxisType = new GraphQLObjectType({
           // no explicit mapping passed: group all, unless 'ordering' list passed
           const valuesSet = ordering ? ordering : groups.keys();
 
-          value = valuesSet.map((groupValue) => {
+          valuesSet.forEach((groupValue) => {
             const rows = groups.keys(groupValue);
 
-            return {
+            // check minimum threshold if setting provided
+            if (minimum && rows.length < minimum) {
+              if (showRedacted) value.push({
+                ...data,
+                key: groupValue,
+                _rows: [],
+                _redacted: true,
+                _aggIndex: data._aggIndex,
+                _query: { ...data._query, [dataKey]: groupValue },
+                _renderIds: concat(data._renderIds, renderId),
+                renderId
+              })
+              return;
+            }
+
+            value.push({
               ...data,
               key: groupValue,
-              _rows: minimum 
-                ? rows.length >= minimum ? rows : []
-                : rows,
-              _redacted: data._redacted
-                ? true
-                : !minimum || rows.length >= minimum ? false : true,
+              _rows: rows,
+              _redacted: false,
               _aggIndex: data._aggIndex,
               _query: { ...data._query, [dataKey]: groupValue },
               _renderIds: concat(data._renderIds, renderId),
               renderId
-            }
+            })
           })
         }
   
@@ -265,6 +274,19 @@ const AxisType = new GraphQLObjectType({
             renderId
           }
         )
+
+        // if no groupings have resulted due to exclusions, include empty group
+        if (value.length === 0) {
+          value.push({
+            ...data,
+            _rows: [],
+            key: '(none)',
+            _redacted: true,
+            _aggIndex: data._aggIndex, 
+            renderIds: concat(data._renderIds, renderId), 
+            renderId
+          })
+        }
   
         return value;
       },

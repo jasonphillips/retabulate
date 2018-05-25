@@ -6,7 +6,7 @@ import makeRenderers from '../utils/makeRenderers';
 class Expand extends React.Component {
   static serialize(props, index, context) {
     const {
-      column, label, total, mapping, ordering, orderBy, minimum,
+      column, label, total, mapping, ordering, orderBy,
       cellProps, cellStyles, 
       labelRenderer, labelProps, labelStyles,
       children
@@ -24,7 +24,6 @@ class Expand extends React.Component {
         mapping, 
         ordering, 
         orderBy,
-        minimum
       }
     );
     const descendents = gatherChildConfig(children, context);

@@ -57,7 +57,6 @@ var Expand = function (_React$Component) {
           mapping = props.mapping,
           ordering = props.ordering,
           orderBy = props.orderBy,
-          minimum = props.minimum,
           cellProps = props.cellProps,
           cellStyles = props.cellStyles,
           labelRenderer = props.labelRenderer,
@@ -75,8 +74,7 @@ var Expand = function (_React$Component) {
         all: total,
         mapping: mapping,
         ordering: ordering,
-        orderBy: orderBy,
-        minimum: minimum
+        orderBy: orderBy
       });
       var descendents = (0, _gatherChildConfig2.default)(children, context);
 
