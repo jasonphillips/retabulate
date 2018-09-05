@@ -1,19 +1,24 @@
 const d3A = require('d3-array');
 const d3C = require('d3-collection');
 
+// memoized, chainable container for descending into data by groups
 export class CollectionMap {
   constructor(data) {
       this.data = data || [];
+      this.columnFlags = {};
       this.length = this.data.length;
       if (!this._groups) this._groups = {};
   }
-  descend(col) {
+  descend(col, flags) {
       if (this._groups[col]) return this._groups[col];
+
+      // keep the flags for downstream use
+      if (flags) this.columnFlags[col] = flags;
       
-      const groups = groupBy(this.data, col);
+      const groups = groupBy(this.data, col, flags || this.columnFlags[col]);
       const groupKeys = Object.keys(groups);
       const memo = {};
-        
+      
       this._groups[col] = {
           keys: (keys) => {
               if (!keys) return groupKeys;
@@ -60,9 +65,20 @@ export class CollectionMap {
   }
 }
 
-export const groupBy = (rows, col) => d3C.nest()
-  .key(row => row[col])
-  .object(rows)
+export const groupBy = (rows, col, flags) => (flags && flags.delimiter)
+  ? d3C.nest()
+      .key(row => row[`_${col}`])
+      .object(rows.reduce(
+        (all, r) => r[col]
+          ? all.concat(
+              r[col].split(flags.delimiter).map(val => ({ ...r, [`_${col}`]: val }))
+            )
+          : all, 
+          []
+      ))
+  : d3C.nest()
+      .key(row => row[col])
+      .object(rows)
 
 export const colValues = (rows, col, excludeEmpty) => rows
   .map(r => r[col])
