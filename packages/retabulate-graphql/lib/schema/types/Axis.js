@@ -145,6 +145,10 @@ const AxisType = new _graphql.GraphQLObjectType({
         ordering: {
           description: 'Explicit ordering of values',
           type: new _graphql.GraphQLList(_graphql.GraphQLString)
+        },
+        delimiter: {
+          description: 'Treat as multiple values using this delimiter',
+          type: _graphql.GraphQLString
         }
       },
       resolve: (data, {
@@ -154,7 +158,8 @@ const AxisType = new _graphql.GraphQLObjectType({
         orderBy,
         renderId,
         mapping,
-        ordering
+        ordering,
+        delimiter
       }, context) => {
         data._aggIndex++;
         const options = context.retabulateOptions || {};
@@ -168,7 +173,7 @@ const AxisType = new _graphql.GraphQLObjectType({
         // resolve any transposition first
         const dataKey = data._detransposes[key] || key;
 
-        const groups = data._rows.descend(dataKey);
+        const groups = data._rows.descend(dataKey, delimiter ? { delimiter } : null);
         const value = [];
 
         if (mapping) {
