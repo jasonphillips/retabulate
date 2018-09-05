@@ -52,6 +52,7 @@ var Filter = function (_React$Component) {
       var column = props.column,
           values = props.values,
           label = props.label,
+          delimiter = props.delimiter,
           cellProps = props.cellProps,
           cellStyles = props.cellStyles,
           labelRenderer = props.labelRenderer,
@@ -65,7 +66,10 @@ var Filter = function (_React$Component) {
           renderId = _makeRenderers.renderId,
           renderers = _makeRenderers.renderers;
 
-      var Query = new _QueryClosure2.default('classes', column, 'skip_' + index, renderId, { mapping: [{ label: label, values: values }] });
+      var Query = new _QueryClosure2.default('classes', column, 'skip_' + index, renderId, {
+        mapping: [{ label: label, values: values }],
+        delimiter: delimiter
+      });
       var descendents = (0, _gatherChildConfig2.default)(children, context);
 
       if (descendents.query) {

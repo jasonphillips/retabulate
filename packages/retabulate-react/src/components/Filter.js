@@ -6,7 +6,7 @@ import makeRenderers from '../utils/makeRenderers';
 class Filter extends React.Component {
   static serialize(props, index, context) {
     const {
-      column, values, label,
+      column, values, label, delimiter,
       cellProps, cellStyles, 
       labelRenderer, labelProps, labelStyles,
       children
@@ -15,7 +15,16 @@ class Filter extends React.Component {
     const {renderId, renderers} = makeRenderers({
       cellProps, cellStyles, labelRenderer, labelProps, labelStyles
     }, context);
-    const Query = new QueryClosure('classes', column, `skip_${index}`, renderId, {mapping: [{label, values}]});
+    const Query = new QueryClosure(
+      'classes', 
+      column, 
+      `skip_${index}`, 
+      renderId, 
+      {
+        mapping: [{label, values}],
+        delimiter,
+      }
+    );
     const descendents = gatherChildConfig(children, context);
     
     if (descendents.query) {
