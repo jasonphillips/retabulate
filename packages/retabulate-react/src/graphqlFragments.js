@@ -29,4 +29,16 @@ const TableWithFragment = (component) => {
     }
 }
 
-export {Tabulation, Expand, Filter, Axis, All, Header, Transpose, Variable, Value, Statistic, TableWithFragment};
+export {
+    Tabulation, 
+    Expand, 
+    Filter, 
+    Axis, 
+    All, 
+    Header, 
+    Transpose, 
+    Variable, 
+    Value, 
+    Statistic, 
+    TableWithFragment,
+};
