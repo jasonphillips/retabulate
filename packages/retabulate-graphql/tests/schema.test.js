@@ -6,18 +6,18 @@ import fs from 'fs'
 import { basename, extname, resolve } from 'path'
 
 const dataset = [
-  {category: 'a', subcat: 'w', alpha: 3.2, beta: 5, delimed: 'y'},
-  {category: 'a', subcat: 'x', alpha: 8.2, beta: 8, delimed: 'y,u'},
-  {category: 'a', subcat: 'x', alpha: 3.1, beta: 1, delimed: 'i'},
-  {category: 'a', subcat: 'y', alpha: 2.1, beta: 0, delimed: 'y,u,i'},
-  {category: 'b', subcat: 'y', alpha: 5.5, beta: 9, delimed: 'i'},
-  {category: 'b', subcat: 'y', alpha: 9.9, beta: 1, delimed: 'i'},
-  {category: 'b', subcat: 'z', alpha: 0.2, beta: 2, delimed: 'y'},
-  {category: 'b', subcat: 'z', alpha: 3.2, beta: 7, delimed: 'y,i'},
+  {category: 'a', catorder: 2, subcat: 'w', alpha: 3.2, beta: 5, delimed: 'y'},
+  {category: 'a', catorder: 2, subcat: 'x', alpha: 8.2, beta: 8, delimed: 'y,u'},
+  {category: 'a', catorder: 2, subcat: 'x', alpha: 3.1, beta: 1, delimed: 'i'},
+  {category: 'a', catorder: 2, subcat: 'y', alpha: 2.1, beta: 0, delimed: 'y,u,i'},
+  {category: 'b', catorder: 1, subcat: 'y', alpha: 5.5, beta: 9, delimed: 'i'},
+  {category: 'b', catorder: 1, subcat: 'y', alpha: 9.9, beta: 1, delimed: 'i'},
+  {category: 'b', catorder: 1, subcat: 'z', alpha: 0.2, beta: 2, delimed: 'y'},
+  {category: 'b', catorder: 1, subcat: 'z', alpha: 3.2, beta: 7, delimed: 'y,i'},
   // final rows test that undefined, null values 
   // do not get counted in the 'n' statistic
-  {category: 'b', subcat: 'z', alpha: 3.0, beta: undefined, delimed: null},
-  {category: 'b', subcat: 'z', alpha: 3.0, beta: null, delimed: 'y,i'},
+  {category: 'b', catorder: 1, subcat: 'z', alpha: 3.0, beta: undefined, delimed: null},
+  {category: 'b', catorder: 1, subcat: 'z', alpha: 3.0, beta: null, delimed: 'y,i'},
 ]
 
 const datasets = { test: dataset }

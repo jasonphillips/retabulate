@@ -263,11 +263,17 @@ const AxisType = new GraphQLObjectType({
         }
   
         // apply optional ordering by another column
-        if (orderBy) value.sort(
-          (a,b) => a._rows.data[0][orderBy] > b._rows.data[0][orderBy]
-            ? 1
-            : -1
-        )
+        if (orderBy) {
+          value.sort((orderBy==='_ASC' || orderBy==='_DESC')
+            // special case: _ASC / _DESC based on row count
+            ? (a,b) => a._rows.length > b._rows.length
+              ? orderBy==='_ASC' ? 1 : -1
+              : orderBy==='_ASC' ? -1 : 1
+            : (a,b) => a._rows.data[0][orderBy] > b._rows.data[0][orderBy]
+                ? 1
+                : -1
+          )
+        }
   
         // add in the total group if all / total requested
         if (all || total) value.push(
