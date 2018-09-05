@@ -71,7 +71,9 @@ export const groupBy = (rows, col, flags) => (flags && flags.delimiter)
       .object(rows.reduce(
         (all, r) => r[col]
           ? all.concat(
-              r[col].split(flags.delimiter).map(val => ({ ...r, [`_${col}`]: val }))
+              (r[col] && r[col].split)
+                ? r[col].split(flags.delimiter).map(val => ({ ...r, [`_${col}`]: val }))
+                : []
             )
           : all, 
           []
