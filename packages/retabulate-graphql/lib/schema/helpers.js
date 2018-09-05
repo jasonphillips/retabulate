@@ -64,7 +64,9 @@ class CollectionMap {
 }
 
 exports.CollectionMap = CollectionMap;
-const groupBy = exports.groupBy = (rows, col, flags) => flags && flags.delimiter ? d3C.nest().key(row => row[`_${col}`]).object(rows.reduce((all, r) => r[col] ? all.concat(r[col] && r[col].split ? r[col].split(flags.delimiter).map(val => Object.assign({}, r, { [`_${col}`]: val })) : []) : all, [])) : d3C.nest().key(row => row[col]).object(rows);
+const groupBy = exports.groupBy = (rows, col, flags) => flags && flags.delimiter ?
+// if a delimiter provided, split row values
+d3C.nest().key(row => row[`_${col}`]).object(rows.reduce((all, r) => r[col] ? all.concat(r[col] && r[col].split ? r[col].split(flags.delimiter).map(val => Object.assign({}, r, { [`_${col}`]: val })) : []) : all, [])) : d3C.nest().key(row => row[col]).object(rows);
 
 const colValues = exports.colValues = (rows, col, excludeEmpty) => rows.map(r => r[col]).filter(r => excludeEmpty ? r !== '' && r !== false && r !== null && typeof r !== 'undefined' : r);
 

@@ -66,6 +66,7 @@ export class CollectionMap {
 }
 
 export const groupBy = (rows, col, flags) => (flags && flags.delimiter)
+  // if a delimiter provided, split row values
   ? d3C.nest()
       .key(row => row[`_${col}`])
       .object(rows.reduce(
