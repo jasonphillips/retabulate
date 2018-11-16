@@ -2,7 +2,8 @@ import {
   GraphQLString,
   GraphQLList,
   GraphQLNonNull,
-  GraphQLInputObjectType
+  GraphQLInputObjectType,
+  GraphQLBoolean
 } from 'graphql';
 
 export const ConditionType = new GraphQLInputObjectType({
@@ -32,5 +33,24 @@ export const GroupMapType = new GraphQLInputObjectType({
       description: 'List of accepted values',
       type: new GraphQLList(GraphQLString)
     },
+  }
+});
+
+export const OrderConditionType = new GraphQLInputObjectType({
+  name: 'OrderConditionType',
+  description: 'column, statistic, and direction by which to order groups',
+  fields: {
+    column: {
+      description: 'the data column',
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    method: {
+      description: 'the statistical method',
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    descending: {
+      description: 'if true, sort descending instead of ascending',
+      type: GraphQLBoolean
+    }
   }
 });

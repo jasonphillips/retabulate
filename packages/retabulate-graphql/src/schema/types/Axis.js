@@ -7,11 +7,12 @@ import {
 } from 'graphql';
 
 import VariableType from './Variable';
-import { GroupMapType } from './inputTypes';
+import { GroupMapType, OrderConditionType } from './inputTypes';
 
 import {
   generateLeaf,
   concat,
+  applyAggregations,
 } from '../helpers';
 
 const AxisType = new GraphQLObjectType({
@@ -96,15 +97,19 @@ const AxisType = new GraphQLObjectType({
           description: 'Target key name as new variable',
           type: GraphQLString,
         },
+        orderByStatistic: {
+          description: 'Order by statistic applied to each grouping',
+          type: OrderConditionType
+        },
         renderId: {
           description: 'Unique id for use when coordinating rendering',
           type: GraphQLString,
         },
       },
-      resolve: (data, {keys, asKey, renderId}) => {
+      resolve: (data, {keys, asKey, renderId, orderByStatistic}) => {
         data._aggIndex++;
   
-        return keys.map(inKey => ({
+        let values = keys.map(inKey => ({
           ...data, 
           key: inKey,
           _rows:data._rows,
@@ -113,6 +118,27 @@ const AxisType = new GraphQLObjectType({
           _renderIds: concat(data._renderIds, renderId),
           renderId
         }));
+
+        // apply ordering by a statistic
+        if (orderByStatistic) {
+          const { method, column, descending } = orderByStatistic;
+          
+          values = values.sort((a,b) => {
+            // if statistic is on the new key, detranspose each group
+            const col = column===asKey
+              ? group => group.key
+              : group => column
+
+            return (
+              applyAggregations(method)(a._rows.data, col(a)) >
+              applyAggregations(method)(b._rows.data, col(b))
+                ? descending ? -1 : 1
+                : descending ? 1 : -1
+            )
+          })
+        }
+
+        return values;
       },
     },
     classes: {
@@ -134,6 +160,10 @@ const AxisType = new GraphQLObjectType({
         orderBy: {
           description: 'Order by values of another column',
           type: GraphQLString,
+        },
+        orderByStatistic: {
+          description: 'Order by statistic applied to each grouping',
+          type: OrderConditionType
         },
         renderId: {
           description: 'Unique id for use when coordinating rendering',
@@ -157,6 +187,7 @@ const AxisType = new GraphQLObjectType({
         all, 
         total, 
         orderBy, 
+        orderByStatistic,
         renderId, 
         mapping, 
         ordering, 
@@ -175,7 +206,7 @@ const AxisType = new GraphQLObjectType({
         const dataKey = data._detransposes[key] || key;
 
         const groups = data._rows.descend(dataKey, delimiter ? { delimiter } : null);
-        const value = [];
+        let value = [];
   
         if (mapping) {
           // build list of possible values, to track umapped keys left over
@@ -272,6 +303,18 @@ const AxisType = new GraphQLObjectType({
             : (a,b) => a._rows.data[0][orderBy] > b._rows.data[0][orderBy]
                 ? 1
                 : -1
+          )
+        }
+
+        // apply ordering by a statistic
+        if (orderByStatistic) {
+          const { method, column, descending } = orderByStatistic;
+          
+          value.sort((a,b) =>
+            applyAggregations(method)(a._rows.data, column) >
+            applyAggregations(method)(b._rows.data, column)
+              ? descending ? -1 : 1
+              : descending ? 1 : -1
           )
         }
   

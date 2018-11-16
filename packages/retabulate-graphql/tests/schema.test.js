@@ -48,7 +48,6 @@ describe('retabulate schema', function () {
     it(test, done => {
       execute(query, { context: { retabulateOptions } })
         .then(data => {
-          // log(data)
           expect(data).toMatchObject(output)
           done()
         })

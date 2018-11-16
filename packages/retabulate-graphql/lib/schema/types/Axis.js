@@ -96,15 +96,19 @@ const AxisType = new _graphql.GraphQLObjectType({
           description: 'Target key name as new variable',
           type: _graphql.GraphQLString
         },
+        orderByStatistic: {
+          description: 'Order by statistic applied to each grouping',
+          type: _inputTypes.OrderConditionType
+        },
         renderId: {
           description: 'Unique id for use when coordinating rendering',
           type: _graphql.GraphQLString
         }
       },
-      resolve: (data, { keys, asKey, renderId }) => {
+      resolve: (data, { keys, asKey, renderId, orderByStatistic }) => {
         data._aggIndex++;
 
-        return keys.map(inKey => Object.assign({}, data, {
+        let values = keys.map(inKey => Object.assign({}, data, {
           key: inKey,
           _rows: data._rows,
           _transposes: Object.assign({}, data._transposes, { [inKey]: asKey }),
@@ -112,6 +116,20 @@ const AxisType = new _graphql.GraphQLObjectType({
           _renderIds: (0, _helpers.concat)(data._renderIds, renderId),
           renderId
         }));
+
+        // apply ordering by a statistic
+        if (orderByStatistic) {
+          const { method, column, descending } = orderByStatistic;
+
+          values = values.sort((a, b) => {
+            // if statistic is on the new key, detranspose each group
+            const col = column === asKey ? group => group.key : group => column;
+
+            return (0, _helpers.applyAggregations)(method)(a._rows.data, col(a)) > (0, _helpers.applyAggregations)(method)(b._rows.data, col(b)) ? descending ? -1 : 1 : descending ? 1 : -1;
+          });
+        }
+
+        return values;
       }
     },
     classes: {
@@ -133,6 +151,10 @@ const AxisType = new _graphql.GraphQLObjectType({
         orderBy: {
           description: 'Order by values of another column',
           type: _graphql.GraphQLString
+        },
+        orderByStatistic: {
+          description: 'Order by statistic applied to each grouping',
+          type: _inputTypes.OrderConditionType
         },
         renderId: {
           description: 'Unique id for use when coordinating rendering',
@@ -156,6 +178,7 @@ const AxisType = new _graphql.GraphQLObjectType({
         all,
         total,
         orderBy,
+        orderByStatistic,
         renderId,
         mapping,
         ordering,
@@ -174,7 +197,7 @@ const AxisType = new _graphql.GraphQLObjectType({
         const dataKey = data._detransposes[key] || key;
 
         const groups = data._rows.descend(dataKey, delimiter ? { delimiter } : null);
-        const value = [];
+        let value = [];
 
         if (mapping) {
           // build list of possible values, to track umapped keys left over
@@ -260,6 +283,13 @@ const AxisType = new _graphql.GraphQLObjectType({
           value.sort(orderBy === '_ASC' || orderBy === '_DESC' ?
           // special case: _ASC / _DESC based on row count
           (a, b) => a._rows.length > b._rows.length ? orderBy === '_ASC' ? 1 : -1 : orderBy === '_ASC' ? -1 : 1 : (a, b) => a._rows.data[0][orderBy] > b._rows.data[0][orderBy] ? 1 : -1);
+        }
+
+        // apply ordering by a statistic
+        if (orderByStatistic) {
+          const { method, column, descending } = orderByStatistic;
+
+          value.sort((a, b) => (0, _helpers.applyAggregations)(method)(a._rows.data, column) > (0, _helpers.applyAggregations)(method)(b._rows.data, column) ? descending ? -1 : 1 : descending ? 1 : -1);
         }
 
         // add in the total group if all / total requested
