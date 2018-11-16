@@ -6,7 +6,8 @@ import makeRenderers from '../utils/makeRenderers';
 class Expand extends React.Component {
   static serialize(props, index, context) {
     const {
-      column, label, total, mapping, ordering, orderBy, delimiter,
+      column, label, total, 
+      mapping, ordering, orderBy, orderByStatistic, delimiter,
       cellProps, cellStyles, 
       labelRenderer, labelProps, labelStyles,
       children
@@ -17,13 +18,15 @@ class Expand extends React.Component {
     }, context);
     const Query = new QueryClosure(
       'classes', 
-      column, label ? renderId : `skip_${index}`, 
+      column,
+      label ? renderId : `skip_${index}`, 
       renderId, 
       {
         all: total, 
         mapping, 
         ordering, 
         orderBy,
+        orderByStatistic,
         delimiter,
       }
     );

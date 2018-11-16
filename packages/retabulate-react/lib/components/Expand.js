@@ -57,6 +57,7 @@ var Expand = function (_React$Component) {
           mapping = props.mapping,
           ordering = props.ordering,
           orderBy = props.orderBy,
+          orderByStatistic = props.orderByStatistic,
           delimiter = props.delimiter,
           cellProps = props.cellProps,
           cellStyles = props.cellStyles,
@@ -76,6 +77,7 @@ var Expand = function (_React$Component) {
         mapping: mapping,
         ordering: ordering,
         orderBy: orderBy,
+        orderByStatistic: orderByStatistic,
         delimiter: delimiter
       });
       var descendents = (0, _gatherChildConfig2.default)(children, context);

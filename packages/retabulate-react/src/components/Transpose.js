@@ -6,7 +6,7 @@ import makeRenderers from '../utils/makeRenderers';
 class Transpose extends React.Component {
   static serialize(props, index, context) {
     const {
-      columns, as, label, total,
+      columns, as, label, total, orderByStatistic,
       cellProps, cellStyles, 
       labelRenderer, labelProps, labelStyles,
       children
@@ -15,7 +15,13 @@ class Transpose extends React.Component {
     const {renderId, renderers} = makeRenderers({
       cellProps, cellStyles, labelRenderer, labelProps, labelStyles
     }, context);
-    const Query = new QueryClosure('transpose', columns, label ? renderId : `skip_${index}`, renderId, {asKey: as});
+    const Query = new QueryClosure(
+      'transpose', 
+      columns, 
+      label ? renderId : `skip_${index}`, 
+      renderId, 
+      {asKey: as, orderByStatistic }
+    );
     const descendents = gatherChildConfig(children, context);
     
     if (descendents.query) {

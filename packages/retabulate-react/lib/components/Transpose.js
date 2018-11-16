@@ -55,6 +55,7 @@ var Transpose = function (_React$Component) {
           as = props.as,
           label = props.label,
           total = props.total,
+          orderByStatistic = props.orderByStatistic,
           cellProps = props.cellProps,
           cellStyles = props.cellStyles,
           labelRenderer = props.labelRenderer,
@@ -68,7 +69,7 @@ var Transpose = function (_React$Component) {
           renderId = _makeRenderers.renderId,
           renderers = _makeRenderers.renderers;
 
-      var Query = new _QueryClosure2.default('transpose', columns, label ? renderId : 'skip_' + index, renderId, { asKey: as });
+      var Query = new _QueryClosure2.default('transpose', columns, label ? renderId : 'skip_' + index, renderId, { asKey: as, orderByStatistic: orderByStatistic });
       var descendents = (0, _gatherChildConfig2.default)(children, context);
 
       if (descendents.query) {
