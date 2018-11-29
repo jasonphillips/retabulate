@@ -1,7 +1,7 @@
 {
   "name": "gatsby-plugin-retabulate",
   "main": "index.js",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "dependencies": {
     "@babel/register": "^7.0.0",
     "retabulate-graphql": "^1.8.5"
