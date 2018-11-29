@@ -1,4 +1,5 @@
 const print = require('graphql/language/printer').print
+const path = require('path')
 const { tableField } = require('retabulate-graphql/lib/schema/graphqlSchema');
 const processTabulations = require('./process')
 
